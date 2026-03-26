@@ -1,0 +1,52 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Install brew packages
+      homebrew:
+        name:
+         - git-delta
+         - nushell
+        state: present
+
+    - name: Configure git to use delta as pager
+      git_config:
+        name: core.pager
+        value: delta
+        scope: global
+
+    - name: Delta side by side
+      git_config:
+        name: delta.side-by-side
+        value: "true"
+        scope: global
+
+    - name: Ensure .npmrc exists
+      file:
+        path: "~/.npmrc"
+        state: touch
+        mode: '0600'
+
+    - name: Ensure ~/bin exists
+      file:
+        path: "~/bin"
+        state: directory
+
+    - name: Npmrc config
+      lineinfile:
+        path: ~/.npmrc
+        regexp: '^{{ item.key }}\s*='
+        line: '{{ item.key }}={{ item.value }}'
+        state: present
+      loop:
+        - { key: 'min-release-age', value: '3' }
+        - { key: 'ignore-scripts', value: 'true' }
+
+    # Inherit PATH env from zsh
+    - name: Zsh nushell wrapping
+      ansible.builtin.copy:
+        dest: ~/bin/shell
+        mode: '0555'
+        content: |
+          #!/bin/zsh -l
+          exec nu

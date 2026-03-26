@@ -1,0 +1,8 @@
+/_billy
+/.nvim
+/nvim/syntax/*
+/nvim/theme.vim
+/config/nushell/history*
+/config/nushell/plugin*
+/node_modules
+.claudeignore
