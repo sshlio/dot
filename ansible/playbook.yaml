@@ -6,6 +6,7 @@
       homebrew:
         name:
          - nushell
+         - rg
          - neovim
          - git-delta
         state: present

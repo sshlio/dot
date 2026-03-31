@@ -3,6 +3,19 @@
   "extends": [
     "config:recommended"
   ],
+  "packageRules": [
+    {
+      "minimumReleaseAge": "14 days",
+      "internalChecksFilter": "strict"
+    },
+    {
+      "matchManagers": [
+        "dockerfile",
+        "custom.regex"
+      ],
+      "automerge": false
+    }
+  ],
   "dockerfile": {
     "enabled": true
   },
@@ -61,15 +74,6 @@
       ],
       "depNameTemplate": "aws-sdk",
       "datasourceTemplate": "npm"
-    }
-  ],
-  "packageRules": [
-    {
-      "matchManagers": [
-        "dockerfile",
-        "custom.regex"
-      ],
-      "automerge": false
     }
   ]
 }
