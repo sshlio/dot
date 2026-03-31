@@ -13,9 +13,15 @@
 -- https://github.com/nvim-mini/MiniMax/blob/main/configs/nvim-0.11/plugin/10_options.luq
 
 -- TODO button5 to esc in hammerspoon
-vim.opt.packpath = vim.opt.runtimepath:get()
--- vim.opt.clipboard:append 'unnamedplus'
 
+
+_G.billy = {}
+
+dofile(vim.env.HOME .. "/.config/nvim/init.local.lua")
+
+print("nonce", _G.NONCE)
+
+vim.opt.packpath = vim.opt.runtimepath:get()
 vim.opt.grepprg = "rg --vimgrep --glob '!_billy' --glob '!CLAUDE.md'"
 vim.opt.complete = '.,w'
 vim.opt.completeopt = { 'menu', 'menuone', 'fuzzy' }
@@ -1882,10 +1888,11 @@ vim.keymap.set('v', 'C', function()
   local header = 'The user selected lines ' .. from_line .. ' to ' .. to_line .. ' from ./' .. filepath .. ':'
 
   if f then
-    f:write(string.format("\n-----\n\n<ide_selection>%s\n%s\n</ide_selection>", header, content))
+    f:write(string.format("<ide_selection>%s\n%s\n</ide_selection>\n-----\n", header, content))
     f:close()
+
     vim.fn.setreg('+', 'cat ' .. tmpfile .. ' | cl ')
+
     print('Written to ' .. tmpfile)
   end
 end, { desc = 'Copy selection as Claude Code context' })
-

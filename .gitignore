@@ -6,3 +6,4 @@
 /config/nushell/plugin*
 /node_modules
 .claudeignore
+*.local*

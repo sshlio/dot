@@ -22,11 +22,14 @@
         value: "true"
         scope: global
 
-    - name: Ensure .npmrc exists
+    - name: Ensure config files exist
       file:
-        path: "~/.npmrc"
+        path: "{{ item }}"
         state: touch
         mode: '0600'
+      loop:
+        - "~/.npmrc"
+        - "~/.config/nvim/init.local.lua"
 
     - name: Ensure ~/bin exists
       file:
@@ -60,4 +63,3 @@
         type: dict
         value:
           "Save Page As...": "@$s"
-
