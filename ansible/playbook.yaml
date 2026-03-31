@@ -5,8 +5,9 @@
     - name: Install brew packages
       homebrew:
         name:
-         - git-delta
          - nushell
+         - neovim
+         - git-delta
         state: present
 
     - name: Configure git to use delta as pager
@@ -50,3 +51,13 @@
         content: |
           #!/bin/zsh -l
           exec nu
+
+    # use `defaults find NSUserKeyEquivalents` to debug
+    - name: Set Chrome shortcuts
+      community.general.osx_defaults:
+        domain: com.google.Chrome
+        key: NSUserKeyEquivalents
+        type: dict
+        value:
+          "Save Page As...": "@$s"
+
