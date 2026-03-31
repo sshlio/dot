@@ -3,11 +3,9 @@
   "extends": [
     "config:recommended"
   ],
+  "minimumReleaseAge": "14 days",
+  "internalChecksFilter": "strict",
   "packageRules": [
-    {
-      "minimumReleaseAge": "14 days",
-      "internalChecksFilter": "strict"
-    },
     {
       "matchManagers": [
         "dockerfile",
