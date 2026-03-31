@@ -3,29 +3,16 @@
 
 local cwd = vim.fn.getcwd()
 local filepath = cwd .. "/_billy/nvim.lua"
-local noncepath = cwd .. "/_billy/.nonce"
+local trusted_paths = _G.TRUSTED
+local has_local_config = u.file_exists(filepath)
+local is_trusted = trusted_paths ~= nil and vim.tbl_contains(trusted_paths, cwd)
 
-local function read_file(path)
-  local f = io.open(path, "r")
-
-  if not f then
-    return nil
-  end
-
-  local content = f:read("*a")
-  f:close()
-
-  return content
-end
-
-local nonce = read_file(noncepath)
-
-if nonce then
-  nonce = nonce:gsub("%s+$", "")
-end
-
-if u.file_exists(filepath) and nonce ~= nil and _G.NONCE ~= nil and nonce == tostring(_G.NONCE) then
+if has_local_config and is_trusted then
   vim.schedule(function()
     dofile(filepath)
+  end)
+elseif has_local_config then
+  vim.schedule(function()
+    vim.notify("Local nvim config present but cwd is not trusted: " .. cwd, vim.log.levels.WARN)
   end)
 end

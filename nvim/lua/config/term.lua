@@ -217,6 +217,11 @@ _G.executeCommandUnderTheCursor = function(opts)
   local line = vim.fn.getline('.')
   if line:match("^%s*$") then return end
   local linenr = vim.api.nvim_win_get_cursor(0)[1]
+  local cwd = vim.fn.getcwd()
+  local trusted_paths = _G.TRUSTED
+  local is_trusted = trusted_paths ~= nil and vim.tbl_contains(trusted_paths, cwd)
+  local local_nu_config = "_billy/.env.nu"
+  local has_local_nu_config = vim.uv.fs_stat(local_nu_config) ~= nil
 
   opts = opts or {}
   opts.silent = opts.silent or false
@@ -249,7 +254,8 @@ _G.executeCommandUnderTheCursor = function(opts)
   -- changeExtmark(state, "Executing..", "Question")
 
   -- local cmd = { "nu", "--config", "~/.config/nushell/utils.nu", "-c",  line };
-  local cmd = { "nu", "--config", "_billy/.env.nu", "-c",  line };
+  local nu_config = is_trusted and has_local_nu_config and local_nu_config or "~/.config/nushell/utils.nu"
+  local cmd = { "nu", "--config", nu_config, "-c",  line };
 
   local prev_win = vim.api.nvim_get_current_win()
 
@@ -432,4 +438,3 @@ vim.api.nvim_create_autocmd("BufDelete", {
 --     end
 --   end)
 -- )
-

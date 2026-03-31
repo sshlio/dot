@@ -19,8 +19,6 @@ _G.billy = {}
 
 dofile(vim.env.HOME .. "/.config/nvim/init.local.lua")
 
-print("nonce", _G.NONCE)
-
 vim.opt.packpath = vim.opt.runtimepath:get()
 vim.opt.grepprg = "rg --vimgrep --glob '!_billy' --glob '!CLAUDE.md'"
 vim.opt.complete = '.,w'

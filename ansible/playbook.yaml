@@ -30,6 +30,7 @@
       loop:
         - "~/.npmrc"
         - "~/.config/nvim/init.local.lua"
+        - "~/.config/nushell/config.local.nu"
 
     - name: Ensure ~/bin exists
       file:

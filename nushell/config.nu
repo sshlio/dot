@@ -1,6 +1,10 @@
 # Copyright (c) 2026 Sławomir Laskowski
 # SPDX-License-Identifier: MIT
 
+$env.TRUSTED_PROJECTS = []
+
+source "~/.config/nushell/config.local.nu"
+
 $env.config = {
   show_banner: false
 
@@ -131,18 +135,22 @@ $env.PROMPT_COMMAND_RIGHT = { || "" }
 source ~/.config/nushell/utils.nu
 
 def hookConfig --env [] {
+  let cwd = (pwd | path expand)
   mut hook = ['source ~/.config/nushell/utils.nu']
+  let is_trusted = ($env.TRUSTED_PROJECTS | any {|trusted| ($trusted | path expand) == $cwd })
+  let has_local_env = ("_billy/.env.nu" | path exists)
+  let has_user_env = ("_billy/user.env.nu" | path exists)
 
   if ("~/p/_billy/global.env.nu" | path exists) {
     $hook = $hook | insert 0 'source ~/p/_billy/global.env.nu'
   }
 
-  if ("_billy/.env.nu" | path exists) {
+  if $is_trusted and $has_local_env {
     $hook = $hook | insert 0 'source _billy/.env.nu'
   }
 
-  if ("_billy/user.env.nu" | path exists) {
-    $hook = $hook | insert 0 'source _billy/user.env.nu'
+  if (not $is_trusted) and ($has_local_env or $has_user_env) {
+    print $"(ansi yellow)warning:(ansi reset) local nushell config present but project is not trusted: ($cwd)"
   }
 
   $env.config.hooks = {
@@ -222,7 +230,6 @@ def pp [path?: string@"p-path-compl"] {
 def boostrap [] {
   project Dotfiles
 }
-
 
 
 
