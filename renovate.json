@@ -1,0 +1,75 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "dockerfile": {
+    "enabled": true
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^Dockerfile$"
+      ],
+      "matchStrings": [
+        "ARG NVIM_VERSION=(?<currentValue>v?[0-9.]+)"
+      ],
+      "depNameTemplate": "neovim/neovim",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^Dockerfile$"
+      ],
+      "matchStrings": [
+        "ARG NODE_MAJOR=(?<currentValue>[0-9]+)"
+      ],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "node-version"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^Dockerfile$"
+      ],
+      "matchStrings": [
+        "ARG NUSHELL_NPM_VERSION=(?<currentValue>[0-9.]+)"
+      ],
+      "depNameTemplate": "nushell",
+      "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^Dockerfile$"
+      ],
+      "matchStrings": [
+        "ARG CLAUDE_CODE_NPM_VERSION=(?<currentValue>[0-9.]+)"
+      ],
+      "depNameTemplate": "@anthropic-ai/claude-code",
+      "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^Dockerfile$"
+      ],
+      "matchStrings": [
+        "ARG AWS_SDK_NPM_VERSION=(?<currentValue>[0-9.]+)"
+      ],
+      "depNameTemplate": "aws-sdk",
+      "datasourceTemplate": "npm"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchManagers": [
+        "dockerfile",
+        "custom.regex"
+      ],
+      "automerge": false
+    }
+  ]
+}
