@@ -296,7 +296,7 @@ _G.executeCommandUnderTheCursor = function(opts)
     state.buf = buf
     state.job_id = job_id
 
-    changeExtmark(bufState[buf], os.date("%H:%M"), "StatusLine", "", "Debug")
+    changeExtmark(bufState[buf], os.date("%H:%M"), "StatusLine", "", "Debug")
 
     if opts.silent then
       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-\\><C-n>G<c-w>q', true, false, true), 'n', false)
