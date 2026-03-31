@@ -1,5 +1,6 @@
 /_billy
 /.nvim
+**/.nvim/
 /nvim/syntax/*
 /nvim/theme.vim
 /config/nushell/history*
