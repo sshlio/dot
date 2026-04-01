@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 source ~/.config/nushell/boot.nu
+source ~/.config/nushell/git.nu
 
 $env.DOCKER_BUILDKIT_PROGRESS = "plain"
 
