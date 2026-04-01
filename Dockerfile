@@ -6,31 +6,25 @@ FROM ubuntu:24.04
 
 LABEL maintainer="Sławomir Laskowski"
 
-ARG NVIM_VERSION=v0.10.0
-ARG NODE_MAJOR=22
-ARG NUSHELL_NPM_VERSION=0.111.0
-ARG CLAUDE_CODE_NPM_VERSION=2.1.87
-ARG AWS_SDK_NPM_VERSION=2.1693.0
-
 RUN apt-get update && apt-get install -y \
     git \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Neovim from an explicit release so automation can update it safely.
-RUN curl -LO https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-arm64.tar.gz \
+# Install the current Neovim release.
+RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-arm64.tar.gz \
     && tar -C /usr/local -xzf nvim-linux-arm64.tar.gz --strip-components=1 \
     && rm nvim-linux-arm64.tar.gz
 
-# Install Node.js from a pinned major release channel.
-RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
+# Install the current Node.js release channel.
+RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g \
-    nushell@${NUSHELL_NPM_VERSION} \
-    @anthropic-ai/claude-code@${CLAUDE_CODE_NPM_VERSION} \
-    aws-sdk@${AWS_SDK_NPM_VERSION}
+    nushell \
+    @anthropic-ai/claude-code \
+    aws-sdk
 
 RUN useradd -m -s /usr/bin/nu billy
 

@@ -118,7 +118,7 @@ $env.EDITOR = $"vim"
 $env.PROMPT_EXTRA = ""
 $env.PROMPT_COMMAND = { ||
   let branch = (do { git rev-parse --abbrev-ref HEAD } | complete)
-  let dirty = if $branch.exit_code == 0 { (do { git status --porcelain } | complete).stdout | str trim | if ($in | is-empty) { "" } else { " *" } } else { "" }
+  let dirty = if $branch.exit_code == 0 { (do { git status --porcelain } | complete).stdout | str trim | if ($in | is-empty) { "" } else { "'" } } else { "" }
   let branch_name = ($branch.stdout | str trim)
   let branch_color = if $branch_name in [development master main] { "dark_gray_dimmed" } else { "xterm_lightsteelblue" }
   let git = if $branch.exit_code == 0 { $" (ansi $branch_color)󰊢 ($branch_name)($dirty)(ansi reset)" } else { "" }
@@ -128,7 +128,7 @@ $env.PROMPT_COMMAND = { ||
 
   let aws = if ($showAws) { $" (ansi xterm_lightgoldenrod2) ($env.AWS_PROFILE)(ansi reset)" } else { "" }
 
-  $"\n(ansi green_bold)(pwd | path basename)(ansi reset)($git)($aws)($env.PROMPT_EXTRA)\n(ansi xterm_lime)❯(ansi reset) "
+  $"\n(ansi green_bold)(pwd | path basename)(ansi reset)($git)($aws)($env.PROMPT_EXTRA)\n(ansi dark_gray_dimmed)$(ansi reset) "
 }
 $env.PROMPT_COMMAND_RIGHT = { || "" }
 
