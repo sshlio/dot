@@ -11,11 +11,12 @@ vim.keymap.set('t', '<left>', '<C-\\><C-n><c-w>W')
 -- local last_line = nil
 -- local last_linenumber = nil
 local bufState = {}
-local bufStateByExt = {}
 local spins = { "" }
 -- local spins = { "", "", "", "", "", "" }
 local timer = vim.loop.new_timer()
 
+local ExtmarkState = require('config.extmark')
+local extmarks = ExtmarkState.new(ns)
 
 function getFileName(str)
   local fileName = str:match("%S+%s*$")
@@ -130,6 +131,8 @@ vim.api.nvim_create_autocmd('TermRequest', {
     if n > 0 then
       local value = vim.base64.decode(val)
 
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'n', false)
+
       markInsert(true)
 
       vim.api.nvim_win_close(0, true)
@@ -161,56 +164,22 @@ vim.api.nvim_create_autocmd("BufEnter", {
 -- Snips
 vim.keymap.set('t', ']c', '/clear')
 vim.keymap.set('t', ']m', '/compact')
-
 vim.keymap.set('t', '<cr>', '<cr>')
-
--- Make terminal buffer editable (keeps colors)
-local function term_to_normal_buffer()
-  vim.bo.buftype = ''
-  vim.bo.modifiable = true
-  vim.bo.readonly = false
-  print("Made modifable")
-
-end
-
-vim.api.nvim_create_user_command('TermCopy', term_to_normal_buffer, {})
-vim.keymap.set('n', 'stc', term_to_normal_buffer, { desc = 'Convert terminal to normal buffer' })
 
 -- Execute current line in shell and paste output below (streaming)
 
 _G.__term_envs = { __NVIM_VER = "1" }
 
-local function cleanupExtmark(state)
-  if state.extmark then
-    local pos = vim.api.nvim_buf_get_extmark_by_id(state.parentBuf, ns, state.extmark, {  })
-
-    -- Update position of the file
-    state.linenr = pos[1] + 1
-
-    vim.api.nvim_buf_del_extmark(state.parentBuf, ns, state.extmark)
-    state.extmark = false
-
-    local ids = tostring(state.extmark);
-
-    bufStateByExt[ids] = nil
-  end
-end
-
 local function changeExtmark(state, newText, hl, sign_text, sign_hl_group)
-  cleanupExtmark(state)
-
-  state.extmark = vim.api.nvim_buf_set_extmark(state.parentBuf, ns, state.linenr - 1, 0, {
+  extmarks:set(state, {
+    row = state.linenr - 1,
+    col = 0,
     virt_text = {{ newText, hl }},
     virt_text_pos = "eol",
     sign_text = " " .. (sign_text or "X"),
     sign_hl_group = sign_hl_group or "Question",
-
-    invalidate = true,
-  });
-
-  local ids = tostring(state.extmark);
-
-  bufStateByExt[ids] = state
+    invalidate = false,
+  })
 end
 
 _G.executeCommandUnderTheCursor = function(opts)
@@ -229,14 +198,9 @@ _G.executeCommandUnderTheCursor = function(opts)
   local buf = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_set_option(buf, "signcolumn", "yes:2")
 
-  local marks = vim.api.nvim_buf_get_extmarks(buf, ns, {linenr-1,0}, {linenr-1,0}, {})
+  local state = extmarks:get_state_at_line(buf, linenr)
 
-  if #marks > 0 then
-    local ids = tostring(marks[1][1]);
-    local state = bufStateByExt[ids]
-
-    -- print("ext:", vim.inspect(marks[1]), vim.inspect(bufStateByExt), vim.inspect(state));
-
+  if state then
     vim.cmd("botright 50new")
     vim.api.nvim_set_current_buf(state.buf)
 
@@ -327,18 +291,15 @@ end
 
 local function clearAllExtmarks()
   local buf = vim.api.nvim_get_current_buf()
-  local marks = vim.api.nvim_buf_get_extmarks(buf, ns, 0, -1, {})
+  local states = extmarks:get_all_states(buf)
 
-  for _, mark in ipairs(marks) do
-    local ids = tostring(mark[1])
-    local state = bufStateByExt[ids]
-
+  for _, state in ipairs(states) do
     if state then
       if not state.exited then goto continue end
       if state.buf and vim.api.nvim_buf_is_valid(state.buf) then
         vim.api.nvim_buf_delete(state.buf, { force = true })
       end
-      cleanupExtmark(state)
+      extmarks:clear(state)
     end
     ::continue::
   end
@@ -358,19 +319,16 @@ _G.stopCommandUnderTheCursor = function()
   local linenr = vim.api.nvim_win_get_cursor(0)[1]
   local buf = vim.api.nvim_get_current_buf()
 
-  local marks = vim.api.nvim_buf_get_extmarks(buf, ns, {linenr-1,0}, {linenr-1,0}, {})
+  local state = extmarks:get_state_at_line(buf, linenr)
 
-  if #marks > 0 then
-    local ids = tostring(marks[1][1])
-    local state = bufStateByExt[ids]
-
+  if state then
     if state and state.job_id then
       state.disowned = true
       vim.fn.jobstop(state.job_id)
       vim.api.nvim_buf_delete(state.buf, { force = true })
     end
 
-    cleanupExtmark(state)
+    extmarks:clear(state)
   end
 end
 
@@ -409,7 +367,7 @@ vim.api.nvim_create_autocmd("WinLeave", {
 
     if bufState[buf] and bufState[buf].clenupOnQuit then
       vim.api.nvim_buf_delete(buf, { force = true })
-      cleanupExtmark(bufState[buf])
+      extmarks:clear(bufState[buf])
     end
   end,
   desc = "Close window when unfocused if buffer has quitUnfocused flag"
@@ -418,7 +376,7 @@ vim.api.nvim_create_autocmd("WinLeave", {
 vim.api.nvim_create_autocmd("BufDelete", {
   callback = function(args)
     if bufState[args.buf] then
-      cleanupExtmark(bufState[args.buf])
+      extmarks:clear(bufState[args.buf])
     end
   end,
   desc = "Close window when unfocused if buffer has quitUnfocused flag"

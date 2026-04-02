@@ -271,7 +271,25 @@ o.termguicolors = true -- Enable 24-bit RGB colors
 -- Basics
 local cmd = function(x) return '<cmd>' .. x .. '<cr>' end
 
-vim.keymap.set('n', ':', 'q:A')
+local function current_relative_file_parts()
+  local relpath = vim.fn.fnamemodify(vim.fn.expand('%'), ':.')
+
+  if relpath == '' then
+    return '', ''
+  end
+
+  return relpath, vim.fn.fnamemodify(relpath, ':h')
+end
+
+vim.keymap.set('n', ':', function()
+  local relpath, reldir = current_relative_file_parts()
+
+  vim.fn.setreg('f', relpath)
+  vim.fn.setreg('d', reldir)
+
+  return 'q:A'
+end, { expr = true })
+
 vim.keymap.set("n", "Q", "<nop>", { noremap = true, silent = true })
 
 vim.keymap.set('n', 'sQ', function()
@@ -1072,6 +1090,9 @@ end)
 u.ft({ "vim" }, function(buffer)
   vim.keymap.set('i', ';m', "Macro esc>j<esc>bbi<<left>", { buffer = buffer })
   vim.keymap.set('i', ';e', "<esc<left><right>>", { buffer = buffer })
+  vim.keymap.set('i', ';f', "<c-r>f", { buffer = buffer })
+  vim.keymap.set('i', ';d', "<c-r>d", { buffer = buffer })
+  vim.keymap.set('i', ';r', "Rename <c-r>f<esc>bhi", { buffer = buffer })
 end)
 
 
@@ -1952,5 +1973,3 @@ require('vim._core.ui2').enable({
     },
   },
 })
-
-vim.cmd("packadd nohlsearch")
