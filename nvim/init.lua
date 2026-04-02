@@ -1057,7 +1057,7 @@ end)
 
 u.ft({ "markdown" }, function(buffer)
   vim.keymap.set('i', ';t', "- [ ] ", { buffer = buffer })
-  vim.keymap.set('i', ';l', "[](<c-r>0)<esc>^a", { buffer = buffer })
+  vim.keymap.set('i', ';l', "[](<c-r>+)<esc>^a", { buffer = buffer })
   vim.keymap.set('i', ';h1', "# ", { buffer = buffer })
   vim.keymap.set('i', ';h2', "## ", { buffer = buffer })
   snip(";d", '[<date>] ', buffer)
@@ -1075,12 +1075,14 @@ u.ft({ "vim" }, function(buffer)
 end)
 
 
--- nushell
+-- xnushell
 u.ft({ "nu", "bash", "sh" }, function(buffer)
   vim.keymap.set('n', '<c-g>', 'ddsjGp', { remap = true })
   vim.keymap.set('v', '<d-g>', 'dsjGp', { remap = true })
 
   vim.keymap.set('i', '`', '$""<left>', { buffer = buffer })
+  vim.keymap.set('i', ';q', '``<left>', { buffer = buffer })
+  vim.keymap.set('i', ';jq', '"``"<left><left>', { buffer = buffer })
   vim.keymap.set('i', ';e', '$env.MY_ENV<esc>viw', { buffer = buffer })
   vim.keymap.set('i', ';ai', 'if true {}<esc>bbviw', { buffer = buffer })
   vim.keymap.set('i', ';i', '()<left>', { buffer = buffer })
@@ -1223,6 +1225,7 @@ vim.keymap.set('n', 'L', '>>')
 vim.keymap.set('n', 'H', '<<')
 
 vim.keymap.set('n', '0', '_')
+vim.keymap.set('n', 's0', '0')
 vim.keymap.set('n', '-', 'g_')
 
 -- vim.keymap.set('n', '<tab>', '>>')
