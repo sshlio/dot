@@ -815,7 +815,7 @@ vim.keymap.set('n', '<c-u>', '<c-u>zz')
 
 vim.keymap.set('n', '<esc>', function()
   vim.cmd.noh()
-  print " "
+  vim.snippet.stop()
 
   -- Closing diagnostics
   for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -966,6 +966,9 @@ function snip(key, txt, buffer)
   end, { buffer = buffer })
 end
 
+function snip(exp)
+  return function() vim.snippet.expand(exp) end
+end
 
 u.ft({ "lua" }, function(buffer)
   vim.opt_local.indentexpr = "v:lua.FirstNonEmptyIndent()"
@@ -979,6 +982,10 @@ u.ft({ "lua" }, function(buffer)
 
 
   snip(";o", "[<date>]", buffer)
+  -- function dahaha is dahaha
+  vim.keymap.set('i', ';p', snip("${1:prop} = $1"), { buffer = buffer })
+  vim.keymap.set('i', ';2', snip("const ${1:foo} = set${1/capitalize}"), { buffer = buffer })
+
 
 
   vim.keymap.set('i', ';e', "<esc<left><right>>", { buffer = buffer })
@@ -1645,11 +1652,12 @@ end, { desc = 'Open file under cursor (with optional :line)' })
 
 vim.keymap.set({ 'o', 'x' }, 'q', 'iq', { remap = true })
 
-vim.keymap.set('i', '<tab>', function()
+vim.keymap.set({'i', 's'}, '<tab>', function()
   local col = vim.fn.col('.') - 1
 
-
-  if col == 0 or vim.fn.getline('.'):sub(col, col):match('^%s?$') then
+  if vim.snippet.active({ direction = 1 }) then
+    return '<Cmd>lua vim.snippet.jump(1)<CR>'
+  elseif col == 0 or vim.fn.getline('.'):sub(col, col):match('^%s?$') then
     print("before char", vim.inspect(vim.fn.getline('.'):sub(col, col)))
     return '<tab>'
   else
