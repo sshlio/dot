@@ -1291,6 +1291,12 @@ end)
 vim.api.nvim_create_autocmd({"FocusLost", "BufWinLeave", "WinLeave"}, {
   group = augroup,
   callback = function()
+    if fn.getcmdwintype() ~= "" then
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'n', false)
+      vim.cmd.close()
+      return
+    end
+
     local bt = vim.bo.buftype
     vim.cmd.checktime()
 
@@ -1889,7 +1895,7 @@ vim.keymap.set('v', 'C', function()
   local header = 'The user selected lines ' .. from_line .. ' to ' .. to_line .. ' from ./' .. filepath .. ':'
 
   if f then
-    f:write(string.format("<ide_selection>%s\n%s\n</ide_selection>\n-----\n", header, content))
+    f:write(string.format("<ide_selection>%s\n%s\n</ide_selection>\n-----\n\n", header, content))
     f:close()
 
     vim.fn.setreg('+', 'cat ' .. tmpfile .. ' | cl ')
@@ -1897,3 +1903,54 @@ vim.keymap.set('v', 'C', function()
     print('Written to ' .. tmpfile)
   end
 end, { desc = 'Copy selection as Claude Code context' })
+
+-- o.cmdheight = 0
+
+require('vim._core.ui2').enable({
+  enable = true,
+  msg = {
+    targets = {
+      [''] = 'msg',
+      empty = 'cmd',
+      bufwrite = 'msg',
+      confirm = 'cmd',
+      emsg = 'pager',
+      echo = 'msg',
+      echomsg = 'msg',
+      echoerr = 'pager',
+      completion = 'cmd',
+      list_cmd = 'pager',
+      lua_error = 'pager',
+      lua_print = 'msg',
+      progress = 'pager',
+      rpc_error = 'pager',
+      quickfix = 'msg',
+      search_cmd = 'cmd',
+      search_count = 'cmd',
+      shell_cmd = 'pager',
+      shell_err = 'pager',
+      shell_out = 'pager',
+      shell_ret = 'msg',
+      undo = 'msg',
+      verbose = 'pager',
+      wildlist = 'cmd',
+      wmsg = 'msg',
+      typed_cmd = 'cmd',
+    },
+    cmd = {
+      height = 0.5,
+    },
+    dialog = {
+      height = 0.5,
+    },
+    msg = {
+      height = 0.3,
+      timeout = 5000,
+    },
+    pager = {
+      height = 0.5,
+    },
+  },
+})
+
+vim.cmd("packadd nohlsearch")

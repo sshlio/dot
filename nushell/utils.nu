@@ -109,21 +109,6 @@ def mn [] {
   git pull
 }
 
-def ghb [] {
-  let repoName = get-env GH_REPO { basename (git rev-parse --show-toplevel) }
-
-  let repoUrl = $"https://github.com/($env.GH_ROOT)/($repoName)"
-  let currentBranch = (git branch --show-current)
-
-  $repoUrl
-
-  if ($currentBranch == $env.MAIN_BRANCH) {
-    ^open $"($repoUrl)/commits/($currentBranch)"
-  } else {
-    ^open $"($repoUrl)/compare/($currentBranch)"
-  }
-}
-
 def load-dotenv-file [file: string] {
   if not ($file | path exists) {
     return {}
