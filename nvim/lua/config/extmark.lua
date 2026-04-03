@@ -1,6 +1,8 @@
 -- Copyright (c) 2026 Sławomir Laskowski
 -- SPDX-License-Identifier: MIT
 
+-- docs: https://neovim.io/doc/user/api/#nvim_buf_set_extmark()
+
 local ExtmarkState = {}
 ExtmarkState.__index = ExtmarkState
 
@@ -75,6 +77,7 @@ function ExtmarkState:set(state, opts)
   self:clear(state)
 
   local row = assert(opts.row, "ExtmarkState:set requires opts.row")
+
   local col = opts.col or 0
   local extmark_opts = vim.deepcopy(opts)
   extmark_opts.row = nil
@@ -88,18 +91,24 @@ end
 
 function ExtmarkState:get_marks_at_line(buf, linenr, opts)
   buf = self:_normalize_buf(buf)
-  return vim.api.nvim_buf_get_extmarks(buf, self.namespace, { linenr - 1, 0 }, { linenr, 0 }, opts or {})
+  return vim.api.nvim_buf_get_extmarks(buf, self.namespace, { linenr - 1, 0 }, { linenr, 0 }, opts or {
+    overlap = true,
+  })
 end
 
 function ExtmarkState:get_state_at_line(buf, linenr, opts)
   buf = self:_normalize_buf(buf)
+  local row = linenr - 1
   local marks = self:get_marks_at_line(buf, linenr, opts)
-  if #marks == 0 then
-    return nil, nil
+
+  for _, mark in ipairs(marks) do
+    if mark[2] == row then
+      local extmark_id = mark[1]
+      return self:get(buf, extmark_id), extmark_id
+    end
   end
 
-  local extmark_id = marks[1][1]
-  return self:get(buf, extmark_id), extmark_id
+  return nil, nil
 end
 
 function ExtmarkState:get_all_states(buf, opts)

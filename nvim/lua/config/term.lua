@@ -197,7 +197,6 @@ _G.executeCommandUnderTheCursor = function(opts)
 
   local buf = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_set_option(buf, "signcolumn", "yes:2")
-
   local state = extmarks:get_state_at_line(buf, linenr)
 
   if state then
