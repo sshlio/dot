@@ -20,7 +20,7 @@ _G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
 
 dofile(vim.env.HOME .. "/.config/nvim/init.local.lua")
 
-vim.opt.timeoutlen = 300    -- ms to wait for mapped sequence (default 1000)
+vim.opt.timeoutlen = 350    -- ms to wait for mapped sequence (default 1000)
 vim.opt.ttimeoutlen = 50    -- ms to wait for key code sequence (default 50)
 
 vim.keymap.set('n', 'q', '<Nop>')
