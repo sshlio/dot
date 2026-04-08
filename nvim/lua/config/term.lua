@@ -201,6 +201,7 @@ _G.executeCommandUnderTheCursor = function(opts)
 
   if state then
     vim.cmd("botright 50new")
+    vim.cmd("botright 50new")
     vim.api.nvim_set_current_buf(state.buf)
 
     return

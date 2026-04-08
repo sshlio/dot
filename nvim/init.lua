@@ -14,17 +14,25 @@
 
 -- TODO button5 to esc in hammerspoon
 
-
 _G.billy = {}
 
+_G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
+
 dofile(vim.env.HOME .. "/.config/nvim/init.local.lua")
+
+vim.opt.timeoutlen = 300    -- ms to wait for mapped sequence (default 1000)
+vim.opt.ttimeoutlen = 50    -- ms to wait for key code sequence (default 50)
+
+vim.keymap.set('n', 'q', '<Nop>')
+vim.keymap.set('n', 'g', '<Nop>')
+vim.keymap.set('n', 's', '<Nop>')
+
+vim.keymap.set('n', 'gg', 'gg')
 
 vim.opt.packpath = vim.opt.runtimepath:get()
 vim.opt.grepprg = "rg --vimgrep --glob '!_billy' --glob '!CLAUDE.md'"
 vim.opt.complete = '.,w'
 vim.opt.completeopt = { 'menu', 'menuone', 'fuzzy' }
---
-_G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
 
 _G.last_file = nil
 _G.last_line = nil
@@ -1940,49 +1948,49 @@ end, { desc = 'Copy selection as Claude Code context' })
 
 -- o.cmdheight = 0
 
--- require('vim._core.ui2').enable({
---   enable = true,
---   msg = {
---     targets = {
---       [''] = 'msg',
---       empty = 'cmd',
---       bufwrite = 'msg',
---       confirm = 'cmd',
---       emsg = 'pager',
---       echo = 'msg',
---       echomsg = 'msg',
---       echoerr = 'pager',
---       completion = 'cmd',
---       list_cmd = 'pager',
---       lua_error = 'pager',
---       lua_print = 'msg',
---       progress = 'pager',
---       rpc_error = 'pager',
---       quickfix = 'msg',
---       search_cmd = 'cmd',
---       search_count = 'cmd',
---       shell_cmd = 'pager',
---       shell_err = 'pager',
---       shell_out = 'pager',
---       shell_ret = 'msg',
---       undo = 'msg',
---       verbose = 'pager',
---       wildlist = 'cmd',
---       wmsg = 'msg',
---       typed_cmd = 'cmd',
---     },
---     cmd = {
---       height = 0.5,
---     },
---     dialog = {
---       height = 0.5,
---     },
---     msg = {
---       height = 0.3,
---       timeout = 5000,
---     },
---     pager = {
---       height = 0.5,
---     },
---   },
--- })
+require('vim._core.ui2').enable({
+  enable = true,
+  msg = {
+    targets = {
+      [''] = 'msg',
+      empty = 'cmd',
+      bufwrite = 'msg',
+      confirm = 'cmd',
+      emsg = 'pager',
+      echo = 'msg',
+      echomsg = 'msg',
+      echoerr = 'pager',
+      completion = 'cmd',
+      list_cmd = 'pager',
+      lua_error = 'pager',
+      lua_print = 'msg',
+      progress = 'pager',
+      rpc_error = 'pager',
+      quickfix = 'msg',
+      search_cmd = 'cmd',
+      search_count = 'cmd',
+      shell_cmd = 'pager',
+      shell_err = 'pager',
+      shell_out = 'pager',
+      shell_ret = 'msg',
+      undo = 'cmd',
+      verbose = 'pager',
+      wildlist = 'cmd',
+      wmsg = 'msg',
+      typed_cmd = 'cmd',
+    },
+    cmd = {
+      height = 0.5,
+    },
+    dialog = {
+      height = 0.5,
+    },
+    msg = {
+      height = 0.3,
+      timeout = 5000,
+    },
+    pager = {
+      height = 0.5,
+    },
+  },
+})

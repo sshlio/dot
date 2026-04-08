@@ -8,6 +8,8 @@ vim.o.tabline = '%!v:lua.tabline()'
 
 -- vim.o.winbar = " - %f"
 vim.o.statusline = "%!v:lua.statusline()"
+vim.diagnostic.status()
+vim.lsp.status()
 
 local function colorful(text, color)
   return "%#" .. color .. "#" .. text .. "%*"
