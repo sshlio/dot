@@ -42,7 +42,7 @@
       ansible.builtin.import_tasks: tasks/symlink/main.yaml
       vars:
         symlink_src: "{{ playbook_dir }}/../.vimrc"
-        symlink_dest: "{{ ansible_facts['env']['HOME'] }}/.vimrc"
+        symlink_dest: "~/.vimrc"
 
     - name: Npmrc config
       lineinfile:
