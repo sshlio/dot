@@ -146,7 +146,6 @@ vim.api.nvim_create_autocmd('TermRequest', {
   end,
 })
 
-vim.keymap.set('t', '<c-g>', '<esc>')
 vim.keymap.set('t', '<c-l>', function()
   vim.fn.chansend(vim.b.terminal_job_id, "clear\r")
 end, { noremap = true, desc = 'Clear shell' })
@@ -236,7 +235,7 @@ _G.executeCommandUnderTheCursor = function(opts)
     local buf = vim.api.nvim_create_buf(false, true)
     local win = vim.api.nvim_open_win(buf, true, opts)
 
-    -- if true then 
+    -- if true then
     -- return
     -- end
   else

@@ -32,11 +32,17 @@
         - "~/.npmrc"
         - "~/.config/nvim/init.local.lua"
         - "~/.config/nushell/config.local.nu"
-
     - name: Ensure ~/bin exists
+
       file:
         path: "~/bin"
         state: directory
+
+    - name: Link vimrc
+      ansible.builtin.import_tasks: tasks/symlink/main.yaml
+      vars:
+        symlink_src: "{{ playbook_dir }}/../.vimrc"
+        symlink_dest: "{{ ansible_facts['env']['HOME'] }}/.vimrc"
 
     - name: Npmrc config
       lineinfile:

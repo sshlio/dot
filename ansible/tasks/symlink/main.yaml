@@ -1,0 +1,20 @@
+---
+
+- name: Validate symlink task variables
+  ansible.builtin.assert:
+    that:
+      - symlink_src is defined
+      - symlink_dest is defined
+      - symlink_src | length > 0
+      - symlink_dest | length > 0
+    fail_msg: "Pass symlink_src and symlink_dest when importing this task file."
+
+- name: Create symlink
+  ansible.builtin.command:
+    argv:
+      - bash
+      - "{{ playbook_dir }}/tasks/symlink/symlink.sh"
+      - "{{ symlink_src }}"
+      - "{{ symlink_dest }}"
+  tags:
+    - symlink
