@@ -178,7 +178,7 @@ local function changeExtmark(state, newText, hl, sign_text, sign_hl_group)
     virt_text_pos = "eol",
     sign_text = " " .. (sign_text or "X"),
     sign_hl_group = sign_hl_group or "Question",
-    invalidate = false,
+    invalidate = true,
   })
 end
 
@@ -200,7 +200,6 @@ _G.executeCommandUnderTheCursor = function(opts)
   local state = extmarks:get_state_at_line(buf, linenr)
 
   if state then
-    vim.cmd("botright 50new")
     vim.cmd("botright 50new")
     vim.api.nvim_set_current_buf(state.buf)
 
@@ -224,7 +223,22 @@ _G.executeCommandUnderTheCursor = function(opts)
   local prev_win = vim.api.nvim_get_current_win()
 
   if opts.silent then
-    vim.cmd("botright 10new")
+    local opts = {
+      relative = "editor",
+      width = 10000,
+      height = 20,
+      col = -100,
+      row = 1000,
+      hide = true,
+      zindex = 1,
+    }
+
+    local buf = vim.api.nvim_create_buf(false, true)
+    local win = vim.api.nvim_open_win(buf, true, opts)
+
+    -- if true then 
+    -- return
+    -- end
   else
     vim.cmd("botright 50new")
   end

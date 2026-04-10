@@ -8,6 +8,9 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = { "*.nu" },
   callback = function()
     local syntax_file = vim.fn.expand("~/.config/nvim/syntax/nu.vim")
+
+    vim.opt_local.filetype = "nu"
+
     if vim.fn.filereadable(syntax_file) == 1 then
       vim.cmd("so " .. syntax_file)
     end
