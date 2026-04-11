@@ -251,6 +251,18 @@ _G.executeCommandUnderTheCursor = function(opts)
       -- print("Terminal exited with code: " .. exit_code, buf)
       -- cleanupExtmark(bufState[buf])
       bufState[buf].exited = true
+      local extmark_text = ""
+
+      if vim.api.nvim_buf_is_valid(buf) then
+        local content = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+
+        local first_line = content[1]
+        local second_line = content[2]
+
+        if first_line and second_line == "" and #first_line <= 50 then
+          extmark_text = " " .. first_line .. " "
+        end
+      end
 
       if bufState[buf].disowned then
         return
@@ -261,7 +273,7 @@ _G.executeCommandUnderTheCursor = function(opts)
       local sign = exit_code < 1 and "󰄬" or "󰰱"
       local signhl = exit_code < 1 and "TabLineSel" or "SpellBad"
 
-      changeExtmark(bufState[buf], " exit: " .. exit_code .. " ", hl, sign, signhl)
+      changeExtmark(bufState[buf], extmark_text, hl, sign, signhl)
 
       -- bufState[buf].clenupOnQuit = true
       -- bufState[buf].inProgress = false

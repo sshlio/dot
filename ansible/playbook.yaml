@@ -9,6 +9,7 @@
          - rg
          - neovim
          - git-delta
+         - libqalculate
         state: present
 
     - name: Configure git to use delta as pager
