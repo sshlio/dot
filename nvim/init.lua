@@ -239,6 +239,8 @@ o.swapfile = false
 o.laststatus = 2
 o.path = '**'
 vim.o.showmode = false      -- Don't show mode in command line
+vim.o.showcmd = false       -- Don't show partially typed commands in command line
+vim.o.ruler = false         -- Don't show cursor position/column in command line
 o.number = true -- Enable line numbers
 o.relativenumber = true -- Enable relative line numbers
 vim.o.signcolumn     = 'yes'      -- Always show signcolumn (less flicker)
@@ -326,8 +328,32 @@ vim.keymap.set('n', '<right>', '<c-w>w')
 vim.keymap.set('n', '<c-l>', '<c-w>w')
 
 vim.keymap.set('n', '=', '<c-w>=')
--- vim.keymap.set('n', "'", ';')
-vim.keymap.set('n', '<c-v>', '<c-w>o<c-w>v')
+
+local function count_normal_windows()
+  local count = 0
+
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local config = vim.api.nvim_win_get_config(win)
+
+    if config.relative == "" and vim.fn.win_gettype(win) == "" then
+      local buf = vim.api.nvim_win_get_buf(win)
+
+      if vim.bo[buf].buftype == "" then
+        count = count + 1
+      end
+    end
+  end
+
+  return count
+end
+
+vim.keymap.set('n', '<c-v>', function()
+  if count_normal_windows() > 1 then
+    vim.cmd.wincmd('o')
+  end
+
+  vim.cmd.wincmd('v')
+end, { silent = true })
 
 
 -- Clipboard
