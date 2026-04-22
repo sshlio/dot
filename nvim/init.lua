@@ -329,6 +329,9 @@ vim.keymap.set('n', '<c-l>', '<c-w>w')
 
 vim.keymap.set('n', '=', '<c-w>=')
 
+vim.keymap.set('n', 'u', ':silent undo<cr>', { silent = true })
+vim.keymap.set('n', 'U', ":silent redo<cr>", { silent = true })
+
 local function count_normal_windows()
   local count = 0
 
@@ -486,7 +489,6 @@ end, { expr = true })
 --   print("")
 -- end, { noremap = true, silent = true })
 
-vim.keymap.set('n', 'U', "<c-r>")
 
 -- vim.keymap.set('n', 'U', cmd("silent! redo"))
 -- vim.keymap.set('n', 'u', cmd("silent! undo"))
