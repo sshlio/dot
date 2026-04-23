@@ -1279,7 +1279,7 @@ local function ii(reverse, inner)
 end
 
 vim.keymap.set({'o', 'x'}, 'ii', function() ii(false) end)
-vim.keymap.set({'o', 'x'}, 'I', function() ii(true) end)
+-- vim.keymap.set({'o', 'x'}, 'I', function() ii(true) end)
 
 vim.keymap.set({'o', 'x'}, 'ai', function() ii(false, true) end)
 vim.keymap.set({'o', 'x'}, 'ao', function() ii(true, true) end)
