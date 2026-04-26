@@ -350,7 +350,7 @@ _G.stopCommandUnderTheCursor = function()
     if state and state.job_id then
       state.disowned = true
       vim.fn.jobstop(state.job_id)
-      vim.api.nvim_buf_delete(state.buf, { force = true })
+      pcall(vim.api.nvim_buf_delete, state.buf, { force = true })
     end
 
     extmarks:clear(state)
@@ -421,5 +421,4 @@ vim.api.nvim_create_autocmd("BufDelete", {
 --     end
 --   end)
 -- )
-
 
