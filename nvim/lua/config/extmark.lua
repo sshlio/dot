@@ -74,14 +74,27 @@ function ExtmarkState:clear(state)
 end
 
 function ExtmarkState:set(state, opts)
-  self:clear(state)
-
   local row = assert(opts.row, "ExtmarkState:set requires opts.row")
 
   local col = opts.col or 0
   local extmark_opts = vim.deepcopy(opts)
   extmark_opts.row = nil
   extmark_opts.col = nil
+  if state.extmark then
+    extmark_opts.id = state.extmark
+
+    local pos = vim.api.nvim_buf_get_extmark_by_id(
+      state.parentBuf,
+      self.namespace,
+      state.extmark,
+      {}
+    )
+
+    print(vim.inspect(pos))
+
+    row = pos[1]
+
+  end
 
   state.extmark = vim.api.nvim_buf_set_extmark(state.parentBuf, self.namespace, row, col, extmark_opts)
   self:_ensure_buf(state.parentBuf)[self:_key(state.extmark)] = state
