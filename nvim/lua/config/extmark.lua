@@ -90,8 +90,6 @@ function ExtmarkState:set(state, opts)
       {}
     )
 
-    print(vim.inspect(pos))
-
     row = pos[1]
 
   end
