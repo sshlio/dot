@@ -1136,7 +1136,7 @@ end)
 
 -- xvim
 u.ft({ "vim" }, function(buffer)
-  vim.keymap.set('i', ';m', "Macro esc>j<esc>bbi<<left>", { buffer = buffer })
+  vim.keymap.set('i', ';m', "Macro esc>j<esc>bbi0<<left>", { buffer = buffer })
   vim.keymap.set('i', ';e', "<esc<left><right>>", { buffer = buffer })
   vim.keymap.set('i', ';f', "<c-r>f", { buffer = buffer })
   vim.keymap.set('i', ';d', "<c-r>d", { buffer = buffer })

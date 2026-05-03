@@ -41,7 +41,7 @@ function _G.statusline()
     local m = vim.fn.mode()
     mode_info = mode_map[m] or { m, "StatusLine" }
   else
-    mode_info = { "INACTV", "Comment" }
+    mode_info = { "------", "Comment" }
   end
   return " "
     .. colorful(" " .. mode_info[1] .. " ", mode_info[2])
