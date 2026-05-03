@@ -405,6 +405,10 @@ local function checkUSBMouse()
         if name:lower():find("mouse") then
             found = true
         end
+
+        if vendor:lower():find("logitech") then
+            found = true
+        end
     end
 
     print("[USB] Mouse present:", found)
@@ -429,6 +433,7 @@ local usbWatcher = hs.usb.watcher.new(function(data)
 
     checkUSBMouse()
 end)
+
 checkUSBMouse()
 
 usbWatcher:start()
