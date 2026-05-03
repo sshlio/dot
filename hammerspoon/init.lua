@@ -200,21 +200,21 @@ button4Watcher = eventtap.new({ eventTypes.otherMouseDown }, function(event)
   return false
 end)
 
-myTap = hs.eventtap.new( { eventTypes.gesture }, function(e)
-  local gestureType = e:getTouches()
-
-  if #gestureType == 0 then
-    return false
-  end
-
-  if #gestureType == 2 then
-    scrollWatcher:stop()
-    return false
-  end
-
-  scrollWatcher:start()
-  touches = #gestureType
-end)
+-- myTap = hs.eventtap.new( { eventTypes.gesture }, function(e)
+--   local gestureType = e:getTouches()
+--
+--   if #gestureType == 0 then
+--     return false
+--   end
+--
+--   if #gestureType == 2 then
+--     scrollWatcher:stop()
+--     return false
+--   end
+--
+--   scrollWatcher:start()
+--   touches = #gestureType
+-- end)
 
 hs.hotkey.bind({"cmd"}, "1", function()
   hs.application.launchOrFocus("kitty")
@@ -363,13 +363,13 @@ w = hs.application.watcher.new(function(name, ev)
       chromebinding:enable()
       chromebinding2:enable()
       chromebinding3:enable()
-      chromebinding4:enable()
+      -- chromebinding4:enable()
       chromebinding5:enable()
     else
       chromebinding:disable()
       chromebinding2:disable()
       chromebinding3:disable()
-      chromebinding4:disable()
+      -- chromebinding4:disable()
       chromebinding5:disable()
     end
   end
@@ -386,8 +386,53 @@ end)
 w:start()
 scrollWatcher:start()
 button4Watcher:start()
-myTap:start()      
+-- myTap:start()      
 
 -- "world "
+-- "world "
+-- "world "
+
+local function checkUSBMouse()
+    local devices = hs.usb.attachedDevices()
+    local found = false
+
+    for _, dev in ipairs(devices) do
+        local name = dev.productName or "unknown"
+        local vendor = dev.vendorName or "unknown"
+
+        print(string.format("[USB] device=%s vendor=%s", name, vendor))
+
+        if name:lower():find("mouse") then
+            found = true
+        end
+    end
+
+    print("[USB] Mouse present:", found)
+    if found then
+      scrollWatcher:start()
+    else
+      scrollWatcher:stop()
+    end
+    return found
+end
+
+
+local usbWatcher = hs.usb.watcher.new(function(data)
+    if data.eventType ~= "added" and data.eventType ~= "removed" then return end
+
+    print(string.format(
+        "[USB] event=%s product=%s vendor=%s",
+        data.eventType,
+        data.productName or "unknown",
+        data.vendorName or "unknown"
+    ))
+
+    checkUSBMouse()
+end)
+checkUSBMouse()
+
+usbWatcher:start()
+
+
 
 

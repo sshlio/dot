@@ -7,6 +7,8 @@
         name:
          - nushell
          - rg
+         - fzf
+         - node
          - neovim
          - git-delta
          - libqalculate

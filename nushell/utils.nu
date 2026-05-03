@@ -313,7 +313,7 @@ def ln_conf [_path, dest?: string] {
   let home = ("~" | path expand)
 
   let distPath = ($dest | default "~/.config"| path expand)
-  let sourncPath = $"("~" | path expand)/p/Dotfiles/($_path)" | path expand
+  let sourncPath = $"("~" | path expand)/p/dot/($_path)" | path expand
 
   whatever { ln -s $sourncPath $distPath }
 }
