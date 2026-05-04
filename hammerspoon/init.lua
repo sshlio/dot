@@ -226,18 +226,16 @@ end)
 --   hs.eventtap.keyStroke({"ctrl"}, "y")
 -- end)
 
-
-
-eschs = hs.hotkey.bind({}, "Escape", function()
-  hs.eventtap.keyStroke({}, "`")
-end)
-
-seschs = hs.hotkey.bind({"cmd"}, "Escape", function()
+seschs = hs.hotkey.bind({"cmd"}, "§", function()
   hs.eventtap.keyStroke({"cmd"}, "`")
 end)
 
-sseschs = hs.hotkey.bind({"shift"}, "Escape", function()
-  hs.eventtap.keyStroke({"shift"}, "`")
+hs.hotkey.bind({}, "§", function()
+  hs.eventtap.keyStroke({}, "`", 0)
+end)
+
+hs.hotkey.bind({"shift"}, "§", function()
+  hs.eventtap.keyStroke({"shift"}, "`", 0)
 end)
 
 hs.hotkey.bind({"cmd"}, ";", function()
@@ -437,7 +435,4 @@ end)
 checkUSBMouse()
 
 usbWatcher:start()
-
-
-
 
