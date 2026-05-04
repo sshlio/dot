@@ -239,9 +239,7 @@ hs.hotkey.bind({"shift"}, "§", function()
 end)
 
 hs.hotkey.bind({"cmd"}, ";", function()
-  eschs:disable()
   hs.eventtap.keyStroke({}, "Escape")
-  eschs:enable()
 end)
 
 hs.hotkey.bind({"cmd"}, "3", function()
