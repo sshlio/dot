@@ -20,6 +20,12 @@
         value: delta
         scope: global
 
+    - name: Set global git ignore file
+      git_config:
+        name: core.excludesfile
+        value: "{{ ansible_env.HOME }}/p/dot/git/ignore"
+        scope: global
+
     - name: Delta side by side
       git_config:
         name: delta.side-by-side
