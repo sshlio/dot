@@ -220,11 +220,11 @@ hs.hotkey.bind({"cmd"}, "1", function()
   hs.application.launchOrFocus("kitty")
 end)
 
-hs.hotkey.bind({"cmd"}, "space", function()
-  hs.application.launchOrFocus("kitty")
-
-  hs.eventtap.keyStroke({"ctrl"}, "y")
-end)
+-- hs.hotkey.bind({"cmd"}, "space", function()
+--   hs.application.launchOrFocus("kitty")
+--
+--   hs.eventtap.keyStroke({"ctrl"}, "y")
+-- end)
 
 
 
