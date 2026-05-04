@@ -1614,8 +1614,10 @@ if is_windows then
   vim.keymap.set({ "c", "x", "o", "i", "n", "t" }, "<c-l>", "<right>", { remap = true })
   vim.keymap.set({ "c", "x", "o", "i", "n", "t" }, "<c-h>", "<left>", { remap = true })
   vim.keymap.set({ "c", "x", "o", "n", "t" }, "<c-;>", "<esc>", { remap = true })
+  vim.keymap.set({ "c", "x", "o", "n", "t" }, "<d-;>", "<esc>", { remap = true })
 
   vim.keymap.set({ "i" }, "<c-;>", "<esc>", { remap = false })
+  vim.keymap.set({ "i" }, "<d-;>", "<esc>", { remap = false })
   vim.keymap.set({ "i" }, "<esc>", "`", { remap = true })
 
   vim.g.neovide_scale_factor = 0.8
