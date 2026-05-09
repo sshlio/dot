@@ -2,6 +2,8 @@
 -- SPDX-License-Identifier: MIT
 
 local ns = vim.api.nvim_create_namespace('_billy_term')
+
+local last = nil
 -- vim.keymap.set('t', '<esc>', '<C-\\><C-n>')
 vim.keymap.set('t', '<c-e>', '<C-\\><C-n>kj0f l')
 vim.keymap.set('t', '<c-e>', '<C-\\><C-n>kj0f l')
@@ -181,6 +183,8 @@ local function changeExtmark(state, newText, hl, sign_text, sign_hl_group)
   })
 end
 
+local lastExtmark = nil
+
 _G.executeCommandUnderTheCursor = function(opts)
   local line = vim.fn.getline('.')
   if line:match("^%s*$") then return end
@@ -202,6 +206,8 @@ _G.executeCommandUnderTheCursor = function(opts)
     vim.cmd("botright 50new")
     vim.api.nvim_set_current_buf(state.buf)
 
+    last = state
+
     return
   end
 
@@ -213,9 +219,6 @@ _G.executeCommandUnderTheCursor = function(opts)
     inProgress = true,
   }
 
-  -- changeExtmark(state, "Executing..", "Question")
-
-  -- local cmd = { "nu", "--config", "~/.config/nushell/utils.nu", "-c",  line };
   local nu_config = is_trusted and has_local_nu_config and local_nu_config or "~/.config/nushell/utils.nu"
   local cmd = { "nu", "--config", nu_config, "-c",  line };
 
@@ -291,6 +294,8 @@ _G.executeCommandUnderTheCursor = function(opts)
     state.buf = buf
     state.job_id = job_id
 
+    last = state
+
     changeExtmark(bufState[buf], os.date("%H:%M"), "StatusLine", "●", "Debug")
 
     if opts.silent then
@@ -306,6 +311,14 @@ end
 local function stopAndExecute(opt)
   _G.stopCommandUnderTheCursor()
   _G.executeCommandUnderTheCursor(opt)
+end
+
+local function openLast(opt)
+  print("last", vim.inspect(last))
+  if last then
+    vim.cmd("botright 50new")
+    vim.api.nvim_set_current_buf(last.buf)
+  end
 end
 
 local function executeQuiet()
@@ -339,6 +352,7 @@ _G.bindExecuteCommand = function(buffer)
   vim.keymap.set('n', 'sC', clearAllExtmarks, { desc = 'Clear all extmarks and their terminal buffers', buffer = buffer })
 end
 
+vim.keymap.set('n', 'qp', openLast, { desc = 'Open last execute command terminal window', buffer = buffer })
 
 _G.stopCommandUnderTheCursor = function()
   local linenr = vim.api.nvim_win_get_cursor(0)[1]
