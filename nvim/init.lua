@@ -180,6 +180,29 @@ local once = function(id, fn)
   return _G.__once_flags[id].result
 end
 
+function normalizedVisual(command, wrap, inversed)
+  if wrap == nil then wrap = true end
+
+  return function()
+    local keys = ''
+
+    local v = vim.fn.getpos('v')
+    local c = vim.fn.getpos('.')
+
+    local cursor_is_before_anchor = (c[2] < v[2]) or (c[2] == v[2] and c[3] < v[3])
+
+    if cursor_is_before_anchor or inversed then
+      keys = "o"
+    end
+
+    if wrap then
+      return keys .. command .. keys
+    end
+
+    return keys .. command
+  end
+end
+
 local augroup = vim.api.nvim_create_augroup("billy_init", { clear = true })
 
 function u.normal(arg)
@@ -510,8 +533,6 @@ vim.keymap.set('n', 'su', function()
 end)
 
 vim.keymap.set('n', 'sd', '<cmd>t.<cr>')
-vim.keymap.set('x', 'sd', 'mx"xy`xo<esc>"xp')
-
 vim.keymap.set('n', 'so', '<cmd>silent! w! | execute "luafile %"<cr>')
 -- vim.keymap.set('n', 'se', function() print("--------") end)
 vim.keymap.set('n', 'sm', cmd("messages"))
@@ -1025,8 +1046,8 @@ u.ft({ "lua" }, function(buffer)
   snip(";o", "[<date>]", buffer)
   -- function dahaha is dahaha
   vim.keymap.set('i', ';p', snip("${1:prop} = $1"), { buffer = buffer })
+  vim.keymap.set('i', ';o', snip("${1:prop} = $1 or ${2:false}"), { buffer = buffer })
   vim.keymap.set('i', ';2', snip("const ${1:foo} = set${1/capitalize}"), { buffer = buffer })
-
 
 
   vim.keymap.set('i', ';e', "<esc<left><right>>", { buffer = buffer })
@@ -1565,27 +1586,14 @@ vim.keymap.set("v", "\"", "c\"\"<Esc>Pgvlolo", { noremap = true, silent = true }
 -- vim.keymap.set({ "v", "o" }, "b", "ib", { noremap = false, silent = true })
 vim.keymap.set({ "v", "n" }, "'", ";", { noremap = true, silent = true })
 
-function normalizedVisual(command)
-  return function()
-    local keys = ''
-
-    local v = vim.fn.getpos('v')
-    local c = vim.fn.getpos('.')
-
-    local cursor_is_before_anchor = (c[2] < v[2]) or (c[2] == v[2] and c[3] < v[3])
-
-    if cursor_is_before_anchor then
-      keys = "o"
-    end
-
-    return keys .. command .. keys
-  end
-end
 
 vim.keymap.set('x', 'L', normalizedVisual('loho'), { expr = true })
 vim.keymap.set('x', 'H', normalizedVisual('holo'), { expr = true })
 vim.keymap.set("v", "x", normalizedVisual("<esc>lxgvo<esc>Xgvhoh"), { expr = true })
 vim.keymap.set("v", "X", normalizedVisual("<esc>xgvo<esc>xgvohh"), { expr = true })
+vim.keymap.set("x", "A", normalizedVisual("A", false), { expr = true, noremap = true })
+vim.keymap.set("x", "I", normalizedVisual("A<left>", false, true), { expr = true })
+vim.keymap.set('x', 'sd', normalizedVisual('mx"xy`xo<esc>"xp', false), { expr = true })
 
 -- "(word)" two
 -- "(word)" two
@@ -1716,7 +1724,6 @@ vim.keymap.set('x', 'sr', ":s//<left>")
 
 vim.keymap.set('n', 'so', '<cmd>silent! w! | execute "luafile %"<cr>')
 vim.keymap.set('n', 'sd', '<cmd>t.<cr>')
-vim.keymap.set('x', 'sd', 'mx"xy`xo<esc>"xp')
 
 vim.keymap.set('n', 'so', '<cmd>silent! w! | execute "luafile %"<cr>')
 vim.keymap.set({ 'n', 'v' }, 'y', '"+y')
