@@ -343,6 +343,36 @@ local function clearAllExtmarks()
   end
 end
 
+local function moveAllExtmarksToLocationList()
+  local buf = vim.api.nvim_get_current_buf()
+  local marks = vim.api.nvim_buf_get_extmarks(buf, ns, 0, -1, {})
+  local items = {}
+
+  for _, mark in ipairs(marks) do
+    local extmark_id = mark[1]
+    local lnum = mark[2] + 1
+    local col = mark[3] + 1
+    local state = extmarks:get(buf, extmark_id)
+
+    table.insert(items, {
+      bufnr = buf,
+      lnum = lnum,
+      col = col,
+      text = vim.api.nvim_buf_get_lines(buf, lnum - 1, lnum, false)[1] or "",
+    })
+  end
+
+  if #items == 0 then
+    return
+  end
+
+  vim.fn.setloclist(0, {}, "r", {
+    title = "Executed commands",
+    items = items,
+  })
+  vim.cmd.lopen()
+end
+
 _G.bindExecuteCommand = function(buffer)
   vim.keymap.set('n', '<cr>', _G.executeCommandUnderTheCursor, { desc = 'Execute line in shell and paste output below', buffer = buffer })
   vim.keymap.set('n', 's<cr>', stopAndExecute, { desc = 'Execute line in shell and paste output below', buffer = buffer })
@@ -350,6 +380,7 @@ _G.bindExecuteCommand = function(buffer)
   vim.keymap.set('n', 'sc', _G.stopCommandUnderTheCursor, { desc = 'Stop command and clear extmark', buffer = buffer })
   vim.keymap.set('n', 'se', executeQuiet, { desc = 'Execute quietly (close window)', buffer = buffer })
   vim.keymap.set('n', 'sC', clearAllExtmarks, { desc = 'Clear all extmarks and their terminal buffers', buffer = buffer })
+  vim.keymap.set('n', 'qo', moveAllExtmarksToLocationList, { desc = 'Move execute command extmarks to location list', buffer = buffer })
 end
 
 vim.keymap.set('n', 'qp', openLast, { desc = 'Open last execute command terminal window', buffer = buffer })
@@ -435,5 +466,3 @@ vim.api.nvim_create_autocmd("BufDelete", {
 --     end
 --   end)
 -- )
-
-
