@@ -321,6 +321,39 @@ local function openLast(opt)
   end
 end
 
+local function isRunning(state)
+  if not state or state.exited or not state.job_id then
+    return false
+  end
+
+  local ok, result = pcall(vim.fn.jobwait, { state.job_id }, 0)
+
+  return ok and result[1] == -1
+end
+
+local function sendLineToFirstRunningAbove()
+  local line = vim.fn.getline('.')
+  if line:match("^%s*$") then return end
+
+  local parent_buf = vim.api.nvim_get_current_buf()
+  local linenr = vim.api.nvim_win_get_cursor(0)[1]
+
+  for row = linenr - 1, 1, -1 do
+    local state = extmarks:get_state_at_line(parent_buf, row)
+
+    if isRunning(state) then
+      vim.fn.chansend(state.job_id, line .. "\r")
+      last = state
+
+      vim.cmd("botright 50new")
+      vim.api.nvim_set_current_buf(state.buf)
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-\\><C-n>G', true, false, true), 'n', false)
+
+      return
+    end
+  end
+end
+
 local function executeQuiet()
   _G.executeCommandUnderTheCursor()
 
@@ -381,6 +414,7 @@ _G.bindExecuteCommand = function(buffer)
   vim.keymap.set('n', 'se', executeQuiet, { desc = 'Execute quietly (close window)', buffer = buffer })
   vim.keymap.set('n', 'sC', clearAllExtmarks, { desc = 'Clear all extmarks and their terminal buffers', buffer = buffer })
   vim.keymap.set('n', 'qo', moveAllExtmarksToLocationList, { desc = 'Move execute command extmarks to location list', buffer = buffer })
+  vim.keymap.set('n', 'qk', sendLineToFirstRunningAbove, { desc = 'Send line to first running command above', buffer = buffer })
 end
 
 vim.keymap.set('n', 'qp', openLast, { desc = 'Open last execute command terminal window', buffer = buffer })
