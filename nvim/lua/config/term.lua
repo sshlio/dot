@@ -186,9 +186,13 @@ end
 local lastExtmark = nil
 
 _G.executeCommandUnderTheCursor = function(opts)
-  local line = vim.fn.getline('.')
+  opts = opts or {}
+  local linenr = opts.linenr or vim.api.nvim_win_get_cursor(0)[1]
+  local buf = opts.buf or vim.api.nvim_get_current_buf()
+
+  local line = vim.fn.getline(linenr)
   if line:match("^%s*$") then return end
-  local linenr = vim.api.nvim_win_get_cursor(0)[1]
+
   local cwd = vim.fn.getcwd()
   local trusted_paths = _G.TRUSTED
   local is_trusted = trusted_paths ~= nil and vim.tbl_contains(trusted_paths, cwd)
@@ -198,11 +202,10 @@ _G.executeCommandUnderTheCursor = function(opts)
   opts = opts or {}
   opts.silent = opts.silent or false
 
-  local buf = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_set_option(buf, "signcolumn", "yes:2")
   local state = extmarks:get_state_at_line(buf, linenr)
 
-  if state then
+  if state and not state.pending then
     vim.cmd("botright 50new")
     vim.api.nvim_set_current_buf(state.buf)
 
@@ -211,13 +214,15 @@ _G.executeCommandUnderTheCursor = function(opts)
     return
   end
 
-  local state = {
-    parentBuf = buf,
-    linenr = linenr,
-    extmark = false,
-    show = true,
-    inProgress = true,
-  }
+  if not state then
+    state = {
+      parentBuf = buf,
+      linenr = linenr,
+      extmark = false,
+      show = true,
+      inProgress = true,
+    }
+  end
 
   local nu_config = is_trusted and has_local_nu_config and local_nu_config or "~/.config/nushell/utils.nu"
   local cmd = { "nu", "--config", nu_config, "-c",  line };
@@ -267,6 +272,10 @@ _G.executeCommandUnderTheCursor = function(opts)
         end
       end
 
+      if state.next and exit_code < 1 then
+        state.next()
+      end
+
       if bufState[buf].disowned then
         return
       end
@@ -311,6 +320,42 @@ end
 local function stopAndExecute(opt)
   _G.stopCommandUnderTheCursor()
   _G.executeCommandUnderTheCursor(opt)
+end
+
+local function enqueue(opt)
+  _G.stopCommandUnderTheCursor()
+
+  local buf = vim.api.nvim_get_current_buf()
+  local linenr = vim.api.nvim_win_get_cursor(0)[1]
+
+  local state = { 
+    parentBuf = buf,
+    linenr = linenr,
+    inProgress = false,
+    pending = true,
+  }
+
+  -- TODO create extmark here
+  local extmark = extmarks:set(state, {
+    row = linenr - 1,
+    col = 0,
+    sign_text = " ",
+    -- sign_hl_group = "Question",
+    invalidate = true,
+  });
+
+
+  if last then
+    last.next = function() 
+      _G.executeCommandUnderTheCursor({
+        buf = buf,
+        linenr = linenr,
+        silent = true,
+      })
+    end
+  end
+
+  last = state
 end
 
 local function openLast(opt)
@@ -410,6 +455,7 @@ _G.bindExecuteCommand = function(buffer)
   vim.keymap.set('n', '<cr>', _G.executeCommandUnderTheCursor, { desc = 'Execute line in shell and paste output below', buffer = buffer })
   vim.keymap.set('n', 's<cr>', stopAndExecute, { desc = 'Execute line in shell and paste output below', buffer = buffer })
   vim.keymap.set('n', 'q<cr>', function() stopAndExecute({ silent = true }) end, { desc = 'Execute line in shell and paste output below', buffer = buffer })
+  vim.keymap.set('n', 'qn', function() enqueue() end, { desc = 'Execute line in shell and paste output below', buffer = buffer })
   vim.keymap.set('n', 'sc', _G.stopCommandUnderTheCursor, { desc = 'Stop command and clear extmark', buffer = buffer })
   vim.keymap.set('n', 'se', executeQuiet, { desc = 'Execute quietly (close window)', buffer = buffer })
   vim.keymap.set('n', 'sC', clearAllExtmarks, { desc = 'Clear all extmarks and their terminal buffers', buffer = buffer })
