@@ -19,12 +19,11 @@ function _G.FirstNonEmptyIndent()
 
   local baseIndent = vim.fn.indent(lnum)
 
-  if baseIndent > 0 then
+  if baseIndent > 1 then
     -- Dont mess wit it
     return baseIndent
   end
 
-  print("current line", line)
   -- Search upwards for the first non-empty line
   for i = lnum - 1, 1, -1 do
     local line = vim.fn.getline(i)
