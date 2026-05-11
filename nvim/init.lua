@@ -1986,7 +1986,7 @@ end, { desc = 'Copy selection as Claude Code context' })
 -- o.cmdheight = 0
 
 require('vim._core.ui2').enable({
-  enable = true,
+  enable = false,
   msg = {
     targets = {
       [''] = 'msg',

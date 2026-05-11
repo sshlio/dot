@@ -23,9 +23,9 @@ function _G.tabline()
 end
 
 local mode_map = {
-  n = { "NORMAL", "Cursor" },
-  i = { "INSERT", "WildMenu" },
-  t = { " TERM ", "WildMenu" },
+  n = { "NORMAL", "StatusNormal" },
+  i = { "INSERT", "StatusInsert" },
+  t = { " TERM ", "StatusInsert" },
   v = { "VISUAL", "Visual" },
   V = { "V-LINE", "Visual" },
   ["\22"] = { "V-BLCK", "Visual" },

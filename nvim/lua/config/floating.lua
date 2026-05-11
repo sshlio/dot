@@ -22,7 +22,7 @@ function float(gbuf)
   local ui = vim.api.nvim_list_uis()[1]
 
   -- Calculate 90% width and height
-  local width = math.floor(ui.width * 0.95)
+  local width = math.floor(ui.width * 0.95) - 5
   local height = math.floor(ui.height * 0.92)
 
   -- Window options
@@ -32,7 +32,7 @@ function float(gbuf)
     height = height,
     col = math.floor((ui.width - width) / 2),
     row = math.floor((ui.height - height) / 2),
-    border = "rounded",
+    border = "none",
   }
 
   -- Open the floating window

@@ -115,15 +115,6 @@ vim.api.nvim_create_autocmd({"TermLeave"}, {
   end,
 })
 
-vim.api.nvim_create_autocmd({"TermEnter"}, {
-  group = augroup,
-  callback = function()
-    vim.api.nvim_set_hl(0, "MyCursorLineNr", { fg = "#333333" })
-    vim.api.nvim_set_hl(0, "TermCursor", { bg = "#ffff00" })
-    vim.wo.winhl = "CursorLineNr:SpellCap"
-  end,
-})
-
 vim.api.nvim_create_autocmd('TermRequest', {
   group = augroup,
   callback = function(ev)
@@ -282,8 +273,8 @@ _G.executeCommandUnderTheCursor = function(opts)
 
       local hl = exit_code < 1 and "WildMenu" or "DiffDelete"
 
-      local sign = exit_code < 1 and "󰄬" or "󰰱"
-      local signhl = exit_code < 1 and "TabLineSel" or "SpellBad"
+      local sign = exit_code < 1 and "󰄬" or ""
+      local signhl = exit_code < 1 and "TermRunSuccess" or "TermRunFail"
 
       changeExtmark(bufState[buf], extmark_text, hl, sign, signhl)
 
@@ -305,7 +296,8 @@ _G.executeCommandUnderTheCursor = function(opts)
 
     last = state
 
-    changeExtmark(bufState[buf], os.date("%H:%M"), "StatusLine", "●", "Debug")
+    -- changeExtmark(bufState[buf], os.date("%H:%M"), "StatusLine", "●", "TermRunInProgress")
+    changeExtmark(bufState[buf], os.date("%H:%M"), "StatusLine", "󰔪", "TermRunInProgress")
 
     if opts.silent then
       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-\\><C-n>G<c-w>q', true, false, true), 'n', false)
@@ -328,7 +320,7 @@ local function enqueue(opt)
   local buf = vim.api.nvim_get_current_buf()
   local linenr = vim.api.nvim_win_get_cursor(0)[1]
 
-  local state = { 
+  local state = {
     parentBuf = buf,
     linenr = linenr,
     inProgress = false,
@@ -346,7 +338,7 @@ local function enqueue(opt)
 
 
   if last then
-    last.next = function() 
+    last.next = function()
       _G.executeCommandUnderTheCursor({
         buf = buf,
         linenr = linenr,
