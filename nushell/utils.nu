@@ -810,5 +810,5 @@ def pbar [
 }
 
 def diff [] {
-  git add .; git diff --cached
+  git diff HEAD
 }

@@ -17,7 +17,7 @@ function M.open_float20()
     width = 100,
     height = 20,
     style = "minimal",
-    border = { "","","", "▌","","","","▐" },
+    border = { "","","", "▐","","","","▌" },
     noautocmd = true,
   }
 
