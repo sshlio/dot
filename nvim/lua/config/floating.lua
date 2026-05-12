@@ -32,11 +32,18 @@ function float(gbuf)
     height = height,
     col = math.floor((ui.width - width) / 2),
     row = math.floor((ui.height - height) / 2),
-    border = "none",
+    -- border = "none",
+    border = {
+      "","","",
+      "▌","","",
+      "",
+      "▐"
+    },
   }
 
   -- Open the floating window
   local win = vim.api.nvim_open_win(buf, true, opts)
+  vim.wo.signcolumn = "yes"
 
   return true
 end
