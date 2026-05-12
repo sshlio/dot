@@ -255,10 +255,10 @@ _G.executeCommandUnderTheCursor = function(opts)
       if vim.api.nvim_buf_is_valid(buf) then
         local content = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
 
-        local first_line = content[1]
+        local first_line = vim.trim(content[1]) or ""
         local second_line = content[2]
 
-        if first_line and second_line == "" and #first_line <= 50 then
+        if first_line ~= "" and second_line == "" and #first_line <= 50 then
           extmark_text = " " .. first_line .. " "
         end
       end
@@ -297,7 +297,7 @@ _G.executeCommandUnderTheCursor = function(opts)
     last = state
 
     -- changeExtmark(bufState[buf], os.date("%H:%M"), "StatusLine", "●", "TermRunInProgress")
-    changeExtmark(bufState[buf], os.date("%H:%M"), "StatusLine", "󰔪", "TermRunInProgress")
+    changeExtmark(bufState[buf], os.date("%H:%M"), "StatusLine", "", "TermRunInProgress")
 
     if opts.silent then
       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-\\><C-n>G<c-w>q', true, false, true), 'n', false)
@@ -331,8 +331,8 @@ local function enqueue(opt)
   local extmark = extmarks:set(state, {
     row = linenr - 1,
     col = 0,
-    sign_text = " ",
-    -- sign_hl_group = "Question",
+    sign_text = " ",
+    sign_hl_group = "TermRunNext",
     invalidate = true,
   });
 
