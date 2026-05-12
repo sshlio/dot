@@ -32,13 +32,8 @@ function float(gbuf)
     height = height,
     col = math.floor((ui.width - width) / 2),
     row = math.floor((ui.height - height) / 2),
-    -- border = "none",
-    border = {
-      "","","",
-      "▌","","",
-      "",
-      "▐"
-    },
+    border = { "","","", "▌","","","","▐" },
+
   }
 
   -- Open the floating window
