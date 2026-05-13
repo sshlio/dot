@@ -472,6 +472,8 @@ local backupRegister = "undf"
 
 vim.keymap.set('n', 'p', function() return put() end, { expr = true })
 vim.keymap.set('n', 'sp', function() return put(backupRegister) end, { expr = true })
+vim.keymap.set('c', '*', '.*')
+vim.keymap.set('o', 'l', '2l')
 
 vim.keymap.set('v', 'p', function()
   local reg = fn.getreg('+'):gsub("\n$", "")
@@ -1173,7 +1175,8 @@ u.ft({ "nu", "bash", "sh" }, function(buffer)
   vim.keymap.set('i', '`', '$""<left>', { buffer = buffer })
   vim.keymap.set('i', ';q', '``<left>', { buffer = buffer })
   vim.keymap.set('i', ';jq', '"``"<left><left>', { buffer = buffer })
-  vim.keymap.set('i', ';e', '$env.MY_ENV<esc>viw', { buffer = buffer })
+  vim.keymap.set('i', ';e', '$env.', { buffer = buffer })
+  vim.keymap.set('i', ';je', 'nenv ', { buffer = buffer })
   vim.keymap.set('i', ';ai', 'if true {}<esc>bbviw', { buffer = buffer })
   vim.keymap.set('i', ';i', '()<left>', { buffer = buffer })
   vim.keymap.set('i', ';d', 'def --wrapped foo [...args] {}<esc>3Bvt ', { buffer = buffer })
@@ -1393,6 +1396,15 @@ vim.api.nvim_create_autocmd({"FocusLost", "BufWinLeave", "WinLeave"}, {
     if bt == "" and vim.bo.modified then
       vim.cmd("silent! write ++p")
     end
+  end,
+})
+
+vim.api.nvim_create_autocmd("WinLeave", {
+  group = augroup,
+  callback = function()
+    vim.schedule(function()
+      vim.cmd.noh({ mods = { emsg_silent = true } })
+    end)
   end,
 })
 

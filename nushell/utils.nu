@@ -812,3 +812,10 @@ def pbar [
 def diff [] {
   git diff HEAD
 }
+
+
+def nenv [name, value] {
+  let b64value = $value | base64
+
+  nvr -c $"lua _G.__term_envs.($name) = vim.base64.decode\('($b64value)')";
+}

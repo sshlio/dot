@@ -93,7 +93,7 @@ vim.api.nvim_create_autocmd({"TermOpen"}, {
     vim.keymap.set('n', 'i', 'i', { buffer = true })
     vim.keymap.set('n', '<cr>', 'i<cr>', { buffer = true })
 
-    vim.wo.winhighlight = "Normal:NormalFloat"
+    vim.wo.winhighlight = "Normal:NormalFloat,CursorLine:FloatCursorLine"
 
     -- markInsert(true)
   end,
@@ -105,7 +105,6 @@ vim.api.nvim_create_autocmd({"TermLeave"}, {
     vim.api.nvim_buf_set_option(0, 'cursorlineopt', 'screenline')
     vim.api.nvim_buf_set_option(0, 'cursorline', true)
 
-    -- vim.wo.winhl = "CursorLineNr:CursorLineNr"
 
     -- vim.schedule(function()
     --   -- print("Set cursor line in schedule")
@@ -201,7 +200,7 @@ _G.executeCommandUnderTheCursor = function(opts)
   if state and not state.pending then
     vim.cmd("botright 50new")
     vim.api.nvim_set_current_buf(state.buf)
-    vim.wo.winhighlight = "Normal:NormalFloat"
+    vim.wo.winhighlight = "Normal:NormalFloat,CursorLine:FloatCursorLine"
 
     last = state
 
@@ -387,7 +386,7 @@ local function sendLineToFirstRunningAbove()
       last = state
 
       vim.cmd("botright 50new")
-      vim.wo.winhighlight = "Normal:NormalFloat"
+      vim.wo.winhighlight = "Normal:NormalFloat,CursorLineNr:FloatCursorLine"
       vim.api.nvim_set_current_buf(state.buf)
       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-\\><C-n>G', true, false, true), 'n', false)
 

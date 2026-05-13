@@ -38,6 +38,7 @@ function float(gbuf)
   -- Open the floating window
   local win = vim.api.nvim_open_win(buf, true, opts)
   vim.wo.signcolumn = "yes"
+  vim.wo.winhighlight = "Normal:NormalFloat,CursorLine:FloatCursorLine"
 
   return true
 end
@@ -56,3 +57,5 @@ vim.api.nvim_create_autocmd("WinLeave", {
 })
 
 _G.float = float
+
+

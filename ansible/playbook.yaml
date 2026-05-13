@@ -6,6 +6,7 @@
       homebrew:
         name:
          - nushell
+         - nvr
          - rg
          - fzf
          - node
