@@ -809,7 +809,12 @@ def pbar [
   $"[($bar)] ($pct)%"
 }
 
-def diff [] {
+def diff [ref?: string] {
+  if $ref != null {
+    git diff $"($ref)^" $ref
+    return
+  }
+
   git diff HEAD
 }
 
@@ -818,4 +823,9 @@ def nenv [name, value] {
   let b64value = $value | base64
 
   nvr -c $"lua _G.__term_envs.($name) = vim.base64.decode\('($b64value)')";
+}
+
+def s [] {
+  git add .
+  git diff --stat HEAD
 }

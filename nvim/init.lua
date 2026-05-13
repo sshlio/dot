@@ -12,10 +12,7 @@
 -- https://nvim-mini.org/blog/2025-10-13-announce-minimax.html
 -- https://github.com/nvim-mini/MiniMax/blob/main/configs/nvim-0.11/plugin/10_options.luq
 
--- TODO button5 to esc in hammerspoon
-
 _G.billy = {}
-
 _G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
 
 dofile(vim.env.HOME .. "/.config/nvim/init.local.lua")
