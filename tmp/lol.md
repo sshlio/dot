@@ -483,7 +483,7 @@ def --env nore_set_env [name, value] {
 }
 
 def --env y [...args] {
-	yazi ...$args
+  yazi ...$args
 }
 
 def ring [size = 10] {

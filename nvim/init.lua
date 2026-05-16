@@ -1164,10 +1164,11 @@ u.ft({ "vim" }, function(buffer)
 end)
 
 
+vim.keymap.set('n', '<c-g>', '<cmd>m $<cr>OG', { remap = true })
+vim.keymap.set('v', '<d-g>', '<cmd>m $<cr>OG', { remap = true })
+
 -- xnushell
 u.ft({ "nu", "bash", "sh" }, function(buffer)
-  vim.keymap.set('n', '<c-g>', 'ddsjGp', { remap = true })
-  vim.keymap.set('v', '<d-g>', 'dsjGp', { remap = true })
 
   vim.keymap.set('i', '`', '$""<left>', { buffer = buffer })
   vim.keymap.set('i', ';q', '``<left>', { buffer = buffer })
@@ -2040,5 +2041,4 @@ require('vim._core.ui2').enable({
     },
   },
 })
-
 
