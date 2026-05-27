@@ -309,6 +309,11 @@ _G.executeCommandUnderTheCursor = function(opts)
     end
 
     vim.b[buf].quitUnfocused = true
+
+    if opts.next then
+      print('Calling next...')
+      opts.next()
+    end
   end)
 end
 
@@ -417,6 +422,33 @@ local function clearAllExtmarks()
   end
 end
 
+local function runParagraph()
+  vim.cmd("normal! vip")
+
+  local from = vim.fn.getpos('v')[2]
+  local to = vim.fn.getpos('.')[2]
+
+  local buf = vim.api.nvim_get_current_buf()
+
+  local i = from
+
+  local callNext = function() 
+    print('callNext', i)
+
+    if i > to then
+      return 
+    end
+
+    stopAndExecute({ silent = true, linenr = i, buf = buf, next = callNext })
+    i = i + 1
+  end
+
+
+  callNext()
+
+
+end
+
 local function moveAllExtmarksToLocationList()
   local buf = vim.api.nvim_get_current_buf()
   local marks = vim.api.nvim_buf_get_extmarks(buf, ns, 0, -1, {})
@@ -457,9 +489,9 @@ _G.bindExecuteCommand = function(buffer)
   vim.keymap.set('n', 'sC', clearAllExtmarks, { desc = 'Clear all extmarks and their terminal buffers', buffer = buffer })
   vim.keymap.set('n', 'qo', moveAllExtmarksToLocationList, { desc = 'Move execute command extmarks to location list', buffer = buffer })
   vim.keymap.set('n', 'qk', sendLineToFirstRunningAbove, { desc = 'Send line to first running command above', buffer = buffer })
-end
+  vim.keymap.set('n', 'qp', runParagraph, { desc = 'Run entire paragraph', buffer = buffer })
 
-vim.keymap.set('n', 'qp', openLast, { desc = 'Open last execute command terminal window', buffer = buffer })
+end
 
 _G.stopCommandUnderTheCursor = function()
   local linenr = vim.api.nvim_win_get_cursor(0)[1]
