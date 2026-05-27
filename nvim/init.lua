@@ -36,9 +36,10 @@ _G.last_line = nil
 _G.last_linenumber = nil
 
 local cwd = vim.fn.getcwd()
-
+_G.data_dir = vim.fn.stdpath("data")
 if not is_windows then
   local nvim_data_dir = cwd .. '/.nvim'
+
 
   -- Create directory if it doesn't exist
   if vim.fn.isdirectory(nvim_data_dir) == 0 then
@@ -46,6 +47,7 @@ if not is_windows then
   end
 
   -- Set shada file and undo directory to the local .nvim folder
+  _G.data_dir = nvim_data_dir
   vim.o.shadafile = nvim_data_dir .. '/shada'
   vim.o.viminfofile = nvim_data_dir .. '/viminfo'
   vim.o.undodir = nvim_data_dir .. '/undo'
@@ -604,6 +606,13 @@ local termCommands = {
   y = "y" -- yazi
 }
 
+local defaultMarks = { 
+  N = "_billy/notes.md",
+  G = "_billy/console.nu",
+  Z = "_billy/commands.nu",
+  [1] = "_billy/.env.nu",
+}
+
 -- Helper function to register a terminal command with its keymap
 local function addTermCommand(mapping, command, cb)
   table.insert(termMarks, mapping)
@@ -688,6 +697,10 @@ function _G.mark(name)
       vim.cmd.edit(m.file)
       return
     end
+  end
+
+  if defaultMarks[name] then
+    vim.cmd.edit(defaultMarks[name])
   end
 end
 
@@ -1161,6 +1174,7 @@ u.ft({ "vim" }, function(buffer)
   vim.keymap.set('i', ';f', "<c-r>f", { buffer = buffer })
   vim.keymap.set('i', ';d', "<c-r>d", { buffer = buffer })
   vim.keymap.set('i', ';r', "Rename <c-r>f<esc>bhi", { buffer = buffer })
+  vim.keymap.set('i', ';g', "Grep ", { buffer = buffer })
 end)
 
 
@@ -2041,4 +2055,3 @@ require('vim._core.ui2').enable({
     },
   },
 })
-

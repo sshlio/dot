@@ -1,10 +1,7 @@
 -- Copyright (c) 2026 Sławomir Laskowski
 -- SPDX-License-Identifier: MIT
 
-local file = vim.fn.stdpath("data") .. "/kvstore.json"
-
-
-
+local file = _G.data_dir .. "/kvstore.json"
 
 -- load data from disk
 local function load()

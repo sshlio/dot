@@ -3,6 +3,11 @@
 
 local quickfix_group = vim.api.nvim_create_augroup("MyQuickfixMappings", { clear = true })
 
+vim.api.nvim_create_user_command("Grep", function(opts)
+  vim.cmd.lgrep({ args = { opts.args }, mods = { silent = true } })
+  vim.cmd.lopen()
+end, { nargs = "+", complete = "file", desc = "Search into the location list" })
+
 local function open_item_and_close_list()
   local qf_win = vim.api.nvim_get_current_win()
 
