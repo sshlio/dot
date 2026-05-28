@@ -1123,6 +1123,7 @@ u.ft({ "javascript", "typescript", "javascriptreact", "typescriptreact" }, funct
   vim.keymap.set('i', ';af', "async () => {}<left>", { buffer = buffer })
 
   vim.keymap.set('i', ';f', "() => ", { buffer = buffer })
+  vim.keymap.set('i', ';e', "process.env.", { buffer = buffer })
   vim.keymap.set('i', ';h', "<div>", { buffer = buffer })
   vim.keymap.set('i', ';g', 'className=""<left>', { buffer = buffer })
   vim.keymap.set('i', ';c', "const ", { buffer = buffer })

@@ -179,10 +179,13 @@ local lastExtmark = nil
 
 _G.executeCommandUnderTheCursor = function(opts)
   opts = opts or {}
+
   local linenr = opts.linenr or vim.api.nvim_win_get_cursor(0)[1]
   local buf = opts.buf or vim.api.nvim_get_current_buf()
+  local line = vim.api.nvim_buf_get_lines(buf, linenr - 1, linenr, false)[1]
 
-  local line = vim.fn.getline(linenr)
+  print("entering executeCommandUnderTheCursor", buf, linenr, line)
+
   if line:match("^%s*$") then return end
 
   local cwd = vim.fn.getcwd()
@@ -195,7 +198,19 @@ _G.executeCommandUnderTheCursor = function(opts)
   opts.silent = opts.silent or false
 
   vim.api.nvim_buf_set_option(buf, "signcolumn", "yes:2")
+
   local state = extmarks:get_state_at_line(buf, linenr)
+
+  -- Rerun
+  if state and opts.force then
+    state.disowned = true
+
+    vim.fn.jobstop(state.job_id)
+    extmarks:clear(state)
+    pcall(vim.api.nvim_buf_delete, state.buf, { force = true })
+
+    state = nil
+  end
 
   if state and not state.pending then
     vim.cmd("botright 50new")
@@ -204,10 +219,13 @@ _G.executeCommandUnderTheCursor = function(opts)
 
     last = state
 
+    print("opening pendig")
+
     return
   end
 
   if not state then
+    print("no state")
     state = {
       parentBuf = buf,
       linenr = linenr,
@@ -303,22 +321,27 @@ _G.executeCommandUnderTheCursor = function(opts)
     changeExtmark(bufState[buf], os.date("%H:%M"), "StatusLine", "", "TermRunInProgress")
 
     if opts.silent then
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-\\><C-n>G<c-w>q', true, false, true), 'n', false)
+      -- If next callback is enabled it will do it itself
+      if not opts.next then
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-\\><C-n>G<c-w>q', true, false, true), 'n', false)
+      end
     else
       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-\\><C-n>G', true, false, true), 'n', false)
     end
 
     vim.b[buf].quitUnfocused = true
 
+    print("next?", opts.next)
+
     if opts.next then
       print('Calling next...')
-      opts.next()
+      vim.schedule(opts.next)
     end
   end)
 end
 
 local function stopAndExecute(opt)
-  _G.stopCommandUnderTheCursor()
+  _G.stopCommandUnderTheCursor(opt)
   _G.executeCommandUnderTheCursor(opt)
 end
 
@@ -431,22 +454,28 @@ local function runParagraph()
   local buf = vim.api.nvim_get_current_buf()
 
   local i = from
+  local callNext = {}
 
-  local callNext = function() 
-    print('callNext', i)
-
+  callNext.cb = function() 
     if i > to then
+      local win = vim.api.nvim_get_current_win()
+      local config = vim.api.nvim_win_get_config(win)
+
+      if config.relative ~= "" then
+        vim.api.nvim_win_close(win, true)
+      end
+
       return 
     end
 
-    stopAndExecute({ silent = true, linenr = i, buf = buf, next = callNext })
+    print('callNext', i, to)
+
+    _G.executeCommandUnderTheCursor({ silent = true, linenr = i, buf = buf, next = callNext.cb, force = true })
+
     i = i + 1
   end
 
-
-  callNext()
-
-
+  callNext.cb()
 end
 
 local function moveAllExtmarksToLocationList()
@@ -493,9 +522,10 @@ _G.bindExecuteCommand = function(buffer)
 
 end
 
-_G.stopCommandUnderTheCursor = function()
-  local linenr = vim.api.nvim_win_get_cursor(0)[1]
-  local buf = vim.api.nvim_get_current_buf()
+_G.stopCommandUnderTheCursor = function(opts)
+  opts = otps or {}
+  local linenr = opts.linenr or vim.api.nvim_win_get_cursor(0)[1]
+  local buf = opts.buf or vim.api.nvim_get_current_buf()
 
   local state = extmarks:get_state_at_line(buf, linenr)
 
