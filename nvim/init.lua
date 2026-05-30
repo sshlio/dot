@@ -606,11 +606,11 @@ local termCommands = {
   y = "y" -- yazi
 }
 
-local defaultMarks = { 
+local defaultMarks = {
   N = "_billy/notes.md",
   G = "_billy/console.nu",
   Z = "_billy/commands.nu",
-  [1] = "_billy/.env.nu",
+  ['1'] = "_billy/.env.nu",
 }
 
 -- Helper function to register a terminal command with its keymap
@@ -645,15 +645,25 @@ function _G.mark(name)
 
   if string.find(specialMarks, name) then
     local src = kget("mark_" .. name)
-    local buf = vim.fn.bufnr(src, false)
 
-    if buf ~= -1 then
-      vim.api.nvim_set_current_buf(buf)
-    else
-      vim.cmd("edit " .. src)
+    if not src then
+      if defaultMarks[name] then
+        vim.cmd.edit(defaultMarks[name])
+      end
+      return 
     end
 
-    return
+    if src then
+      local buf = vim.fn.bufnr(src, false)
+
+      if buf ~= -1 then
+        vim.api.nvim_set_current_buf(buf)
+      else
+        vim.cmd("edit " .. src)
+      end
+
+      return
+    end
   end
 
   if vim.tbl_contains(termMarks, name) then
@@ -1137,6 +1147,7 @@ u.ft({ "javascript", "typescript", "javascriptreact", "typescriptreact" }, funct
 
   vim.keymap.set('i', ';jf', "// @FIXME ", { buffer = buffer })
   vim.keymap.set('i', ';jt', "// @TODO ", { buffer = buffer })
+  vim.keymap.set('i', ';s', "const [state, setState] = useState(true);", { buffer = buffer })
 
 
   vim.keymap.set('n', 'g.', 'vii<esc>0w.', { remap = true, buffer = buffer })
