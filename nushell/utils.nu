@@ -818,7 +818,6 @@ def diff [ref?: string] {
   git diff HEAD
 }
 
-
 def nenv [name, value] {
   let b64value = $value | base64
 
@@ -829,3 +828,5 @@ def s [] {
   git add .
   git diff --stat HEAD
 }
+
+alias "http post" = http post --content-type application/json 
