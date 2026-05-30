@@ -650,7 +650,7 @@ function _G.mark(name)
       if defaultMarks[name] then
         vim.cmd.edit(defaultMarks[name])
       end
-      return 
+      return
     end
 
     if src then
@@ -912,7 +912,18 @@ vim.keymap.set('n', '<esc>', function()
   end
 end)
 
-vim.keymap.set({'i', 'c'}, '<C-v>', "<c-r><c-p>+")
+vim.keymap.set({'i', 'c'}, '<C-v>', function()
+  local pasted = vim.fn.getreg('+')
+  local oneliner = pasted:gsub("\n$", "")
+
+  if not oneliner:find("\n", 1, true) then
+    vim.fn.setreg('z', oneliner:gsub("^[ \t]+", ""), 'c')
+    return "<c-r><c-p>z"
+  end
+
+  return "<c-r><c-p>+"
+end, { expr = true })
+
 vim.keymap.set({'i', 'c'}, '<C-c>', "<c-r><c-p>\"")
 
 -- vim.keymap.set('i', '<C-Return>', "<cr><esc>ko")
