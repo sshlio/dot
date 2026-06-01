@@ -14,19 +14,24 @@ local function lines_for(buf)
   return lines_by_buf[buf]
 end
 
+my_move = false
+
 vim.api.nvim_create_autocmd({ 'CursorMoved'}, {
   group = group,
   callback = function(ev)
+    if my_move then
+      my_move = false
+      return
+    end
+
     vim.schedule(function()
       local state = lines_for(ev.buf)
       local line = vim.api.nvim_win_get_cursor(0)[1]
       local diff = math.abs(state.prev_line - line)
 
-      if diff < 2 and state.index >= 0 then
-        print("index is set")
+      if state.index >= 0 then
         state.lines = vim.list_slice(state.lines, 0, #state.lines - state.index)
 
-        print(vim.inspect(state.lines))
         state.index = -1
       end
 
@@ -57,28 +62,6 @@ vim.api.nvim_create_autocmd({ 'CursorMoved'}, {
       end
 
       state.prev_line = line
-
-
-      --
-      -- local last_line = last and last.line or 0
-      --
-      -- local view = { line = line, view = vim.fn.winsaveview() }
-      --  print('dff', diff)
-      --
-      -- if diff < 2 then
-      --   lines[#lines] = view
-      --   view.pending = false
-      -- else
-      --   print("Unsert new view")
-      --   if last and last.pending then return end
-      --   -- dont stack pending
-      --   view.pending = true
-      --   table.insert(lines, view)
-      -- end
-      --
-      -- if #lines > 10 then
-      --   table.remove(lines, 1)
-      -- end
     end)
   end,
 })
@@ -93,13 +76,13 @@ local seek = function(diff)
 
   if state.index >= #lines then
     state.index = #lines - 1
-    print("EOL")
+
     return
   end
 
   if state.index < 0 then
-    print("EOL")
     state.index = -1
+
     return
   end
 
@@ -114,15 +97,16 @@ local seek = function(diff)
 
   if not target then return end
 
-  -- print('target', vim.inspect(target))
-
   local line = vim.api.nvim_win_get_cursor(0)[1]
 
-
-  -- vim.fn.winrestview(target.view)
-
+  my_move = true
   vim.api.nvim_win_set_cursor(0, {target.line, 0})
 
+  local last_line = vim.api.nvim_buf_line_count(0)
+
+  if target.line >= last_line - 4 then
+    vim.cmd('normal! zz')
+  end
 end
 
 vim.keymap.set('n', '<d-[>', function() seek(1) end)
