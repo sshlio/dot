@@ -93,6 +93,9 @@ vim.api.nvim_create_autocmd({"TermOpen"}, {
     vim.keymap.set('n', 'i', 'i', { buffer = true })
     vim.keymap.set('n', '<cr>', 'i<cr>', { buffer = true })
 
+    vim.keymap.set('n', '<c-r>', 'i<cr>-------<cr>', { buffer = true })
+    vim.keymap.set('t', '<c-r>', '<cr>-------<cr>', { buffer = true })
+
     vim.wo.winhighlight = "Normal:NormalFloat,CursorLine:FloatCursorLine"
 
     -- markInsert(true)
@@ -235,6 +238,8 @@ _G.executeCommandUnderTheCursor = function(opts)
     }
   end
 
+  state.pending = false
+
   local nu_config = is_trusted and has_local_nu_config and local_nu_config or "~/.config/nushell/utils.nu"
   local cmd = { "nu", "--config", nu_config, "-c",  line };
 
@@ -286,6 +291,7 @@ _G.executeCommandUnderTheCursor = function(opts)
 
       if state.next and exit_code < 1 then
         state.next()
+        -- state.next = nil
       end
 
       if bufState[buf].disowned then
@@ -456,7 +462,7 @@ local function runParagraph()
   local i = from
   local callNext = {}
 
-  callNext.cb = function() 
+  callNext.cb = function()
     if i > to then
       local win = vim.api.nvim_get_current_win()
       local config = vim.api.nvim_win_get_config(win)
@@ -465,7 +471,7 @@ local function runParagraph()
         vim.api.nvim_win_close(win, true)
       end
 
-      return 
+      return
     end
 
     print('callNext', i, to)

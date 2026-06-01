@@ -53,7 +53,7 @@ local function chrome(work)
       print("----------------", idx)
       print("title:", win:title():lower())
 
-      local private = (win:title():lower():find("- private") ~= nil)
+      local private = (win:title():lower():find("private%)?$") ~= nil)
       print("private:", private)
 
       table.insert(wins, {
@@ -308,14 +308,6 @@ chromebinding3 = hs.hotkey.bind({"cmd"}, "s", function()
     hs.eventtap.keyStroke({"cmd", "shift"}, "]")
 end)
 
--- chromebinding4 = hs.hotkey.bind({"cmd", "shift"}, "s", function()
---     print("cmd+shift+s triggered")
---     chromebinding3:disable()
---     print("chromebinding3 disabled, sending cmd+s")
---     hs.eventtap.keyStroke({"cmd"}, "s")
---     print("cmd+s sent, re-enabling chromebinding3")
---     chromebinding3:enable()
--- end)
 
 chromebinding5 = hs.hotkey.bind({"cmd"}, "u", function()
     hs.eventtap.scrollWheel({0, pageScrollStep}, {}, "pixel")
@@ -434,3 +426,6 @@ checkUSBMouse()
 
 usbWatcher:start()
 
+hs.urlevent.bind("chrome", function(_, params)
+  chrome(false)
+end)
