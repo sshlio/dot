@@ -579,7 +579,7 @@ vim.api.nvim_create_autocmd("WinLeave", {
   callback = function()
     if _G.ingoreNextWinLeave then
       _G.ingoreNextWinLeave = false
-      return 
+      return
     end
 
     local buf = vim.api.nvim_get_current_buf()

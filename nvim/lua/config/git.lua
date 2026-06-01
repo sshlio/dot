@@ -426,13 +426,13 @@ function M.next_change()
 end
 
 -- Keymap to manually refresh git changes
-vim.keymap.set('n', 'sg', M.show_diffs, { desc = "Refresh git changes for current buffer" })
+-- vim.keymap.set('n', 'sg', M.show_diffs, { desc = "Refresh git changes for current buffer" })
 
 -- Keymap to restore file from HEAD
-vim.keymap.set('n', 'sr', M.restore_from_head, { desc = "Restore file from git HEAD" })
+-- vim.keymap.set('n', 'sr', M.restore_from_head, { desc = "Restore file from git HEAD" })
 
 -- Keymap to navigate to next change
-vim.keymap.set('n', ']c', M.next_change, { desc = "Go to next change" })
+-- vim.keymap.set('n', ']c', M.next_change, { desc = "Go to next change" })
 
 -- Clear git HEAD cache on buffer write and update diffs
 -- vim.api.nvim_create_autocmd("BufWritePost", {

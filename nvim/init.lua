@@ -1,16 +1,6 @@
--- Copyright (c) 2026 Sławomir Laskowski
 -- SPDX-License-Identifier: MIT
+-- Copyright (c) 2026 Sławomir Laskowski
 
--- https://neovide.dev/faq.html
--- https://dev.to/slydragonn/how-to-set-up-neovim-for-windows-and-linux-with-lua-and-packer-2391
--- https://github.com/boltlessengineer/NativeVim
--- https://github.com/neovim/neovim/pull/28949#issuecomment-2128729153
--- https://boltless.me/posts/neovim-config-without-plugins-2025/
--- https://vi.stackexchange.com/questions/41578/how-to-automatically-change-the-background-color-of-the-active-split
--- https://chatgpt.com/c/68ed801e-572c-8328-96ff-80cc7a2dae74
--- https://github.com/neovim/neovim/discussions/32930
--- https://nvim-mini.org/blog/2025-10-13-announce-minimax.html
--- https://github.com/nvim-mini/MiniMax/blob/main/configs/nvim-0.11/plugin/10_options.luq
 
 _G.billy = {}
 _G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
@@ -255,7 +245,10 @@ o.fileformats = 'unix'
 -- o.jumpoptions = "view"
 o.ignorecase = true
 o.smartcase = true
-o.relativenumber = true
+
+if not vim.wo.diff then
+  -- o.relativenumber = true
+end
 o.number = true
 o.swapfile = false
 o.laststatus = 2
@@ -264,7 +257,6 @@ vim.o.showmode = false      -- Don't show mode in command line
 vim.o.showcmd = false       -- Don't show partially typed commands in command line
 vim.o.ruler = false         -- Don't show cursor position/column in command line
 o.number = true -- Enable line numbers
-o.relativenumber = true -- Enable relative line numbers
 vim.o.signcolumn     = 'yes'      -- Always show signcolumn (less flicker)
 vim.o.wrap           = false      -- Don't visually wrap lines (toggle with \w)
 vim.o.splitright     = true       -- Vertical splits will be to the right
@@ -326,11 +318,6 @@ vim.keymap.set("n", "Q", "<nop>", { noremap = true, silent = true })
 
 vim.keymap.set('n', 'sQ', function()
   pcall(function() vim.cmd [[ w! ]] end)
-  vim.cmd [[ restart ]]
-end)
-
-vim.keymap.set('n', 'sjQ', function()
-  pcall(function() vim.cmd [[ w! ]] end)
   vim.cmd [[ quitall! ]]
 end)
 
@@ -341,7 +328,14 @@ vim.keymap.set("x", "<c-s>", "<c-x>gv", { noremap = true, silent = true })
 vim.keymap.set("x", "<c-a>", "<c-a>gv", { noremap = true, silent = true })
 -- 2
 
-vim.keymap.set({'n', 't'}, '<c-w>', function() vim.cmd.wincmd('q') end)
+vim.keymap.set({'n', 't'}, '<c-w>', function()
+  if vim.wo.diff then
+    vim.cmd.wincmd('h')
+    vim.cmd.wincmd('h')
+  end
+  vim.cmd.wincmd('q')
+  vim.wo.relativenumber = true
+end)
 
 vim.keymap.set('n', '<c-h>', '<c-w>w')
 vim.keymap.set('n', '<left>', '<c-w>W')
@@ -536,7 +530,6 @@ end)
 vim.keymap.set('n', 'sd', '<cmd>t.<cr>')
 vim.keymap.set('n', 'so', '<cmd>silent! w! | execute "luafile %"<cr>')
 -- vim.keymap.set('n', 'se', function() print("--------") end)
-vim.keymap.set('n', 'sm', cmd("messages"))
 
 vim.keymap.set('x', 'Y', function()
   u.normal("y")
@@ -1526,6 +1519,18 @@ vim.api.nvim_create_autocmd({"WinEnter", "BufEnter"}, {
   callback = function() vim.wo.cursorline = true end
 })
 
+vim.api.nvim_create_autocmd("BufEnter", {
+  group = augroup,
+  callback = function()
+    print("disabling BufWinEnter", vim.wo.diff)
+    if vim.wo.diff then
+      vim.wo.relativenumber = false
+    else
+      vim.wo.relativenumber = true
+    end
+  end,
+})
+
 vim.api.nvim_create_autocmd("WinLeave", {
   callback = function() vim.wo.cursorline = false end
 })
@@ -1556,9 +1561,11 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#454545", bg = "NONE" })
 vim.opt.fillchars:append { vert = '│' }
 
-once("startup-script", function()
-  vim.schedule(function() pcall(vim.cmd.normal, "`Ag;") end)
-end)
+if not vim.wo.diff then
+  once("startup-script", function()
+    vim.schedule(function() pcall(vim.cmd.normal, "`Ag;") end)
+  end)
+end
 
 once("windows_cd", function()
   print(vim.fn.getcwd())
@@ -2080,3 +2087,29 @@ require('vim._core.ui2').enable({
     },
   },
 })
+vim.keymap.set('n', 'sm', '<cmd>messages<cr>')
+vim.keymap.set('n', 'sM', '<cmd>messages clear<cr>')
+vim.keymap.set('n', 'sb', '<cmd>buffers<cr>')
+vim.keymap.set('n', 'sE', '<cmd>set diffopt+=context:30<cr>')
+vim.keymap.set('n', 'se', '<cmd>set diffopt+=context:5<cr>')
+vim.keymap.set('n', 'sI', '<cmd>Inspect<cr>')
+
+_G.diff = function()
+  local path = vim.fn.expand("%")
+  local output = vim.fn.systemlist("git show HEAD:" .. path)
+  local ft = vim.api.nvim_get_option_value("filetype", { buf = 0 })
+
+  vim.cmd.wincmd('o')
+
+  vim.cmd("enew")
+  vim.wo.relativenumber = false
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, output)
+  vim.bo.filetype = "lua"
+  vim.wo.relativenumber = false
+
+  vim.cmd("vert diffsplit " .. path)
+
+  vim.cmd.wincmd('l')
+  vim.wo.relativenumber = false
+end
+vim.keymap.set('n', 'sD', _G.diff)

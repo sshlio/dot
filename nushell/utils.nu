@@ -431,6 +431,14 @@ def sv [path] {
   $in
 }
 
+def tofile [
+  prefix: string = "tmp"
+] {
+  let tmp = (mktemp --tmpdir $"($prefix).XXXXXX")
+  $in | save -f $tmp
+  $tmp
+}
+
 def mvs [path, target] {
   let dir = ($target | path dirname)
 
