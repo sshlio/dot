@@ -612,17 +612,7 @@ local function addTermCommand(mapping, command, cb)
   termCommands[mapping] = command
 
   vim.keymap.set({'n'}, mapping, function() _G.mark(mapping) end)
-  vim.keymap.set({'t'}, mapping, function()
-    markInsert(true)
-
-    vim.cmd.stopinsert()
-
-    vim.schedule(function()
-      mark(mapping)
-    end)
-  end)
 end
-
 
 function _G.mark(name)
   -- Close floating window if navigating to a non-terminal mark
@@ -765,12 +755,6 @@ map(
 )
 -- command marks
 addTermCommand('<c-p>', 'filesw')
-addTermCommand('<c-y>', 'apps', function(buffer)
-
-end)
-
--- WARN this wont work in regular terminal
-addTermCommand('<m-i>', 'claude')
 
 vim.keymap.set('n', 'gJ', function()
   vim.cmd("s/\\s*$//e")
@@ -2113,3 +2097,4 @@ _G.diff = function()
   vim.wo.relativenumber = false
 end
 vim.keymap.set('n', 'sD', _G.diff)
+
