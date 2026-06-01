@@ -43,19 +43,6 @@ function float(gbuf)
   return true
 end
 
-vim.api.nvim_create_autocmd("WinLeave", {
-  callback = function()
-    local win = vim.api.nvim_get_current_win()
-    local cfg = vim.api.nvim_win_get_config(win)
-
-    -- Only close if this is a floating window
-    if cfg.relative ~= "" then
-      vim.api.nvim_win_close(win, true)
-    end
-  end,
-  desc = "Auto-close floating windows on WinLeave",
-})
-
 _G.float = float
 
 
