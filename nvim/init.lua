@@ -2072,7 +2072,7 @@ require('vim._core.ui2').enable({
   },
 })
 vim.keymap.set('n', 'sm', '<cmd>messages<cr>')
-vim.keymap.set('n', 'sM', '<cmd>messages clear<cr>')
+vim.keymap.set('n', 'sM', '<cmd>messages clear | echo "cleared"<cr>')
 vim.keymap.set('n', 'sb', '<cmd>buffers<cr>')
 vim.keymap.set('n', 'sE', '<cmd>set diffopt+=context:30<cr>')
 vim.keymap.set('n', 'se', '<cmd>set diffopt+=context:5<cr>')

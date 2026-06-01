@@ -1,5 +1,6 @@
 # Copyright (c) 2026 Sławomir Laskowski
 # https://github.com/sshlio/dot
+# https://github.com/sshlio/dot
 # Licensed under the MIT License. See LICENSE file for details.
 
 FROM ubuntu:24.04
@@ -70,5 +71,6 @@ COPY --chown=billy:billy nushell .config/nushell
 
 RUN git config --global user.email "you@example.com"
 RUN git config --global user.name "Your Name"
+RUN gasdadas
 
 ENTRYPOINT ["nu"]
