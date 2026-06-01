@@ -2,6 +2,7 @@
 /.nvim
 **/.nvim/
 /nvim/syntax/*
+/nvim/syntax/*
 /nvim/theme.vim
 /config/nushell/history*
 /config/nushell/plugin*

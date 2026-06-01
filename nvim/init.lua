@@ -1820,6 +1820,8 @@ vim.lsp.enable('nu_ls')
 vim.lsp.enable('ts_ls')
 vim.lsp.enable('terraform_ls')
 
+vim.keymap.set("n", "sk", vim.lsp.buf.hover, { desc = "LSP hover" })
+
 local kind_icons = {
   Text = "󰉿",
   Method = "󰆧",
