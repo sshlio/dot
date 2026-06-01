@@ -24,3 +24,11 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     vim.opt_local.filetype = "gitignore"
   end,
 })
+
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = bash_ft,
+  pattern = { "*.prisma" },
+  callback = function()
+    vim.opt_local.filetype = "hcl"
+  end,
+})
