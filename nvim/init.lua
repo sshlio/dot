@@ -1,7 +1,6 @@
 -- SPDX-License-Identifier: MIT
 -- Copyright (c) 2026 Sławomir Laskowski
 
-
 _G.billy = {}
 _G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
 
@@ -1326,10 +1325,10 @@ vim.keymap.set({'o', 'x'}, 'O', function() ii(true, true) end)
 vim.keymap.set('n', 's.', '>ap', { remap = true })
 vim.keymap.set('n', 's,', '<ap', { remap = true })
 
-vim.keymap.set('n', 'L', '>>')
-vim.keymap.set('n', 'H', '<<')
+vim.keymap.set('n', 'L', '$')
+vim.keymap.set('n', 'H', '_')
 
-vim.keymap.set('n', '0', '_')
+vim.keymap.set('n', '0', '0')
 vim.keymap.set('n', 's0', '0')
 vim.keymap.set('n', '-', 'g_')
 
@@ -1406,6 +1405,9 @@ vim.api.nvim_create_autocmd({"FocusLost", "BufWinLeave", "WinLeave"}, {
     vim.cmd.checktime()
 
     if bt == "" and vim.bo.modified then
+      local view = vim.fn.winsaveview()
+      vim.api.nvim_command('silent keepjumps keeppatterns %s/\\s\\+$//e')
+      vim.fn.winrestview(view)
       vim.cmd("silent! write ++p")
     end
   end,
@@ -1506,7 +1508,6 @@ vim.api.nvim_create_autocmd({"WinEnter", "BufEnter"}, {
 vim.api.nvim_create_autocmd("BufEnter", {
   group = augroup,
   callback = function()
-    print("disabling BufWinEnter", vim.wo.diff)
     if vim.wo.diff then
       vim.wo.relativenumber = false
     else
@@ -2097,4 +2098,3 @@ _G.diff = function()
   vim.wo.relativenumber = false
 end
 vim.keymap.set('n', 'sD', _G.diff)
-

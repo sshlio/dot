@@ -206,9 +206,16 @@ _G.executeCommandUnderTheCursor = function(opts)
 
   -- Rerun
   if state and opts.force then
-    state.disowned = true
+    state.disowned = true  
 
-    vim.fn.jobstop(state.job_id)
+    if state.job_id then
+      vim.fn.chansend(state.job_id, "\3")  
+      vim.fn.chansend(state.job_id, "\3")
+      vim.fn.chansend(state.job_id, "\3")
+
+      vim.fn.jobstop(state.job_id)
+    end
+
     extmarks:clear(state)
     pcall(vim.api.nvim_buf_delete, state.buf, { force = true })
 
@@ -279,6 +286,7 @@ _G.executeCommandUnderTheCursor = function(opts)
       -- cleanupExtmark(bufState[buf])
       bufState[buf].exited = true
       local extmark_text = ""
+      state.job_id = nil
 
       if vim.api.nvim_buf_is_valid(buf) then
         local content = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
@@ -324,8 +332,8 @@ _G.executeCommandUnderTheCursor = function(opts)
     state.job_id = job_id
 
     last = state
-
     -- changeExtmark(bufState[buf], os.date("%H:%M"), "StatusLine", "●", "TermRunInProgress")
+
     changeExtmark(bufState[buf], os.date("%H:%M"), "StatusLine", "", "TermRunInProgress")
 
     if opts.silent then
@@ -540,7 +548,17 @@ _G.stopCommandUnderTheCursor = function(opts)
   if state then
     if state and state.job_id then
       state.disowned = true
-      vim.fn.jobstop(state.job_id)
+
+      if state.job_id then
+        print("state.job_id", state.job_id);
+
+        vim.fn.chansend(state.job_id, "\3")
+        vim.fn.chansend(state.job_id, "\3")
+        vim.fn.chansend(state.job_id, "\3")
+
+        vim.fn.jobstop(state.job_id)
+      end
+
       pcall(vim.api.nvim_buf_delete, state.buf, { force = true })
     end
 
@@ -621,3 +639,4 @@ vim.api.nvim_create_autocmd("BufDelete", {
 --     end
 --   end)
 -- )
+
