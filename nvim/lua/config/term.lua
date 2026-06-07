@@ -63,6 +63,49 @@ vim.keymap.set('t', ';:', ':')
 
 local augroup = vim.api.nvim_create_augroup("billy_term", { clear = true })
 
+local function job_is_running(job_id)
+  if not job_id then
+    return false
+  end
+
+  local ok, result = pcall(vim.fn.jobwait, { job_id }, 0)
+  return ok and result[1] == -1
+end
+
+local function interrupt_job(job_id, interrupted)
+  if not job_id or interrupted[job_id] or not job_is_running(job_id) then
+    return
+  end
+
+  interrupted[job_id] = true
+  pcall(vim.fn.chansend, job_id, "\3")
+end
+
+local function interrupt_all_running_jobs()
+  local interrupted = {}
+
+  for _, chan in ipairs(vim.api.nvim_list_chans()) do
+    if chan.stream == "job" and chan.mode ~= "rpc" then
+      interrupt_job(chan.id, interrupted)
+    end
+  end
+
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    local job_id = vim.b[buf].terminal_job_id
+    interrupt_job(job_id, interrupted)
+  end
+
+  for _, state in pairs(bufState) do
+    interrupt_job(state.job_id, interrupted)
+  end
+end
+
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  group = augroup,
+  callback = interrupt_all_running_jobs,
+  desc = "Send Ctrl-C to running jobs before Neovim exits",
+})
+
 vim.api.nvim_create_autocmd("BufLeave", {
   group = augroup,
   callback = function()
@@ -206,10 +249,10 @@ _G.executeCommandUnderTheCursor = function(opts)
 
   -- Rerun
   if state and opts.force then
-    state.disowned = true  
+    state.disowned = true
 
     if state.job_id then
-      vim.fn.chansend(state.job_id, "\3")  
+      vim.fn.chansend(state.job_id, "\3")
       vim.fn.chansend(state.job_id, "\3")
       vim.fn.chansend(state.job_id, "\3")
 
@@ -639,4 +682,3 @@ vim.api.nvim_create_autocmd("BufDelete", {
 --     end
 --   end)
 -- )
-

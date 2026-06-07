@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+
+const args = process.argv.slice(3)
+
+const params = {}
+
+const param = (name) => { return params[name] = params[name] ?? [] }
+
+let mode = {}
+
+for (let arg of args) {
+  if (mode.param) {
+    let p = mode.param;
+
+    if (p == "-H") {
+      p = "headers"
+    }
+
+    let [n,v] = arg.split(": ", 2)
+
+    console.log("headers", {n, v})
+
+    mode = {}
+  }
+
+  if (arg.startsWith("-")) {
+    mode = { param: arg }
+  }
+}

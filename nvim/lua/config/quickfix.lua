@@ -80,3 +80,10 @@ vim.api.nvim_create_autocmd("FileType", {
     })
   end,
 })
+
+vim.api.nvim_create_user_command("Lgrep", function(opts)
+  vim.cmd(("lvimgrep /%s/gj %%"):format(opts.args))
+  vim.cmd("lopen")
+end, {
+  nargs = 1,
+})
