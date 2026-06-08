@@ -230,8 +230,6 @@ _G.executeCommandUnderTheCursor = function(opts)
   local buf = opts.buf or vim.api.nvim_get_current_buf()
   local line = vim.api.nvim_buf_get_lines(buf, linenr - 1, linenr, false)[1]
 
-  print("entering executeCommandUnderTheCursor", buf, linenr, line)
-
   if line:match("^%s*$") then return end
 
   local cwd = vim.fn.getcwd()
@@ -307,13 +305,10 @@ _G.executeCommandUnderTheCursor = function(opts)
     }
 
     local buf = vim.api.nvim_create_buf(false, true)
+
     _G.ingoreNextWinLeave = true
     local win = pcall(vim.api.nvim_open_win, buf, true, opts)
     _G.ingoreNextWinLeave = false
-
-    -- if true then
-    -- return
-    -- end
   else
     vim.cmd("botright 50new")
     vim.api.nvim_set_hl(0, "MyWindowBg", { bg = "#1e1e2e", })
@@ -322,14 +317,12 @@ _G.executeCommandUnderTheCursor = function(opts)
 
   local job_id = vim.fn.termopen(cmd, {
     env = _G.__term_envs,
-    -- vim.fn.jobstop(state.job_id)
 
     on_exit = function(job_id, exit_code, event_type)
-      -- print("Terminal exited with code: " .. exit_code, buf)
-      -- cleanupExtmark(bufState[buf])
       bufState[buf].exited = true
       local extmark_text = ""
       state.job_id = nil
+      state.exit_code = exit_code
 
       if vim.api.nvim_buf_is_valid(buf) then
         local content = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
@@ -357,9 +350,6 @@ _G.executeCommandUnderTheCursor = function(opts)
       local signhl = exit_code < 1 and "TermRunSuccess" or "TermRunFail"
 
       changeExtmark(bufState[buf], extmark_text, hl, sign, signhl)
-
-      -- bufState[buf].clenupOnQuit = true
-      -- bufState[buf].inProgress = false
     end
   })
 
@@ -435,6 +425,10 @@ local function enqueue(opt)
         silent = true,
       })
     end
+
+    if last.exit_code ~= nil then
+      last.next()
+    end
   end
 
   last = state
@@ -507,6 +501,7 @@ end
 local function runParagraph()
   vim.cmd("normal! vip")
 
+  local prev_win = vim.api.nvim_get_current_win()
   local from = vim.fn.getpos('v')[2]
   local to = vim.fn.getpos('.')[2]
 
@@ -522,12 +517,11 @@ local function runParagraph()
 
       if config.relative ~= "" then
         vim.api.nvim_win_close(win, true)
+        vim.api.nvim_set_current_win(prev_win)
       end
 
       return
     end
-
-    print('callNext', i, to)
 
     _G.executeCommandUnderTheCursor({ silent = true, linenr = i, buf = buf, next = callNext.cb, force = true })
 
