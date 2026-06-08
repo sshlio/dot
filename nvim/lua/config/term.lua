@@ -264,14 +264,15 @@ _G.executeCommandUnderTheCursor = function(opts)
   end
 
   if state and not state.pending then
-    vim.cmd("botright 50new")
-    vim.api.nvim_set_current_buf(state.buf)
-    vim.wo.winhighlight = "Normal:NormalFloat,CursorLine:FloatCursorLine"
+    if vim.api.nvim_buf_is_valid(state.buf) then
+      vim.cmd("botright 50new")
+      vim.api.nvim_set_current_buf(state.buf)
+      vim.wo.winhighlight = "Normal:NormalFloat,CursorLine:FloatCursorLine"
 
-    last = state
+      last = state
+    end
 
-    print("opening pendig")
-
+    -- If buffer is invalid quit anyways
     return
   end
 
