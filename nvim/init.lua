@@ -19,6 +19,7 @@ vim.opt.packpath = vim.opt.runtimepath:get()
 vim.opt.grepprg = "rg --vimgrep --glob '!_billy' --glob '!CLAUDE.md'"
 vim.opt.complete = '.,w'
 vim.opt.completeopt = { 'menu', 'menuone', 'fuzzy' }
+vim.opt.shortmess = "asFqIAWTt"
 
 _G.last_file = nil
 _G.last_line = nil
@@ -343,9 +344,9 @@ vim.keymap.set('n', '<right>', '<c-w>w')
 vim.keymap.set('n', '<c-l>', '<c-w>w')
 
 vim.keymap.set('n', '=', '<c-w>=')
-
-vim.keymap.set('n', 'u', ':silent undo<cr>', { silent = true })
-vim.keymap.set('n', 'U', ":silent redo<cr>", { silent = true })
+-- @see https://github.com/neovim/neovim/pull/39554/changes
+-- vim.keymap.set('n', 'u', ':silent undo<cr>', { silent = true })
+-- vim.keymap.set('n', 'U', ":silent redo<cr>", { silent = true })
 
 local function count_normal_windows()
   local count = 0
