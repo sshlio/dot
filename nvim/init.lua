@@ -346,7 +346,9 @@ vim.keymap.set('n', '<c-l>', '<c-w>w')
 vim.keymap.set('n', '=', '<c-w>=')
 -- @see https://github.com/neovim/neovim/pull/39554/changes
 -- vim.keymap.set('n', 'u', ':silent undo<cr>', { silent = true })
--- vim.keymap.set('n', 'U', ":silent redo<cr>", { silent = true })
+vim.keymap.set('n', 'U', "<c-r>", { silent = true })
+
+vim.keymap.set('c', '<c-v>', "<c-r>+")
 
 local function count_normal_windows()
   local count = 0
@@ -889,7 +891,7 @@ vim.keymap.set('n', '<esc>', function()
   end
 end)
 
-vim.keymap.set({'i', 'c'}, '<C-v>', function()
+vim.keymap.set({'i'}, '<C-v>', function()
   local pasted = vim.fn.getreg('+')
   local oneliner = pasted:gsub("\n$", "")
 
