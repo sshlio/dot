@@ -1,6 +1,8 @@
 -- SPDX-License-Identifier: MIT
 -- Copyright (c) 2026 Sławomir Laskowski
 
+vim.api.nvim_create_augroup('_billy_file', { clear = true })
+
 _G.billy = {}
 _G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
 
@@ -270,6 +272,8 @@ vim.o.foldnestmax = 10       -- Limit number of fold levels
 vim.o.foldtext    = ''       -- Show text under fold with its highlighting
 vim.o.infercase     = true    -- Infer case in built-in completion
 vim.o.iskeyword = '@,48-57,_,192-255'
+vim.opt.iskeyword:append("-")
+vim.opt.iskeyword:append("48-57")
 
 vim.o.complete    = '.,w,b,kspell'                  -- Use less sources
 vim.o.completeopt = 'menuone,noselect,fuzzy,nosort' -- Use custom behavior
@@ -877,6 +881,7 @@ vim.keymap.set('n', '<c-d>', '<c-d>zz')
 vim.keymap.set('n', '<c-u>', '<c-u>zz')
 
 vim.keymap.set('n', '<esc>', function()
+  vim.api.nvim_exec_autocmds('User', { pattern = 'NormalEsc' })
   vim.cmd.noh()
   vim.snippet.stop()
 
@@ -889,6 +894,7 @@ vim.keymap.set('n', '<esc>', function()
       vim.api.nvim_win_close(win, true)
     end
   end
+
 end)
 
 vim.keymap.set({'i'}, '<C-v>', function()
@@ -1177,6 +1183,7 @@ u.ft({ "vim" }, function(buffer)
   vim.keymap.set('i', ';d', "<c-r>d", { buffer = buffer })
   vim.keymap.set('i', ';r', "Rename <c-r>f<esc>bhi", { buffer = buffer })
   vim.keymap.set('i', ';g', "Grep ", { buffer = buffer })
+  vim.keymap.set('i', ';d', "GroupMacro ", { buffer = buffer })
 end)
 
 

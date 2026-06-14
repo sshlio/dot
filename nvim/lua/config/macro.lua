@@ -1,6 +1,9 @@
 -- Copyright (c) 2026 Sławomir Laskowski
 -- SPDX-License-Identifier: MIT
 
+vim.keymap.set({ 'x', 'i' }, '<f13>', '<esc>');
+vim.keymap.set({ 'n' }, '<f13>', '<nop>');
+
 _G.macro_instance_6701 = _G.macro_instance_6701 or {}
 
 local M = _G.macro_instance_6701;
@@ -18,7 +21,7 @@ vim.api.nvim_create_user_command('Macro', function(opts)
 end, { nargs = 1 })
 
 function M.execute()
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(M.currentMacro, true, true, true), "m", false)
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(M.currentMacro .. "<f13>", true, true, true), "mx", false)
 end
 
 vim.keymap.set('x', 'sq', function()

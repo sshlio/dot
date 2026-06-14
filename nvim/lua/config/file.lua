@@ -1,7 +1,6 @@
 -- Copyright (c) 2026 Sławomir Laskowski
 -- SPDX-License-Identifier: MIT
 
-vim.api.nvim_create_augroup('_billy_file', { clear = true })
 
 vim.api.nvim_create_user_command('Rename', function(opts)
   local old = vim.fn.expand('%:p')
@@ -59,7 +58,7 @@ vim.api.nvim_create_autocmd('User', {
 
     if err then
       print(err)
-      return 
+      return
     end
 
     print("changes")
@@ -67,7 +66,7 @@ vim.api.nvim_create_autocmd('User', {
 
     vim.lsp.util.apply_workspace_edit(result.result, client.offset_encoding);
 
-    vim.tbl_filter(function(b) 
+    vim.tbl_filter(function(b)
       if vim.bo[b].modified then
         vim.api.nvim_buf_call(b, function() vim.cmd.write() end)
       end
