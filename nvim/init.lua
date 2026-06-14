@@ -7,15 +7,15 @@ _G.billy = {}
 _G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
 
 dofile(vim.env.HOME .. "/.config/nvim/init.local.lua")
-
 vim.opt.timeoutlen = 350    -- ms to wait for mapped sequence (default 1000)
 vim.opt.ttimeoutlen = 50    -- ms to wait for key code sequence (default 50)
 
-vim.keymap.set('n', 'q', '<Nop>')
-vim.keymap.set('n', 'g', '<Nop>')
-vim.keymap.set('n', 's', '<Nop>')
+vim.keymap.set('n', 'q', '<nop>')
+vim.keymap.set('n', 'g', '<nop>')
+vim.keymap.set('n', 'g%', '<nop>', { desc = "<nop>" })
+vim.keymap.set('n', 's', '<nop>')
 
-vim.keymap.set('n', 'gg', 'gg')
+vim.keymap.set('n', 'gg', 'gg', { desc = "Go to beggining of file" })
 
 vim.opt.packpath = vim.opt.runtimepath:get()
 vim.opt.grepprg = "rg --vimgrep --glob '!_billy' --glob '!CLAUDE.md'"
@@ -383,8 +383,6 @@ end, { silent = true })
 
 -- Clipboard
 
-vim.keymap.set('n', 's<cr>', 'a<cr><esc>kA<cr>')
-
 -- TODO ii but inner mode and backward (it worked)
 -- TODO replace system clipboard only if register 0 has changed
 -- TODO civ
@@ -723,13 +721,13 @@ local function move_term(name)
 end
 
 for _, key in ipairs(vim.split("1234567890qwertyuiopasdfghjklzxcvbnm", "")) do
-  vim.keymap.set({ 'n' }, 'q' .. key, function() print("q"..key.." mapping is free to be used!") end)
-  vim.keymap.set({ 'n', 'v', 's' }, 's' .. key, function() print("s"..key.." mapping is free to be used!") end)
+  vim.keymap.set({ 'n' }, 'q' .. key, function() print("q"..key.." mapping is free to be used!") end, { desc = "<nop>" })
+  vim.keymap.set({ 'n', 'v', 's' }, 's' .. key, function() print("s"..key.." mapping is free to be used!") end, { desc = "<nop>" })
 
-  vim.keymap.set('n', 'm' .. key, 'm' .. string.upper(key))
+  vim.keymap.set('n', 'm' .. key, 'm' .. string.upper(key), { desc = "<nop>" })
 
 
-  vim.keymap.set({'n'}, ';' .. key, function() mark(string.upper(key)) end)
+  vim.keymap.set({'n'}, ';' .. key, function() mark(string.upper(key)) end, { desc = "<nop>" })
 
   vim.keymap.set({'t'}, ';' .. key, function()
     markInsert(true)
@@ -745,9 +743,7 @@ end
 map(
   vim.split("1234567890", ""),
   function(key)
-    vim.keymap.set('n', 'm' .. key, function()
-      save_mark(key)
-    end)
+    vim.keymap.set('n', 'm' .. key, function() save_mark(key) end, { desc = "<nop>" })
   end
 )
 
@@ -769,7 +765,7 @@ vim.keymap.set('n', 'gJ', function()
   vim.cmd("s/^\\s*//e")
   vim.cmd("noh")
   u.normal("kgJ")
-end)
+end, { desc = "Join lines and collapse the spaces" })
 
 vim.keymap.set('n', '<up>', cmd('m .-2'))
 vim.keymap.set('n', '<down>', cmd('m .1'))
@@ -1332,8 +1328,8 @@ vim.keymap.set({'o', 'x'}, 'ao', function() ii(true, true) end)
 -- vim.keymap.set({'o', 'x'}, 'o', function() ii(false, true) end)
 vim.keymap.set({'o', 'x'}, 'O', function() ii(true, true) end)
 
-vim.keymap.set('n', 's.', '>ap', { remap = true })
-vim.keymap.set('n', 's,', '<ap', { remap = true })
+vim.keymap.set('n', 's.', '>ap', { remap = true, desc = "Indent pasted text" })
+vim.keymap.set('n', 's,', '<ap', { remap = true, desc = "De-Indent pasted text" })
 
 vim.keymap.set('n', 'L', '$')
 vim.keymap.set('n', 'H', '_')
@@ -1940,10 +1936,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
 })
 -- vim.diagnostic.goto_next()
 
-
-
-vim.keymap.set('n', 'sl', function() vim.diagnostic.open_float() end)
-vim.keymap.set('n', ']e', function() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR }) end)
+vim.keymap.set('n', 'sl', function() vim.diagnostic.open_float() end, { desc = "Open LSP diagnostics" })
+vim.keymap.set('n', ']e', function() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR }) end, { desc = "Next LSP error" })
+vim.keymap.set('n', '[e', function() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR }) end, { desc = "Prev LSP error" })
 
 -- snippets
 -- see https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#snippet_syntax
@@ -2082,12 +2077,10 @@ require('vim._core.ui2').enable({
     },
   },
 })
-vim.keymap.set('n', 'sm', '<cmd>messages<cr>')
-vim.keymap.set('n', 'sM', '<cmd>messages clear | echo "cleared"<cr>')
-vim.keymap.set('n', 'sb', '<cmd>buffers<cr>')
-vim.keymap.set('n', 'sE', '<cmd>set diffopt+=context:30<cr>')
-vim.keymap.set('n', 'se', '<cmd>set diffopt+=context:5<cr>')
-vim.keymap.set('n', 'sI', '<cmd>Inspect<cr>')
+
+vim.keymap.set('n', 'sm', '<cmd>messages<cr>',                        {  desc = "Show messages" })
+vim.keymap.set('n', 'sM', '<cmd>messages clear | echo "cleared"<cr>', {  desc = "Clear essages" })
+vim.keymap.set('n', 'sI', '<cmd>Inspect<cr>',                         {  desc = "Inspect node under the cursor" })
 
 _G.diff = function()
   local path = vim.fn.expand("%")
@@ -2107,4 +2100,4 @@ _G.diff = function()
   vim.cmd.wincmd('l')
   vim.wo.relativenumber = false
 end
-vim.keymap.set('n', 'sD', _G.diff)
+vim.keymap.set('n', 'sD', _G.diff, { desc = "Show git diff of current file" })
