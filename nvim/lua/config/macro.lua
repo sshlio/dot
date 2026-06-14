@@ -45,8 +45,6 @@ vim.keymap.set('x', 'sq', function()
   -- end)
 end)
 
-vim.keymap.set('n', 'qq', function()
-  M.execute()
-end)
+vim.keymap.set('n', 'qq', M.execute, { desc = "Execute macro" })
 
 return M;
