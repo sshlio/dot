@@ -27,6 +27,15 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   group = bash_ft,
+  pattern = { "*.jsonnet" },
+  callback = function()
+    vim.opt_local.filetype = "javascript"
+    vim.b.lsp_disabled = true
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = bash_ft,
   pattern = { "*.prisma" },
   callback = function()
     vim.opt_local.filetype = "hcl"

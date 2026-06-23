@@ -90,3 +90,5 @@ end
 vim.keymap.set('n', 's?', function() openHelpForPrefix("s") end)
 vim.keymap.set('n', 'g?', function() openHelpForPrefix("g") end)
 vim.keymap.set('n', ']?', function() openHelpForPrefix("]") end)
+vim.keymap.set('n', 'z?', function() openHelpForPrefix("z") end)
+

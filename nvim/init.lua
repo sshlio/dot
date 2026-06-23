@@ -1180,6 +1180,11 @@ u.ft({ "vim" }, function(buffer)
   vim.keymap.set('i', ';r', "Rename <c-r>f<esc>bhi", { buffer = buffer })
   vim.keymap.set('i', ';g', "Grep ", { buffer = buffer })
   vim.keymap.set('i', ';d', "GroupMacro ", { buffer = buffer })
+
+  vim.keymap.set('i', ';t', function()
+    local hash = string.format("%06x", math.random(0, 0xffffff))
+    return "e /tmp/draft_" .. hash .. ".md<esc>viw"
+  end, { buffer = buffer, expr = true })
 end)
 
 
@@ -1884,9 +1889,11 @@ vim.api.nvim_create_autocmd('LspAttach', {
       })
     end
 
-    if client.name == "nu_ls" then
+    if client.name == "nu_ls" or vim.b.lsp_disabled then
       vim.b.force_cr_omni = true
       vim.diagnostic.enable(false, { bufnr = args.buf })
+
+      print('LSP Disabled')
     end
   end,
 })

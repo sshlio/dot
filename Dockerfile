@@ -50,7 +50,7 @@ RUN arch="$(dpkg --print-architecture)" \
 
 # Install the current Node.js release channel.
 RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - \
-    && apt-get install -y nodejs \
+    && apt-get install -y nodejs fzf \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g \
@@ -58,19 +58,13 @@ RUN npm install -g \
     @anthropic-ai/claude-code \
     aws-sdk
 
-RUN useradd -m -s /usr/bin/nu billy
+USER ubuntu
 
-USER billy
-
-WORKDIR /home/billy
+WORKDIR /home/ubuntu
 
 RUN mkdir .config
 
-COPY --chown=billy:billy nvim .config/nvim
-COPY --chown=billy:billy nushell .config/nushell
-
-RUN git config --global user.email "you@example.com"
-RUN git config --global user.name "Your Name"
-RUN gasdadas
+COPY --chown=ubuntu:ubuntu nvim .config/nvim
+COPY --chown=ubuntu:ubuntu nushell .config/nushell
 
 ENTRYPOINT ["nu"]
