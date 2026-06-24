@@ -149,7 +149,7 @@ def whatever [command: closure] {
   try {
     do $command
     return 0
-  } catch { |err| return 1 }
+  } catch { |err| error make $err }
 }
 
 def finally [command: closure, finally: closure] {
@@ -169,9 +169,8 @@ def retry [times: number, command: closure] {
       do $command
       return 0
     } catch { |err|
-      if ($currTries > $times) {
-        print $err
-        return 1
+      if ($currTries >= $times) {
+        error make $err
       } else {
         sleep 1sec
       }
