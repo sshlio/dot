@@ -152,6 +152,27 @@ def whatever [command: closure] {
   } catch { |err| return 1 }
 }
 
+def retry [times: number, command: closure] {
+  mut tries = 0
+
+  loop {
+    $tries = $tries + 1
+    let currTries = $tries
+
+    try {
+      do $command
+      return 0
+    } catch { |err|
+      if ($currTries > $times) {
+        print $err
+        return 1
+      } else {
+        sleep 1sec
+      }
+    }
+  }
+}
+
 def watching [command: closure] {
   while true {
     let out = (do $command)
@@ -837,4 +858,4 @@ def s [] {
   git diff --stat HEAD
 }
 
-alias "http post" = http post --content-type application/json 
+alias "http post" = http post --content-type application/json
