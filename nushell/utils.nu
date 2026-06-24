@@ -152,6 +152,12 @@ def whatever [command: closure] {
   } catch { |err| return 1 }
 }
 
+def finally [command: closure, finally: closure] {
+  try {
+    do $command
+  } catch { |err| error make $err } finally { do $finally }
+}
+
 def retry [times: number, command: closure] {
   mut tries = 0
 
