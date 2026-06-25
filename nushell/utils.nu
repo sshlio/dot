@@ -4,6 +4,8 @@
 source ~/.config/nushell/boot.nu
 source ~/.config/nushell/git.nu
 
+$env.config.table.mode = "light"
+
 $env.DOCKER_BUILDKIT_PROGRESS = "plain"
 
 def in [path, what: closure] {
