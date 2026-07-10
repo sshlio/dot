@@ -374,7 +374,7 @@ end)
 w:start()
 scrollWatcher:start()
 button4Watcher:start()
--- myTap:start()      
+-- myTap:start()
 
 -- "world "
 -- "world "
@@ -428,4 +428,10 @@ usbWatcher:start()
 
 hs.urlevent.bind("chrome", function(_, params)
   chrome(false)
+end)
+
+hs.hotkey.bind({"cmd"}, "'", function()
+  hs.application.launchOrFocus("kitty")
+
+  hs.eventtap.keyStroke({"control"}, "p", 0, hs.application.get("kitty"))
 end)

@@ -150,8 +150,11 @@ def ucfirst [s] {
 def whatever [command: closure] {
   try {
     do $command
-    return 0
-  } catch { |err| error make $err }
+
+    return { success: true }
+  } catch { |err|
+    return { success: false, err: $err }
+  }
 }
 
 def finally [command: closure, finally: closure] {
