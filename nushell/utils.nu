@@ -163,7 +163,7 @@ def finally [command: closure, finally: closure] {
   } catch { |err| error make $err } finally { do $finally }
 }
 
-def retry [times: number, command: closure] {
+def retry [--wait: duration = 1sec, times: number, command: closure] {
   mut tries = 0
 
   loop {
@@ -177,7 +177,7 @@ def retry [times: number, command: closure] {
       if ($currTries >= $times) {
         error make $err
       } else {
-        sleep 1sec
+        sleep $wait
       }
     }
   }
@@ -187,6 +187,7 @@ def watching [command: closure] {
   while true {
     let out = (do $command)
     clear
+    print $"(date now)\n"
     print $out
     sleep 1sec
   }
