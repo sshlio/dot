@@ -869,3 +869,5 @@ def s [] {
 }
 
 alias "http post" = http post --content-type application/json
+
+def "from epoch" [] { $in | into datetime -f '%s' }
