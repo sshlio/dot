@@ -568,6 +568,12 @@ _G.bindExecuteCommand = function(buffer)
   vim.keymap.set('n', 'q<cr>', function() stopAndExecute({ silent = true }) end, { desc = 'Execute line in shell and paste output below', buffer = buffer })
   vim.keymap.set('n', 'qn', function() enqueue() end, { desc = 'Execute line in shell and paste output below', buffer = buffer })
   vim.keymap.set('n', 'sc', _G.stopCommandUnderTheCursor, { desc = 'Stop command and clear extmark', buffer = buffer })
+  vim.keymap.set('n', 'dd', function()
+    local line = vim.api.nvim_win_get_cursor(0)[1]
+
+    _G.stopCommandUnderTheCursor()
+    vim.api.nvim_buf_set_lines(0, line - 1, line, false, {})
+  end, { desc = 'Stop command and delete line', buffer = buffer })
   vim.keymap.set('n', 'se', executeQuiet, { desc = 'Execute quietly (close window)', buffer = buffer })
   vim.keymap.set('n', 'sC', clearAllExtmarks, { desc = 'Clear all extmarks and their terminal buffers', buffer = buffer })
   vim.keymap.set('n', 'qo', moveAllExtmarksToLocationList, { desc = 'Move execute command extmarks to location list', buffer = buffer })
@@ -577,7 +583,7 @@ _G.bindExecuteCommand = function(buffer)
 end
 
 _G.stopCommandUnderTheCursor = function(opts)
-  opts = otps or {}
+  opts = opts or {}
   local linenr = opts.linenr or vim.api.nvim_win_get_cursor(0)[1]
   local buf = opts.buf or vim.api.nvim_get_current_buf()
 
@@ -677,5 +683,3 @@ vim.api.nvim_create_autocmd("BufDelete", {
 --     end
 --   end)
 -- )
-
-
