@@ -142,7 +142,7 @@ def update-dotenv [--file: string, envs] {
 }
 
 def ucfirst [s] {
-  let first = ($s | str substring 0..0 | str upcase)
+  let first = ($s | str substring 0..0 | str uppercase)
   let rest = ($s | str substring 1..-1)
   $first + $rest
 }
@@ -328,7 +328,7 @@ def colored_raw [color, value] {
 }
 
 def random-hash [l = 5] {
-  random chars -l 32 | str replace -a " " "" | str substring 0..$l | str downcase
+  random chars -l 32 | str replace -a " " "" | str substring 0..$l | str lowercase
 }
 
 def pqueue_spawn [] {
