@@ -873,3 +873,6 @@ alias "http post" = http post --content-type application/json
 alias "gt" = get -o
 
 def "from epoch" [] { $in | into datetime -f '%s' }
+def "from entries" [] { $in | transpose -d -r }
+
+
