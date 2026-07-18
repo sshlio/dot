@@ -849,6 +849,10 @@ def pbar [
   $"[($bar)] ($pct)%"
 }
 
+def "git tree" [] {
+  git log --oneline --graph --decorate --all
+}
+
 def "diff main" [] {
   git diff $"($env.MAIN_BRANCH)...HEAD"
 }
