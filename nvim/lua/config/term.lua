@@ -3,7 +3,7 @@
 
 local ns = vim.api.nvim_create_namespace('_billy_term')
 local answer_key_ns = vim.api.nvim_create_namespace('_billy_term_answer_key')
-local ASK_HI = "Title"
+local ASK_HI = "Question"
 
 local last = nil
 -- vim.keymap.set('t', '<esc>', '<C-\\><C-n>')
@@ -22,18 +22,6 @@ local timer = vim.loop.new_timer()
 local ExtmarkState = require('config.extmark')
 
 local extmarks = ExtmarkState.new(ns)
-
-local function signcolumn_width(line_count)
-  local width = 2
-  local threshold = 1000
-
-  while line_count > threshold do
-    width = width + 1
-    threshold = threshold * 10
-  end
-
-  return width
-end
 
 local function changeExtmark(state, newText, hl, sign_text, sign_hl_group)
   extmarks:set(state, {
@@ -260,8 +248,7 @@ _G.executeCommandUnderTheCursor = function(opts)
   opts = opts or {}
   opts.silent = opts.silent or false
 
-  local line_count = vim.api.nvim_buf_line_count(buf)
-  vim.api.nvim_buf_set_option(buf, "signcolumn", "yes:" .. signcolumn_width(line_count))
+  vim.api.nvim_buf_set_option(buf, "signcolumn", "yes:2")
 
   local state = extmarks:get_state_at_line(buf, linenr)
 
@@ -382,7 +369,12 @@ _G.executeCommandUnderTheCursor = function(opts)
 
       local hl = exit_code < 1 and "WildMenu" or "DiffDelete"
 
-      local sign = exit_code < 1 and "󰄬" or ""
+      local sign = exit_code < 1 and "󰸞" or "󰚌"
+      -- local sign = exit_code < 1 and "✔" or "󰚌"
+      -- local sign = exit_code < 1 and "✔" or " "
+      -- local sign = exit_code < 1 and "✔" or " "
+      -- local sign = exit_code < 1 and "✔" or "󰞏 "
+      -- local sign = exit_code < 1 and "✔" or " "
       local signhl = exit_code < 1 and "TermRunSuccess" or "TermRunFail"
 
       changeExtmark(bufState[buf], extmark_text, hl, sign, signhl)

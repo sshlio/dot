@@ -13,6 +13,8 @@
          - neovim
          - git-delta
          - libqalculate
+         - terminal-notifier
+         - font-monaspace
         state: present
 
     - name: Configure git to use delta as pager
