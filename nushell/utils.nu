@@ -837,8 +837,8 @@ def --wrapped cl [--print(-p), --auto(-a), --sonnet(-s), ...args] {
 }
 
 def pbar [
-  current: int,    # current step
-  total: int,      # total steps
+  current: int,
+  total: int = 100,
   --width: int = 30  # bar width in characters
 ] {
   let pct = ($current / $total * 100 | math round)
