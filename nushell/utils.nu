@@ -850,7 +850,7 @@ def pbar [
 }
 
 def "diff main" [] {
-  git diff (git merge-base $env.MAIN_BRANCH HEAD) HEAD
+  git diff $"($env.MAIN_BRANCH)...HEAD"
 }
 
 def diff [ref?: string] {
