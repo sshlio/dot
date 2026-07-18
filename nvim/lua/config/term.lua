@@ -699,34 +699,26 @@ vim.api.nvim_create_autocmd("BufDelete", {
   desc = "Close window when unfocused if buffer has quitUnfocused flag"
 })
 
--- timer:start(
---   0,  -- timeout in ms (2 seconds)
---   1000,     -- repeat interval (0 = no repeat)
---   vim.schedule_wrap(function()
---     for i, state in pairs(bufState) do
---       if state.inProgress == true then
---         state.spinState = (state.spinState or 0) + 1
---         local offset = state.spinState % #spins + 1
---
---         changeExtmark(state, "", "Question", spins[offset] .. " ", "Question")
---       end
---     end
---   end)
--- )
-
-_G.nvr = function(hash, command)
-  local state = extmarks:getByHash(hash)
-
-  local msg = vim.json.decode(vim.base64.decode(command))
-
-  if msg.message == "working" then
+_G.billy.nvr_commands.command_notify = function(state, command)
+  if command.message == "working" then
     changeExtmark(state, "working...", "StatusLine", "", "TermRunInProgress")
     state.ask = false
-  elseif msg.message == "ask" then
+  elseif command.message == "ask" then
     changeExtmark(state, "Permission needed", ASK_HI, "󱚟", ASK_HI)
     state.ask = true
-  elseif msg.message == "stopped" then
+  elseif command.message == "stopped" then
     changeExtmark(state, "Answered", "TermRunSuccess", "󱜙", "TermRunSuccess")
     state.ask = false
+  end
+end
+
+_G.nvr = function(hash, command)
+  local msg = vim.json.decode(vim.base64.decode(command))
+  local handler = _G.billy.nvr_commands[msg.type]
+
+  if handler then
+    local state = extmarks:getByHash(hash)
+
+    return handler(state, msg)
   end
 end
