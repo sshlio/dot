@@ -277,13 +277,8 @@ _G.executeCommandUnderTheCursor = function(opts)
       vim.wo.winhighlight = "Normal:NormalFloat,CursorLine:FloatCursorLine"
 
       if state.ask then
-        vim.on_key(function(_, typed)
-          if typed ~= "" and vim.api.nvim_get_mode().mode == "t" and vim.api.nvim_get_current_buf() == state.buf then
-            vim.on_key(nil, answer_key_ns)
-            changeExtmark(state, "answered...", "StatusLine", "", "TermRunInProgress")
-            state.ask = false
-          end
-        end, answer_key_ns)
+        changeExtmark(state, "answered...", "StatusLine", "", "TermRunInProgress")
+        state.ask = false
       end
 
       last = state
@@ -726,10 +721,12 @@ _G.nvr = function(hash, command)
 
   if msg.message == "working" then
     changeExtmark(state, "working...", "StatusLine", "", "TermRunInProgress")
+    state.ask = false
   elseif msg.message == "ask" then
     changeExtmark(state, "Permission needed", ASK_HI, "󱚟", ASK_HI)
     state.ask = true
   elseif msg.message == "stopped" then
     changeExtmark(state, "Answered", "TermRunSuccess", "󱜙", "TermRunSuccess")
+    state.ask = false
   end
 end
