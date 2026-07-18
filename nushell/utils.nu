@@ -853,6 +853,10 @@ def "diff main" [] {
   git diff $"($env.MAIN_BRANCH)...HEAD"
 }
 
+def "s main" [] {
+  git diff --stat $"($env.MAIN_BRANCH)...HEAD"
+}
+
 def diff [ref?: string] {
   if $ref != null {
     git diff $"($ref)^" $ref
