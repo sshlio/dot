@@ -2,6 +2,7 @@
 -- SPDX-License-Identifier: MIT
 
 local ns = vim.api.nvim_create_namespace('_billy_term')
+local answer_key_ns = vim.api.nvim_create_namespace('_billy_term_answer_key')
 local ASK_HI = "Title"
 
 local last = nil
@@ -271,14 +272,19 @@ _G.executeCommandUnderTheCursor = function(opts)
 
   if state and not state.pending then
     if vim.api.nvim_buf_is_valid(state.buf) then
-      if state.ask then
-        changeExtmark(state, "answered...", "StatusLine", "", "TermRunInProgress")
-        state.ask = false
-      end
-
       vim.cmd("botright 50new")
       vim.api.nvim_set_current_buf(state.buf)
       vim.wo.winhighlight = "Normal:NormalFloat,CursorLine:FloatCursorLine"
+
+      if state.ask then
+        vim.on_key(function(_, typed)
+          if typed ~= "" and vim.api.nvim_get_mode().mode == "t" and vim.api.nvim_get_current_buf() == state.buf then
+            vim.on_key(nil, answer_key_ns)
+            changeExtmark(state, "answered...", "StatusLine", "", "TermRunInProgress")
+            state.ask = false
+          end
+        end, answer_key_ns)
+      end
 
       last = state
     end
