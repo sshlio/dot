@@ -362,7 +362,7 @@ _G.executeCommandUnderTheCursor = function(opts)
         return
       end
 
-      local hl = exit_code < 1 and "WildMenu" or "DiffDelete"
+      local hl = exit_code < 1 and "Folded" or "DiffDelete"
 
       local sign = exit_code < 1 and "󰸞" or "󰚌"
       -- local sign = exit_code < 1 and "✔" or "󰚌"
