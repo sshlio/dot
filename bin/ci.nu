@@ -5,5 +5,7 @@ def "main check_nvim" [] {
   if (($stderr | where { $in =~ "Error" } | length) > 0) {
     print $stderr
     exit 1
+  } else {
+    print "Config loaded sucesfully"
   }
 }
