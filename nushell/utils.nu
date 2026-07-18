@@ -849,6 +849,10 @@ def pbar [
   $"[($bar)] ($pct)%"
 }
 
+def "diff main" [] {
+  git diff (git merge-base $env.MAIN_BRANCH HEAD) HEAD
+}
+
 def diff [ref?: string] {
   if $ref != null {
     git diff $"($ref)^" $ref
