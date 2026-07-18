@@ -207,7 +207,10 @@ vim.keymap.set('t', '<cr>', '<cr>')
 
 -- Execute current line in shell and paste output below (streaming)
 
-_G.__term_envs = { __NVIM_VER = "1" }
+_G.__term_envs = {
+   __NVIM_VER = "1",
+   PAGER = "cat",
+}
 
 local function changeExtmark(state, newText, hl, sign_text, sign_hl_group)
   extmarks:set(state, {
