@@ -41,12 +41,30 @@ function ExtmarkState:get(buf, extmark_id)
   end
 
   buf = self:_normalize_buf(buf)
+
   local states = self.by_buf[buf]
+
   if not states then
     return nil
   end
 
   return states[self:_key(extmark_id)]
+end
+
+function ExtmarkState:getByHash(hash)
+  if not hash then
+    return nil
+  end
+
+  for _, states in pairs(self.by_buf) do
+    for _, state in pairs(states) do
+      if state.hash == hash then
+        return state
+      end
+    end
+  end
+
+  return nil
 end
 
 function ExtmarkState:clear(state)

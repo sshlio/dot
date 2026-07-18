@@ -2,6 +2,7 @@
 -- SPDX-License-Identifier: MIT
 
 local ns = vim.api.nvim_create_namespace('_billy_term')
+local ASK_HI = "Title"
 
 local last = nil
 -- vim.keymap.set('t', '<esc>', '<C-\\><C-n>')
@@ -18,7 +19,20 @@ local spins = { "" }
 local timer = vim.loop.new_timer()
 
 local ExtmarkState = require('config.extmark')
+
 local extmarks = ExtmarkState.new(ns)
+
+local function changeExtmark(state, newText, hl, sign_text, sign_hl_group)
+  extmarks:set(state, {
+    row = state.linenr - 1,
+    col = 0,
+    virt_text = {{ newText, hl }},
+    virt_text_pos = "eol",
+    sign_text = " " .. (sign_text or "X"),
+    sign_hl_group = sign_hl_group or "Question",
+    invalidate = true,
+  })
+end
 
 function getFileName(str)
   local fileName = str:match("%S+%s*$")
@@ -186,6 +200,7 @@ vim.api.nvim_create_autocmd('TermRequest', {
   end,
 })
 
+
 vim.keymap.set('t', '<c-l>', function()
   vim.fn.chansend(vim.b.terminal_job_id, "clear\r")
 end, { noremap = true, desc = 'Clear shell' })
@@ -211,18 +226,6 @@ _G.__term_envs = {
    __NVIM_VER = "1",
    PAGER = "cat",
 }
-
-local function changeExtmark(state, newText, hl, sign_text, sign_hl_group)
-  extmarks:set(state, {
-    row = state.linenr - 1,
-    col = 0,
-    virt_text = {{ newText, hl }},
-    virt_text_pos = "eol",
-    sign_text = " " .. (sign_text or "X"),
-    sign_hl_group = sign_hl_group or "Question",
-    invalidate = true,
-  })
-end
 
 local lastExtmark = nil
 
@@ -268,6 +271,11 @@ _G.executeCommandUnderTheCursor = function(opts)
 
   if state and not state.pending then
     if vim.api.nvim_buf_is_valid(state.buf) then
+      if state.ask then
+        changeExtmark(state, "answered...", "StatusLine", "", "TermRunInProgress")
+        state.ask = false
+      end
+
       vim.cmd("botright 50new")
       vim.api.nvim_set_current_buf(state.buf)
       vim.wo.winhighlight = "Normal:NormalFloat,CursorLine:FloatCursorLine"
@@ -319,8 +327,13 @@ _G.executeCommandUnderTheCursor = function(opts)
   end
 
 
+  local hash = string.format("%06x", math.random(0, 0xffffff))
+  state.hash = hash
+
   local job_id = vim.fn.termopen(cmd, {
-    env = _G.__term_envs,
+    env = vim.tbl_extend("force", _G.__term_envs, {
+      NVIM_JOB_HASH = hash,
+    }),
 
     on_exit = function(job_id, exit_code, event_type)
       bufState[buf].exited = true
@@ -360,8 +373,6 @@ _G.executeCommandUnderTheCursor = function(opts)
   buf = vim.api.nvim_get_current_buf()
 
   vim.schedule(function()
-    local hash = string.format("%06x", math.random(0, 0xffffff))
-
     vim.api.nvim_buf_set_name(buf, line .. " [" .. hash .. "]")
 
     bufState[buf] = state
@@ -686,3 +697,18 @@ vim.api.nvim_create_autocmd("BufDelete", {
 --     end
 --   end)
 -- )
+
+_G.nvr = function(hash, command)
+  local state = extmarks:getByHash(hash)
+
+  local msg = vim.json.decode(vim.base64.decode(command))
+
+  if msg.message == "working" then
+    changeExtmark(state, "working...", "StatusLine", "", "TermRunInProgress")
+  elseif msg.message == "ask" then
+    changeExtmark(state, "Permission needed", ASK_HI, "󱚟", ASK_HI)
+    state.ask = true
+  elseif msg.message == "stopped" then
+    changeExtmark(state, "Answered", "TermRunSuccess", "󱜙", "TermRunSuccess")
+  end
+end

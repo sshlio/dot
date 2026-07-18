@@ -3,7 +3,7 @@
 
 vim.api.nvim_create_augroup('_billy_file', { clear = true })
 
-_G.billy = {}
+_G.billy = { harness = "cl" }
 _G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
 
 dofile(vim.env.HOME .. "/.config/nvim/init.local.lua")
@@ -73,10 +73,6 @@ _G.u = {}
 _G.o = vim.o
 _G.fn = vim.fn
 _G.cmd = vim.cmd
-
-function u.acmd(name, cmds)
-
-end
 
 function u.file_exists(path)
   local f = io.open(path, "r")
@@ -220,10 +216,7 @@ function u.ft(ft, cb)
       end
     end
   end)
-
-
 end
-
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "tf",
@@ -235,7 +228,6 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- UTILS
 local keymap = vim.keymap
-
 
 vim.opt.title = true
 vim.opt.titlelen = 0 -- do not shorten title
@@ -1157,7 +1149,6 @@ u.ft({ "openscad" }, function(buffer)
   vim.api.nvim_buf_set_option(buffer, "commentstring", "// %s")
 end)
 
-
 u.ft({ "markdown" }, function(buffer)
   vim.keymap.set('i', ';t', "- [ ] ", { buffer = buffer })
   vim.keymap.set('i', ';l', "[](<c-r>+)<esc>^a", { buffer = buffer })
@@ -1203,6 +1194,8 @@ u.ft({ "nu", "bash", "sh" }, function(buffer)
   vim.keymap.set('i', ';i', '()<left>', { buffer = buffer })
   vim.keymap.set('i', ';d', 'def --wrapped foo [...args] {}<esc>3Bvt ', { buffer = buffer })
   vim.keymap.set('i', ';m', 'def foo [] {}<esc>3bvt ', { buffer = buffer })
+  -- vim.keymap.set('i', ';c', _G.billy.harness .. ' "<esc>i', { buffer = buffer })
+  vim.keymap.set('i', ';c', _G.billy.harness .. ' ""<esc>i', { buffer = buffer })
 
   _G.bindExecuteCommand(buffer)
 
@@ -2008,11 +2001,12 @@ end, { expr = true, silent = true, desc = "Jump to distant change" })
 
 vim.keymap.set('v', 'C', function()
   vim.cmd('normal! \27')
+
   local start_pos = vim.fn.getpos("'<")
   local end_pos = vim.fn.getpos("'>")
 
   local lines = vim.fn.getregion(start_pos, end_pos, { type = vim.fn.visualmode() })
-  print('start_pos',  start_pos)
+
   local content = table.concat(lines, '\n')
   local from_line = start_pos[2]
   local to_line = end_pos[2]
@@ -2024,15 +2018,11 @@ vim.keymap.set('v', 'C', function()
   local f = io.open(tmpfile, 'w')
 
   local filepath = vim.fn.expand('%:.')
-  local header = 'The user selected lines ' .. from_line .. ' to ' .. to_line .. ' from ./' .. filepath .. ':'
 
-  if f then
-    f:write(string.format("<ide_selection>%s\n%s\n</ide_selection>\n-----\n\n", header, content))
-    f:close()
-
-    vim.fn.setreg('+', 'cat ' .. tmpfile .. ' | cl ')
-
-    print('Written to ' .. tmpfile)
+  if from_line == to_line then
+    vim.fn.setreg('+', '@' .. filepath .. ':' .. from_line)
+  else
+    vim.fn.setreg('+', '@' .. filepath .. ':' .. from_line .. '-' .. to_line)
   end
 end, { desc = 'Copy selection as Claude Code context' })
 

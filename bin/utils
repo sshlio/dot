@@ -1,0 +1,24 @@
+#!/usr/bin/env nu
+
+def "main nvr" [$message] {
+  let msg = $message | to json | base64
+
+  nvr --remote-expr $"v:lua.nvr\('($env.NVIM_JOB_HASH)', '($msg)'\)";
+}
+
+def nvr_notify [$message] {
+  let msg = $message | to json | base64
+
+  nvr --remote-expr $"v:lua.nvr\('($env.NVIM_JOB_HASH)', '($msg)'\)";
+}
+
+# ~/p/dot/bin/utils command_notify working
+# ~/p/dot/bin/utils command_notify ask
+# ~/p/dot/bin/utils command_notify stopped
+def "main command_notify" [$message] {
+  nvr_notify { message: $message, type: "command_notify" } | complete
+
+  "{}"
+}
+
+def main [] {}
