@@ -23,6 +23,18 @@ local ExtmarkState = require('config.extmark')
 
 local extmarks = ExtmarkState.new(ns)
 
+local function signcolumn_width(line_count)
+  local width = 2
+  local threshold = 1000
+
+  while line_count > threshold do
+    width = width + 1
+    threshold = threshold * 10
+  end
+
+  return width
+end
+
 local function changeExtmark(state, newText, hl, sign_text, sign_hl_group)
   extmarks:set(state, {
     row = state.linenr - 1,
@@ -248,7 +260,8 @@ _G.executeCommandUnderTheCursor = function(opts)
   opts = opts or {}
   opts.silent = opts.silent or false
 
-  vim.api.nvim_buf_set_option(buf, "signcolumn", "yes:2")
+  local line_count = vim.api.nvim_buf_line_count(buf)
+  vim.api.nvim_buf_set_option(buf, "signcolumn", "yes:" .. signcolumn_width(line_count))
 
   local state = extmarks:get_state_at_line(buf, linenr)
 
@@ -594,6 +607,16 @@ _G.bindExecuteCommand = function(buffer)
     _G.stopCommandUnderTheCursor()
     vim.api.nvim_buf_set_lines(0, line - 1, line, false, {})
   end, { desc = 'Stop command and delete line', buffer = buffer })
+  vim.keymap.set('x', 'd', function()
+    local first = math.min(vim.fn.line('v'), vim.fn.line('.'))
+    local last = math.max(vim.fn.line('v'), vim.fn.line('.'))
+
+    for line = first, last do
+      _G.stopCommandUnderTheCursor({ linenr = line })
+    end
+
+    vim.cmd.normal({ args = { 'd' }, bang = true })
+  end, { desc = 'Stop commands and delete selection', buffer = buffer })
   vim.keymap.set('n', 'se', executeQuiet, { desc = 'Execute quietly (close window)', buffer = buffer })
   vim.keymap.set('n', 'sC', clearAllExtmarks, { desc = 'Clear all extmarks and their terminal buffers', buffer = buffer })
   vim.keymap.set('n', 'qo', moveAllExtmarksToLocationList, { desc = 'Move execute command extmarks to location list', buffer = buffer })
