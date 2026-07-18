@@ -49,6 +49,7 @@ def hist [q = ""] {
 
 def ls-size [dir] {
   ls ($dir | path expand) | update size { |it| du $it.name | get apparent | get 0 -o | default $it.size }
+  nvim --headless '+qa'
     | sort-by size | reverse
     | update name { basename $in }
 }
