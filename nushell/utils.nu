@@ -850,6 +850,7 @@ def pbar [
 }
 
 def diff [ref?: string] {
+# def diff [ref?: string] {
   if $ref != null {
     git diff $"($ref)^" $ref
     return
