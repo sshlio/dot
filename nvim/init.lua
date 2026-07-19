@@ -2097,3 +2097,27 @@ _G.diff = function()
   vim.wo.relativenumber = false
 end
 vim.keymap.set('n', 'sD', _G.diff, { desc = "Show git diff of current file" })
+
+
+local function yank_keep_view(keys)
+  local view = vim.fn.winsaveview()
+
+  vim.cmd.normal({ keys, bang = true, })
+
+  vim.fn.winrestview(view)
+  print("restored")
+end
+
+vim.keymap.set("n", "yip", function()
+  yank_keep_view("\"+yip")
+end, {
+  silent = true,
+  desc = "Yank paragraph without moving view",
+})
+
+vim.keymap.set("n", "yaf", function()
+  yank_keep_view("gg\"+yG")
+end, {
+  silent = true,
+  desc = "Yank whole buffer without moving view",
+})
