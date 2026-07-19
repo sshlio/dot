@@ -347,6 +347,24 @@ vim.keymap.set('n', '=', '<c-w>=')
 -- vim.keymap.set('n', 'u', ':silent undo<cr>', { silent = true })
 vim.keymap.set('n', 'U', "<c-r>", { silent = true })
 
+vim.keymap.set('n', 'gv', function()
+  if _G.undo_version_id then
+    vim.cmd.undo(_G.undo_version_id)
+    vim.fn.winrestview(_G.undo_version_view)
+    _G.undo_version_id = nil
+    _G.undo_version_view = nil
+    return
+  end
+
+  _G.undo_version_id = vim.fn.undotree().seq_cur
+  _G.undo_version_view = vim.fn.winsaveview()
+end, { desc = 'Save/restore undo version' })
+
+vim.keymap.set('n', 'gV', function()
+  _G.undo_version_id = vim.fn.undotree().seq_cur
+  _G.undo_version_view = vim.fn.winsaveview()
+end, { desc = 'Replace saved undo version' })
+
 vim.keymap.set('c', '<c-v>', "<c-r>+")
 
 local function count_normal_windows()
