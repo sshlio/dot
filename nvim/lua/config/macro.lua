@@ -21,7 +21,16 @@ vim.api.nvim_create_user_command('Macro', function(opts)
 end, { nargs = 1 })
 
 function M.execute()
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(M.currentMacro .. "<f13>", true, true, true), "mx", false)
+  local lazyredraw = vim.o.lazyredraw
+
+  vim.o.lazyredraw = true
+  local ok, err = pcall(vim.api.nvim_feedkeys,
+    vim.api.nvim_replace_termcodes(M.currentMacro .. "<f13>", true, true, true), "mx", false)
+  vim.o.lazyredraw = lazyredraw
+
+  if not ok then
+    error(err)
+  end
 end
 
 vim.keymap.set('x', 'sq', function()
