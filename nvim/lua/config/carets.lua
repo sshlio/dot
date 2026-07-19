@@ -33,8 +33,6 @@ function executeMacro()
     local current = vim.api.nvim_buf_get_extmark_by_id(0, ns, id, {})
 
     local row, col = current[1], current[2]
-    print(row, col)
-
     vim.api.nvim_feedkeys((row + 1) .. "G0" .. col .. "l", "nx", true)
 
     macro.execute()

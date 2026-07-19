@@ -997,8 +997,6 @@ local function put(txt)
   -- print("cuur_indent\n\n", cur_indent)
   -- print("indent_str:", "[" .. indent_str .. "]")
 
-  print(vim.inspect(lines))
-
   local lines = map(lines, function(l)
     return indent_str .. l
   end)
@@ -1755,7 +1753,6 @@ vim.keymap.set({'i', 's'}, '<tab>', function()
   if vim.snippet.active({ direction = 1 }) then
     return '<Cmd>lua vim.snippet.jump(1)<CR>'
   elseif col == 0 or vim.fn.getline('.'):sub(col, col):match('^%s?$') then
-    print("before char", vim.inspect(vim.fn.getline('.'):sub(col, col)))
     return '<tab>'
   else
     return '<c-x><c-o>'
@@ -1889,7 +1886,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
       vim.b.force_cr_omni = true
       vim.diagnostic.enable(false, { bufnr = args.buf })
 
-      print('LSP Disabled')
     end
   end,
 })

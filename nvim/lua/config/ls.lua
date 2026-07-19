@@ -129,7 +129,6 @@ local function open_ls(initialDir, sort, opts)
     vim.keymap.set('n', 'sx', 'g_yiWocps <esc>pa <esc>p', { buffer = buf })
 
     vim.keymap.set('n', 'sd', function()
-      print("duplicate line")
       local row = vim.api.nvim_win_get_cursor(0)[1]
 
       local line = vim.api.nvim_get_current_line()
@@ -165,8 +164,6 @@ local function open_ls(initialDir, sort, opts)
     function goUp()
       local lastSegment = vim.b.cwd:match("[^/]*$")
       local up = vim.b.cwd:match("^(.*)/[^/]*$")
-      print("goUp", up)
-
       vim.b.cwd = up
 
       refresh()

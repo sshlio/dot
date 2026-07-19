@@ -52,17 +52,12 @@ vim.api.nvim_create_autocmd('User', {
       }
     }
 
-    print("Renaming in LSP...")
-
     result, err = client:request_sync(method, params, 10000, 0)
 
     if err then
       print(err)
       return
     end
-
-    print("changes")
-    print(vim.inspect(result.result))
 
     vim.lsp.util.apply_workspace_edit(result.result, client.offset_encoding);
 

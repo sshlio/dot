@@ -289,7 +289,6 @@ _G.executeCommandUnderTheCursor = function(opts)
   end
 
   if not state then
-    print("no state")
     state = {
       parentBuf = buf,
       linenr = linenr,
@@ -401,10 +400,7 @@ _G.executeCommandUnderTheCursor = function(opts)
 
     vim.b[buf].quitUnfocused = true
 
-    print("next?", opts.next)
-
     if opts.next then
-      print('Calling next...')
       vim.schedule(opts.next)
     end
   end)
@@ -456,7 +452,6 @@ local function enqueue(opt)
 end
 
 local function openLast(opt)
-  print("last", vim.inspect(last))
   if last then
     vim.cmd("botright 50new")
     vim.api.nvim_set_current_buf(last.buf)
@@ -624,8 +619,6 @@ _G.stopCommandUnderTheCursor = function(opts)
       state.disowned = true
 
       if state.job_id then
-        print("state.job_id", state.job_id);
-
         vim.fn.chansend(state.job_id, "\3")
         vim.fn.chansend(state.job_id, "\3")
         vim.fn.chansend(state.job_id, "\3")

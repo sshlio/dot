@@ -55,8 +55,6 @@ function M.open_float20()
 
     local path = vim.fn.fnamemodify(line, ":p")
 
-    print("path: " .. path)
-
     M.close()
 
     vim.cmd.edit(vim.fn.fnameescape(path))
