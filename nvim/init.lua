@@ -2119,11 +2119,17 @@ vim.keymap.set('n', 'sD', _G.diff, { desc = "Show git diff of current file" })
 
 local function yank_keep_view(keys)
   local view = vim.fn.winsaveview()
+  local lazyredraw = vim.o.lazyredraw
 
-  vim.cmd.normal({ keys, bang = true, })
+  vim.o.lazyredraw = true
+  local ok, err = pcall(vim.cmd.normal, { keys, bang = true, })
+  vim.o.lazyredraw = lazyredraw
 
   vim.fn.winrestview(view)
-  print("restored")
+
+  if not ok then
+    error(err)
+  end
 end
 
 vim.keymap.set("n", "yip", function()
