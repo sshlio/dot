@@ -2145,3 +2145,15 @@ end, {
   silent = true,
   desc = "Yank whole buffer without moving view",
 })
+
+-- u like micro word
+vim.keymap.set({ "o", "x" }, "u", function()
+  local save = vim.bo.iskeyword
+
+  vim.opt_local.iskeyword = "48-57,65-90,97-122"  -- 0-9, A-Z, a-z only
+
+  vim.schedule(function()
+    vim.bo.iskeyword = save
+  end)
+  return "iw"
+end, { expr = true, desc = "a-Z inner word (letters only)" })

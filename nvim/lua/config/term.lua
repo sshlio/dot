@@ -581,6 +581,35 @@ local function moveAllExtmarksToLocationList()
   vim.cmd.lopen()
 end
 
+local function jumpToExtmark(direction, active_only)
+  local marks = vim.api.nvim_buf_get_extmarks(0, ns, 0, -1, {})
+  local cursor_row = vim.api.nvim_win_get_cursor(0)[1] - 1
+  local remaining = vim.v.count1
+
+  local index = direction > 0 and 1 or #marks
+  local limit = direction > 0 and #marks or 1
+
+  while direction > 0 and index <= limit or direction < 0 and index >= limit do
+    local mark = marks[index]
+    local state = extmarks:get(0, mark[1])
+    local is_target = direction > 0 and mark[2] > cursor_row
+        or direction < 0 and mark[2] < cursor_row
+    local is_included = not active_only
+        or state and not state.exited and not state.paused
+
+    if is_target and is_included then
+      remaining = remaining - 1
+
+      if remaining == 0 then
+        vim.api.nvim_win_set_cursor(0, { mark[2] + 1, mark[3] })
+        return
+      end
+    end
+
+    index = index + direction
+  end
+end
+
 local function markPaused()
   local buf = vim.api.nvim_get_current_buf()
   local linenr = vim.api.nvim_win_get_cursor(0)[1]
@@ -590,6 +619,7 @@ local function markPaused()
 
   state.ask = false
   state.paused = true
+
   changeExtmark(state, "...", PAUSE_HI, "", PAUSE_HI)
 end
 
@@ -618,6 +648,10 @@ _G.bindExecuteCommand = function(buffer)
   vim.keymap.set('n', 'se', executeQuiet, { desc = 'Execute quietly (close window)', buffer = buffer })
   vim.keymap.set('n', 'sC', clearAllExtmarks, { desc = 'Clear all extmarks and their terminal buffers', buffer = buffer })
   vim.keymap.set('n', 'qo', moveAllExtmarksToLocationList, { desc = 'Move execute command extmarks to location list', buffer = buffer })
+  vim.keymap.set('n', '[c', function() jumpToExtmark(-1, true) end, { desc = 'Jump to previous active execute command extmark', buffer = buffer })
+  vim.keymap.set('n', ']c', function() jumpToExtmark(1, true) end, { desc = 'Jump to next active execute command extmark', buffer = buffer })
+  vim.keymap.set('n', '[s', function() jumpToExtmark(-1, false) end, { desc = 'Jump to previous execute command extmark', buffer = buffer })
+  vim.keymap.set('n', ']s', function() jumpToExtmark(1, false) end, { desc = 'Jump to next execute command extmark', buffer = buffer })
   vim.keymap.set('n', 'qk', sendLineToFirstRunningAbove, { desc = 'Send line to first running command above', buffer = buffer })
   vim.keymap.set('n', 'qp', runParagraph, { desc = 'Run entire paragraph', buffer = buffer })
   vim.keymap.set('n', 'sp', markPaused, { desc = 'Mark command as paused', buffer = buffer })
@@ -713,12 +747,15 @@ _G.billy.nvr_commands.command_notify = function(state, command)
   if command.message == "working" then
     changeExtmark(state, "working...", "StatusLine", "", "TermRunInProgress")
     state.ask = false
+    state.paused = false
   elseif command.message == "ask" then
     changeExtmark(state, "Permission needed", ASK_HI, "󱚟", ASK_HI)
     state.ask = true
+    state.paused = false
   elseif command.message == "stopped" then
     changeExtmark(state, "Answered", "TermRunSuccess", "󱜙", "TermRunSuccess")
     state.ask = false
+    state.paused = true
   end
 end
 
@@ -732,15 +769,3 @@ _G.nvr = function(hash, command)
     return handler(state, msg)
   end
 end
-
--- u like micro word
-vim.keymap.set({ "o", "x" }, "u", function()
-  local save = vim.bo.iskeyword
-
-  vim.opt_local.iskeyword = "48-57,65-90,97-122"  -- 0-9, A-Z, a-z only
-
-  vim.schedule(function()
-    vim.bo.iskeyword = save
-  end)
-  return "iw"
-end, { expr = true, desc = "a-Z inner word (letters only)" })
