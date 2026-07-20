@@ -4,6 +4,9 @@
 local ns = vim.api.nvim_create_namespace('_billy_term')
 local answer_key_ns = vim.api.nvim_create_namespace('_billy_term_answer_key')
 local ASK_HI = "Question"
+local PAUSE_HI = "LineNr"
+
+vim.api.nvim_set_hl(0, PAUSE_HI, { default = true, link = "DiagnosticWarn" })
 
 local last = nil
 -- vim.keymap.set('t', '<esc>', '<C-\\><C-n>')
@@ -276,9 +279,10 @@ _G.executeCommandUnderTheCursor = function(opts)
       vim.api.nvim_set_current_buf(state.buf)
       vim.wo.winhighlight = "Normal:NormalFloat,CursorLine:FloatCursorLine"
 
-      if state.ask then
+      if state.ask or state.paused then
         changeExtmark(state, "answered...", "StatusLine", "", "TermRunInProgress")
         state.ask = false
+        state.paused = false
       end
 
       last = state
@@ -577,6 +581,18 @@ local function moveAllExtmarksToLocationList()
   vim.cmd.lopen()
 end
 
+local function markPaused()
+  local buf = vim.api.nvim_get_current_buf()
+  local linenr = vim.api.nvim_win_get_cursor(0)[1]
+  local state = extmarks:get_state_at_line(buf, linenr)
+
+  if not state then return end
+
+  state.ask = false
+  state.paused = true
+  changeExtmark(state, "...", PAUSE_HI, "", PAUSE_HI)
+end
+
 _G.bindExecuteCommand = function(buffer)
   vim.keymap.set('n', '<cr>', _G.executeCommandUnderTheCursor, { desc = 'Execute line in shell and paste output below', buffer = buffer })
   vim.keymap.set('n', 's<cr>', stopAndExecute, { desc = 'Execute line in shell and paste output below', buffer = buffer })
@@ -604,6 +620,7 @@ _G.bindExecuteCommand = function(buffer)
   vim.keymap.set('n', 'qo', moveAllExtmarksToLocationList, { desc = 'Move execute command extmarks to location list', buffer = buffer })
   vim.keymap.set('n', 'qk', sendLineToFirstRunningAbove, { desc = 'Send line to first running command above', buffer = buffer })
   vim.keymap.set('n', 'qp', runParagraph, { desc = 'Run entire paragraph', buffer = buffer })
+  vim.keymap.set('n', 'sp', markPaused, { desc = 'Mark command as paused', buffer = buffer })
 
 end
 
