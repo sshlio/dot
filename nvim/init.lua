@@ -7,9 +7,11 @@ _G.billy = {
   harness = "cl",
   nvr_commands = {},
 }
+
 _G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
 
 dofile(vim.env.HOME .. "/.config/nvim/init.local.lua")
+
 vim.opt.timeoutlen = 350    -- ms to wait for mapped sequence (default 1000)
 vim.opt.ttimeoutlen = 50    -- ms to wait for key code sequence (default 50)
 
@@ -25,6 +27,9 @@ vim.opt.grepprg = "rg --vimgrep --glob '!_billy' --glob '!CLAUDE.md'"
 vim.opt.complete = '.,w'
 vim.opt.completeopt = { 'menu', 'menuone', 'fuzzy' }
 vim.opt.shortmess = "asFqIAWTt"
+if vim.fn.has('nvim-0.13') == 1 then
+  vim.opt.shortmess:append('u')
+end
 
 _G.last_file = nil
 _G.last_line = nil
@@ -488,7 +493,6 @@ vim.keymap.set('o', 'l', '2l')
 vim.keymap.set('v', 'p', function()
   local reg = fn.getreg('+'):gsub("\n$", "")
 
-  -- print((not ), "--")
 
   if (not reg:match('\n')) then
     fn.setreg("x", reg)
@@ -521,7 +525,6 @@ end, { expr = true })
 -- vim.keymap.set('n', 'u', function()
 --   local count = vim.v.count1
 --   u.normal(count .. "u")
---   print("")
 -- end, { noremap = true, silent = true })
 
 
@@ -546,7 +549,6 @@ end)
 
 vim.keymap.set('n', 'sd', '<cmd>t.<cr>')
 vim.keymap.set('n', 'so', '<cmd>silent! w! | execute "luafile %"<cr>')
--- vim.keymap.set('n', 'se', function() print("--------") end)
 
 vim.keymap.set('x', 'Y', function()
   u.normal("y")
@@ -675,7 +677,6 @@ function _G.mark(name)
     if cleanupTmpBuf or not buf_id then
       -- If opened new window go to random terminal
       -- It fixes werid cursor moves
-      print("Opened new window")
       vim.cmd.term("nu")
     end
 
@@ -1011,9 +1012,6 @@ local function put(txt)
     local spaces = cur_indent % tabstop
     indent_str = string.rep("\t", tabs) .. string.rep(" ", spaces)
   end
-
-  -- print("cuur_indent\n\n", cur_indent)
-  -- print("indent_str:", "[" .. indent_str .. "]")
 
   local lines = map(lines, function(l)
     return indent_str .. l
@@ -1549,7 +1547,6 @@ vim.api.nvim_create_autocmd({"CursorHold"}, {
   callback = function(event)
     pcall(vim.cmd, "silent! write!")
     -- Clean status line..
-    print("")
   end,
 })
 
@@ -1576,9 +1573,9 @@ if not vim.wo.diff then
 end
 
 once("windows_cd", function()
-  print(vim.fn.getcwd())
-
   if is_windows then
+    print(vim.fn.getcwd())
+
     vim.api.nvim_set_current_dir("C:\\Users\\lasek\\p\\Dotfiles")
   end
 end)
