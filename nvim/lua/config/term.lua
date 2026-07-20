@@ -220,8 +220,6 @@ vim.api.nvim_create_autocmd("BufEnter", {
 
 
 -- Snips
-vim.keymap.set('t', ']c', '/clear')
-vim.keymap.set('t', ']m', '/compact')
 vim.keymap.set('t', '<cr>', '<cr>')
 
 -- Execute current line in shell and paste output below (streaming)
@@ -602,6 +600,14 @@ local function jumpToExtmark(direction, active_only)
 
       if remaining == 0 then
         vim.api.nvim_win_set_cursor(0, { mark[2] + 1, mark[3] })
+
+        local target = mark[2]
+        local last_line = vim.api.nvim_buf_line_count(0)
+
+        if target >= last_line - 12 then
+          vim.cmd('normal! zz')
+        end
+
         return
       end
     end
