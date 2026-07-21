@@ -9,17 +9,12 @@ local PAUSE_HI = "LineNr"
 vim.api.nvim_set_hl(0, PAUSE_HI, { default = true, link = "DiagnosticWarn" })
 
 local last = nil
--- vim.keymap.set('t', '<esc>', '<C-\\><C-n>')
-vim.keymap.set('t', '<c-e>', '<C-\\><C-n>kj0f l')
-vim.keymap.set('t', '<c-e>', '<C-\\><C-n>kj0f l')
-vim.keymap.set('t', '<left>', '<C-\\><C-n><c-w>W')
 
--- local last_file = nil
--- local last_line = nil
--- local last_linenumber = nil
+vim.keymap.set('t', '<c-e>', '<C-\\><C-n>kj0f l')
+vim.keymap.set('t', '<c-e>', '<C-\\><C-n>kj0f l')
+
 local bufState = {}
 local spins = { "" }
--- local spins = { "", "", "", "", "", "" }
 local timer = vim.loop.new_timer()
 
 local ExtmarkState = require('config.extmark')
@@ -603,10 +598,34 @@ local function jumpToExtmark(direction, active_only)
 
         local target = mark[2]
         local last_line = vim.api.nvim_buf_line_count(0)
+        local win = vim.api.nvim_get_current_win()
+        local win_top = vim.fn.win_screenpos(win)[1]
+        local last_line_screen_row = vim.fn.screenpos(win, last_line, 1).row
+        local last_line_is_raised = last_line_screen_row > 0
+            and vim.api.nvim_win_get_height(win) - (last_line_screen_row - win_top + 1) >= 10
 
-        if target >= last_line - 12 then
+        if target >= last_line - 12 and not last_line_is_raised then
           vim.cmd('normal! zz')
         end
+
+        local command_index = 0
+        local command_count = 0
+
+        for _, candidate in ipairs(marks) do
+          local candidate_state = extmarks:get(0, candidate[1])
+          local is_included = not active_only
+              or candidate_state and not candidate_state.exited and not candidate_state.paused
+
+          if is_included then
+            command_count = command_count + 1
+
+            if candidate[1] == mark[1] then
+              command_index = command_count
+            end
+          end
+        end
+
+        print(('Command [%d/%d]'):format(command_index, command_count))
 
         return
       end
@@ -614,6 +633,8 @@ local function jumpToExtmark(direction, active_only)
 
     index = index + direction
   end
+
+  print(direction > 0 and 'End of file' or 'Start of file')
 end
 
 local function markPaused()

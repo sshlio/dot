@@ -9,6 +9,7 @@ _G.billy = {
 }
 
 _G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
+_G.is_open_mode = vim.fn.argc() > 0
 
 dofile(vim.env.HOME .. "/.config/nvim/init.local.lua")
 
@@ -1566,7 +1567,7 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#454545", bg = "NONE" })
 vim.opt.fillchars:append { vert = '│' }
 
-if not vim.wo.diff then
+if (not vim.wo.diff) and (not _G.is_open_mode) then
   once("startup-script", function()
     vim.schedule(function() pcall(vim.cmd.normal, "`Ag;") end)
   end)
@@ -2154,3 +2155,8 @@ vim.keymap.set({ "o", "x" }, "u", function()
   end)
   return "iw"
 end, { expr = true, desc = "a-Z inner word (letters only)" })
+
+if _G.is_open_mode then
+  vim.keymap.set('n', '<c-c>', ':qa!<cr>')
+  vim.keymap.set('n', '<c-s>', ':x<cr>')
+end
