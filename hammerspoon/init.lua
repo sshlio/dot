@@ -3,16 +3,23 @@
 G = {}
 
 print("V13")
-require("hs.ipc")
+-- require("hs.ipc")
 
 local load = function(name)
-  local ok, err = pcall(dofile, hs.spoons.resourcePath(name .. ".lua"))
+  local path = hs.spoons.resourcePath(name .. ".lua")
+  if not hs.fs.attributes(path) then
+    print("SKIP missing ", name)
+    return
+  end
+
+  local ok, err = pcall(dofile, path)
   if not ok then
     print("ERROR loading ", name)
     print(err)
   end
 end
 
+load("local")
 load("layer")
 load("signal")
 load("signal.test")
