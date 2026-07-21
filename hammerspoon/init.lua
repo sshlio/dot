@@ -1,6 +1,24 @@
 -- ~/.hammerspoon/init.lua
 
+G = {}
+
 print("V13")
+require("hs.ipc")
+
+local load = function(name)
+  local ok, err = pcall(dofile, hs.spoons.resourcePath(name .. ".lua"))
+  if not ok then
+    print("ERROR loading ", name)
+    print(err)
+  end
+end
+
+load("layer")
+load("signal")
+load("signal.test")
+load("chrome")
+----
+
 
 -- Page Down/Up scroll step size (pixels per key press)
 local pageScrollStep = 550
@@ -28,59 +46,7 @@ function filter(tbl, predicate)
 end
 
 local function chrome(work)
-  print("==============")
-  print("CHROME")
-  print("==============")
-
-  local chrome = hs.application.get("Google Chrome")
-
-  if not chrome then
-    hs.application.launchOrFocus("Google Chrome")
-    return
-  end
-
-  local windows = chrome:visibleWindows()
-
-  local wins = {}
-
-  print("----------------")
-  print("----------------")
-  print("")
-
-  for i, win in ipairs(windows) do
-
-    if win:isMaximizable() then
-      print("----------------", idx)
-      print("title:", win:title():lower())
-
-      local private = (win:title():lower():find("private%)?$") ~= nil)
-      print("private:", private)
-
-      table.insert(wins, {
-        private = private,
-        win = win,
-      })
-    end
-  end
-
-  if work then
-    local win = filter(wins, function(w) return not w.private end)[1]
-
-    print("Found win", win.win:title())
-
-    if win then
-      win.win:focus()
-      win.win:focus()
-    end
-  else
-    print("------ Show private")
-    local win = filter(wins, function(w) return w.private end)[1]
-
-    win.win:focus()
-    win.win:focus()
-  end
-
-  -- hs.application.launchOrFocus("Google Chrome")
+  Chrome:focus(work)
 end
 
 -- Create the scroll event watcher
@@ -200,31 +166,13 @@ button4Watcher = eventtap.new({ eventTypes.otherMouseDown }, function(event)
   return false
 end)
 
--- myTap = hs.eventtap.new( { eventTypes.gesture }, function(e)
---   local gestureType = e:getTouches()
---
---   if #gestureType == 0 then
---     return false
---   end
---
---   if #gestureType == 2 then
---     scrollWatcher:stop()
---     return false
---   end
---
---   scrollWatcher:start()
---   touches = #gestureType
--- end)
-
 hs.hotkey.bind({"cmd"}, "1", function()
   hs.application.launchOrFocus("kitty")
 end)
 
--- hs.hotkey.bind({"cmd"}, "space", function()
---   hs.application.launchOrFocus("kitty")
---
---   hs.eventtap.keyStroke({"ctrl"}, "y")
--- end)
+hs.hotkey.bind({"cmd"}, "1", function()
+  hs.application.launchOrFocus("kitty")
+end)
 
 seschs = hs.hotkey.bind({"cmd"}, "§", function()
   hs.eventtap.keyStroke({"cmd"}, "`")
@@ -238,30 +186,23 @@ hs.hotkey.bind({"shift"}, "§", function()
   hs.eventtap.keyStroke({"shift"}, "`", 0)
 end)
 
-hs.hotkey.bind({"cmd"}, ";", function()
+Layer:bind({"cmd"}, ";", function()
   hs.eventtap.keyStroke({}, "Escape")
 end)
 
-hs.hotkey.bind({"cmd"}, "3", function()
-  hs.application.launchOrFocus("Slack")
+Layer:bind({"cmd"}, "3", function()
+  if not hs.application.launchOrFocus("Slack") then
+    hs.application.launchOrFocus("Messages")
+  end
 end)
 
-hs.hotkey.bind({"cmd"}, "2", function()
+Layer:bind({"cmd"}, "2", function()
   chrome(true)
 end)
 
-hs.hotkey.bind({"cmd"}, "4", function()
+Layer:bind({"cmd"}, "4", function()
   chrome(false)
 end)
-
-
-configWatcher = hs.pathwatcher.new(
-  hs.configdir,                     -- usually "~/.hammerspoon"
-  function(files)
-    hs.reload()
-  end
-):start()
-
 
 hs.hotkey.bind({"cmd"}, "l", function()
   hs.eventtap.keyStroke({}, "right")
@@ -435,3 +376,17 @@ hs.hotkey.bind({"cmd"}, "'", function()
 
   hs.eventtap.keyStroke({"control"}, "p", 0, hs.application.get("kitty"))
 end)
+
+
+--
+-- capsLayer:bind({}, "h", function()
+--   hs.eventtap.keyStroke({}, "left")
+-- end)
+
+-- capsLayerTrigger = hs.hotkey.bind(
+--   {}, "f18",
+--   function() capsLayer:enter() end,
+--   function() capsLayer:exit() end
+-- )
+
+Layer:enter()

@@ -17,6 +17,7 @@ local bufState = {}
 local spins = { "" }
 local timer = vim.loop.new_timer()
 
+
 local ExtmarkState = require('config.extmark')
 
 local extmarks = ExtmarkState.new(ns)
