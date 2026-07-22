@@ -1,13 +1,11 @@
 local frontmostApplication = hs.application.frontmostApplication()
 local app = Signal.new(frontmostApplication and frontmostApplication:name() or "unknown"):memo()
 
-
 applicationWatcher = hs.application.watcher.new(function(name, event)
   if event == hs.application.watcher.activated then
     app:set(name)
   end
 end)
-
 applicationWatcher:start()
 
 
@@ -28,22 +26,15 @@ G.mappings["Google Chrome"] = {
   ["d"] = function() hs.alert.show("hyper+d is free to take") end,
   ["a"] = function() hs.alert.show("hyper+a is free to take") end,
   ["e"] = function() hs.alert.show("hyper+e is free to take") end,
+  ["i"] = function() hs.eventtap.keyStroke({ "cmd", "alt" }, "i") end,
+  ["j"] = function() hs.eventtap.keyStroke({ "cmd", "alt" }, "j") end,
 };
 
 
 G.mapping = {}
 
-local mappint = app:map(function(appName)
+app:map(function(appName)
   G.mapping = G.mappings[appName] or G.mappings.default
 
   return G.mapping
 end)
-
-mappint:log("mapping")
-
--- local keyboardName = Signal.new("unknown")
--- local combined = Signal.mapN(function(one, two) return { one, two } end, app:memo(), keyboardName)
---
--- keyboardName:set("Logitch")
---
--- combined:log("combined")
