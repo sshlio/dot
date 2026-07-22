@@ -2,6 +2,16 @@ Chrome = {}
 
 local app = "Google Chrome"
 
+function filter(tbl, predicate)
+  local out = {}
+  for i, v in ipairs(tbl) do
+    if predicate(v, i, tbl) then
+      table.insert(out, v)
+    end
+  end
+  return out
+end
+
 function Chrome:focus(work)
   local chrome = hs.application.get(app)
 
@@ -19,7 +29,6 @@ function Chrome:focus(work)
   print("")
 
   for i, win in ipairs(windows) do
-
     if win:isMaximizable() then
       print("----------------", idx)
       print("title:", win:title():lower())

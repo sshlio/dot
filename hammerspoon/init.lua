@@ -3,7 +3,7 @@
 G = {}
 
 print("V13")
--- require("hs.ipc")
+require("hs.ipc")
 
 local load = function(name)
   local path = hs.spoons.resourcePath(name .. ".lua")
@@ -24,8 +24,8 @@ load("layer")
 load("signal")
 load("signal.test")
 load("chrome")
-----
 
+---- - - - - ------
 
 -- Page Down/Up scroll step size (pixels per key press)
 local pageScrollStep = 550
@@ -40,17 +40,6 @@ local scrollThreshold = 15
 
 local lastScrollTime = 1
 local cooldown = 0.3
-local touches = 0
-
-function filter(tbl, predicate)
-  local out = {}
-  for i, v in ipairs(tbl) do
-    if predicate(v, i, tbl) then
-      table.insert(out, v)
-    end
-  end
-  return out
-end
 
 local function chrome(work)
   Chrome:focus(work)
@@ -58,55 +47,25 @@ end
 
 -- Create the scroll event watcher
 scrollWatcher = eventtap.new({eventTypes.scrollWheel}, function(e)
+  local continuous = e:getProperty(
+    eventtap.event.properties.scrollWheelEventIsContinuous
+  )
+
+  if continuous ~= 0 then
+    return false -- leave trackpad scrolling untouched
+  end
+
   local mods = e:getFlags()
 
   local delta = e:getProperty(hs.eventtap.event.properties.scrollWheelEventDeltaAxis2)
-  local deltaY = e:getProperty(hs.eventtap.event.properties.scrollWheelEventDeltaAxis1)
-
 
   local now = hs.timer.secondsSinceEpoch()
 
   if now - lastScrollTime < cooldown then
-    if delta == 0 and deltaY ==0 then
-      return true
-    end
-
-    -- lastScrollTime = now - 0.1
-
-    -- print("HIT coolodow", delta, deltaY)
     return true
   end
 
-  -- print("diff", now - lastScrollTime)
-
-  if touches >= 3 then
-    -- hs.eventtap.keyStroke({"cmd", "shift"}, "[", 0)
-    delta = delta *15 * -1
-    -- print("Three finger", delta, deltaY)
-
-    if delta == 0 and deltaY < 0 then
-      hs.eventtap.middleClick(hs.mouse.absolutePosition())
-
-      lastScrollTime = now
-
-      return true
-    end
-
-    if delta == 0 and deltaY > 0 then
-      hs.eventtap.keyStroke({"cmd"}, "w", 0)
-
-
-      lastScrollTime = now
-
-      return true
-    end
-
-  end
-
   if delta == 0 then
-    if touches >=3 then
-      return true
-    end
     return false
   end
 
@@ -204,11 +163,11 @@ Layer:bind({"cmd"}, "3", function()
 end)
 
 Layer:bind({"cmd"}, "2", function()
-  chrome(true)
+  Chrome:focus(true)
 end)
 
 Layer:bind({"cmd"}, "4", function()
-  chrome(false)
+  Chrome:focus(false)
 end)
 
 hs.hotkey.bind({"cmd"}, "l", function()
@@ -322,57 +281,10 @@ end)
 w:start()
 scrollWatcher:start()
 button4Watcher:start()
--- myTap:start()
 
 -- "world "
 -- "world "
 -- "world "
-
-local function checkUSBMouse()
-    local devices = hs.usb.attachedDevices()
-    local found = false
-
-    for _, dev in ipairs(devices) do
-        local name = dev.productName or "unknown"
-        local vendor = dev.vendorName or "unknown"
-
-        print(string.format("[USB] device=%s vendor=%s", name, vendor))
-
-        if name:lower():find("mouse") then
-            found = true
-        end
-
-        if vendor:lower():find("logitech") then
-            found = true
-        end
-    end
-
-    print("[USB] Mouse present:", found)
-    if found then
-      scrollWatcher:start()
-    else
-      scrollWatcher:stop()
-    end
-    return found
-end
-
-
-local usbWatcher = hs.usb.watcher.new(function(data)
-    if data.eventType ~= "added" and data.eventType ~= "removed" then return end
-
-    print(string.format(
-        "[USB] event=%s product=%s vendor=%s",
-        data.eventType,
-        data.productName or "unknown",
-        data.vendorName or "unknown"
-    ))
-
-    checkUSBMouse()
-end)
-
-checkUSBMouse()
-
-usbWatcher:start()
 
 hs.urlevent.bind("chrome", function(_, params)
   chrome(false)
