@@ -334,6 +334,9 @@ vim.keymap.set("x", "<c-a>", "<c-a>gv", { noremap = true, silent = true })
 -- 2
 
 vim.keymap.set({'n', 't'}, '<c-w>', function()
+  if #vim.api.nvim_tabpage_list_wins(0) == 1 then
+    return
+  end
   if vim.wo.diff then
     vim.cmd.wincmd('h')
     vim.cmd.wincmd('h')
@@ -1198,7 +1201,7 @@ end)
 
 
 vim.keymap.set('n', '<c-g>', '<cmd>m $<cr>OG', { remap = true })
-vim.keymap.set('v', '<d-g>', '<cmd>m $<cr>OG', { remap = true })
+vim.keymap.set('x', '<d-g>', ":'<,'>m $<cr>")
 
 -- xnushell
 u.ft({ "nu", "bash", "sh" }, function(buffer)
@@ -1295,7 +1298,9 @@ local before = ""
 --   desc = "Print first line of yanked text (truncated to 100 chars)"
 -- })
 
-vim.keymap.set({'o', 'x'}, 'il', ':<C-u>normal! ^vg_<CR>', { silent = true, desc = 'Inner line' })
+vim.keymap.set({'o', 'x'}, 'il', ':<C-u>normal! ^vg_<CR>', {
+   silent = true, desc = 'Inner line'
+})
 
 local function ii(reverse, inner)
   local cur_indent = vim.fn.indent(".")
@@ -2157,6 +2162,6 @@ vim.keymap.set({ "o", "x" }, "u", function()
 end, { expr = true, desc = "a-Z inner word (letters only)" })
 
 if _G.is_open_mode then
-  vim.keymap.set('n', '<c-c>', ':qa!<cr>')
-  vim.keymap.set('n', '<c-s>', ':x<cr>')
+  vim.keymap.set({ 'i', 'n' }, '<c-c>', ':qa!<cr>')
+  vim.keymap.set({ 'i', 'n' }, '<c-s>', ':x<cr>')
 end

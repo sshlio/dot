@@ -223,6 +223,7 @@ vim.keymap.set('t', '<cr>', '<cr>')
 _G.__term_envs = {
    __NVIM_VER = "1",
    PAGER = "cat",
+   EDITOR = "nvim",
 }
 
 local lastExtmark = nil
@@ -545,23 +546,37 @@ local function runParagraph()
   callNext.cb()
 end
 
-local function moveAllExtmarksToLocationList()
+local function moveAllExtmarksToLocationList(active_only)
   local buf = vim.api.nvim_get_current_buf()
   local marks = vim.api.nvim_buf_get_extmarks(buf, ns, 0, -1, {})
+  local cursor_lnum = vim.api.nvim_win_get_cursor(0)[1]
   local items = {}
+  local nearest_index
+  local nearest_distance
 
   for _, mark in ipairs(marks) do
     local extmark_id = mark[1]
     local lnum = mark[2] + 1
     local col = mark[3] + 1
     local state = extmarks:get(buf, extmark_id)
+    local is_included = not active_only
+        or state and not state.exited and not state.paused
 
-    table.insert(items, {
-      bufnr = buf,
-      lnum = lnum,
-      col = col,
-      text = vim.api.nvim_buf_get_lines(buf, lnum - 1, lnum, false)[1] or "",
-    })
+    if is_included then
+      local distance = math.abs(lnum - cursor_lnum)
+
+      table.insert(items, {
+        bufnr = buf,
+        lnum = lnum,
+        col = col,
+        text = vim.api.nvim_buf_get_lines(buf, lnum - 1, lnum, false)[1] or "",
+      })
+
+      if not nearest_distance or distance < nearest_distance then
+        nearest_index = #items
+        nearest_distance = distance
+      end
+    end
   end
 
   if #items == 0 then
@@ -572,6 +587,7 @@ local function moveAllExtmarksToLocationList()
     title = "Executed commands",
     items = items,
   })
+  vim.fn.setloclist(0, {}, "a", { idx = nearest_index })
   vim.cmd.lopen()
 end
 
@@ -675,7 +691,8 @@ _G.bindExecuteCommand = function(buffer)
   end, { desc = 'Stop commands and delete selection', buffer = buffer })
   vim.keymap.set('n', 'se', executeQuiet, { desc = 'Execute quietly (close window)', buffer = buffer })
   vim.keymap.set('n', 'sC', clearAllExtmarks, { desc = 'Clear all extmarks and their terminal buffers', buffer = buffer })
-  vim.keymap.set('n', 'qo', moveAllExtmarksToLocationList, { desc = 'Move execute command extmarks to location list', buffer = buffer })
+  vim.keymap.set('n', 'qo', function() moveAllExtmarksToLocationList(true) end, { desc = 'Move active execute command extmarks to location list', buffer = buffer })
+  vim.keymap.set('n', 'qO', moveAllExtmarksToLocationList, { desc = 'Move all execute command extmarks to location list', buffer = buffer })
   vim.keymap.set('n', '[c', function() jumpToExtmark(-1, true) end, { desc = 'Jump to previous active execute command extmark', buffer = buffer })
   vim.keymap.set('n', ']c', function() jumpToExtmark(1, true) end, { desc = 'Jump to next active execute command extmark', buffer = buffer })
   vim.keymap.set('n', '[s', function() jumpToExtmark(-1, false) end, { desc = 'Jump to previous execute command extmark', buffer = buffer })
