@@ -19,8 +19,9 @@ local load = function(name)
   end
 end
 
-load("local")
 load("signal")
+load("local")
+load("ui")
 load("layer")
 load("signal.test")
 load("chrome")
@@ -308,4 +309,4 @@ end)
 --   function() capsLayer:exit() end
 -- )
 
-Layer:enter()
+ActiveLayer:set(Layer)

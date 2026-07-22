@@ -1,50 +1,60 @@
 Layer = hs.hotkey.modal.new()
+SudoLayer = hs.hotkey.modal.new()
 
-local nextKeybindTap
+SudoLayer.name = "SudoLayer"
+Layer.name = "Layer"
 
-local borderSignal = Signal.new(false)
+ActiveLayer = Signal.new(nil)
 
-local border = nil
+ActiveLayer:map(function(l) return l and l.name end):log("ActiveLayer")
 
-borderSignal:log("border")
-
-borderSignal:listen(function(val)
-  if border then
-    border:delete()
-    border = nil
+ActiveLayer:resource(function(layer)
+  if not layer then
+    return function()  end
   end
 
-  if not val then
-    return
+  print('Entering layer', layer.name)
+  layer:enter()
+
+  return function()
+    print('Exiting layer', layer.name)
+    layer:exit()
   end
-
-  local screenFrame = hs.screen.mainScreen():fullFrame()
-
-  local borderWidth = 4
-
-  border = hs.canvas.new(screenFrame):appendElements({
-    type = "rectangle",
-    action = "stroke",
-    strokeColor = val,
-    strokeWidth = borderWidth,
-    frame = {
-      x = borderWidth / 2,
-      y = borderWidth / 2,
-      w = screenFrame.w - borderWidth,
-      h = screenFrame.h - borderWidth,
-    },
-  }):show()
 end)
 
-Layer:bind({"cmd", "shift"}, ";", function()
-  Layer:exit()
+function raw()
+  ActiveLayer:set(nil)
 
   hs.alert("Raw input")
 
-  borderSignal:set({ red = 0.8, green = 0.2 })
+  ScreenBorder:set({ red = .77, alpha = .7 })
 
   timer = hs.timer.doAfter(3, function()
-    borderSignal:set(false)
-    Layer:enter()
+    ScreenBorder:set(false)
+    ActiveLayer:set(Layer)
   end)
+end
+
+SudoLayer:bind({"cmd"}, ';', function()
+  ActiveLayer:set(Layer)
+  ScreenBorder:set(false)
 end)
+
+SudoLayer:bind({}, 'r', raw)
+
+SudoLayer:bind({"shift"}, 'q', function()
+  local app = hs.application.frontmostApplication()
+
+  if app then
+    app:kill9()
+  end
+
+  hs.alert("force killed")
+end)
+
+Layer:bind({"cmd"}, "q", function()
+  ActiveLayer:set(SudoLayer)
+
+  ScreenBorder:set({ green = .77, alpha = .7 })
+end)
+

@@ -155,3 +155,12 @@ function Signal.mapN(first, ...)
 
   return mapped
 end
+
+function Signal:resource(fn)
+  local prev = function() end
+
+  self:listen(function(val)
+    prev()
+    prev = fn(val)
+  end)
+end
