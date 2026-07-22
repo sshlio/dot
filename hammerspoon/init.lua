@@ -20,8 +20,8 @@ local load = function(name)
 end
 
 load("local")
-load("layer")
 load("signal")
+load("layer")
 load("signal.test")
 load("chrome")
 
