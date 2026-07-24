@@ -51,7 +51,33 @@ SudoLayer:bind({}, 'f', function()
   local window = hs.window.focusedWindow()
 
   if window then
-    window:setFrame(window:screen():frame(), 0)
+    local screenFrame = window:screen():frame()
+    local appName = window:application():name()
+
+    local floatingApps = {
+      ["1Password"] = true,
+      ["Messages"] = true,
+      ["Reminders"] = true,
+      ["Things"] = true,
+    }
+
+    if floatingApps[appName] then
+      local width = math.min(screenFrame.w, 1800)
+      local height = math.min(screenFrame.h, 1200)
+      local xRoom = math.floor((screenFrame.w - width) / 2)
+      local yRoom = math.floor((screenFrame.h - height) / 2)
+      local xOffset = math.random(-math.min(xRoom, 50), math.min(xRoom, 50))
+      local yOffset = math.random(-math.min(yRoom, 50), math.min(yRoom, 50))
+
+      window:setFrame({
+        x = screenFrame.x + (screenFrame.w - width) / 2 + xOffset,
+        y = screenFrame.y + (screenFrame.h - height) / 2 + yOffset,
+        w = width,
+        h = height,
+      }, 0)
+    else
+      window:setFrame(screenFrame, 0)
+    end
   end
 end)
 

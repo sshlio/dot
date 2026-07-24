@@ -98,6 +98,52 @@ def colorp --wrapped [colred, ...msg] {
   print $"(ansi $colred)($msg | str join ' ')(ansi reset)"
 }
 
+def hsl2rgb [hue: number, saturation: number, lightness: number] {
+  let h = ((($hue mod 360) + 360) mod 360)
+  let s = $saturation / 100
+  let l = $lightness / 100
+  let chroma = (1 - ((2 * $l - 1) | math abs)) * $s
+  let sector = $h / 60
+  let x = $chroma * (1 - ((($sector mod 2) - 1) | math abs))
+
+  let base = match ($sector | math floor) {
+    0 => [$chroma $x 0]
+    1 => [$x $chroma 0]
+    2 => [0 $chroma $x]
+    3 => [0 $x $chroma]
+    4 => [$x 0 $chroma]
+    _ => [$chroma 0 $x]
+  }
+
+  let offset = $l - $chroma / 2
+
+  {
+    r: (($base.0 + $offset) * 255 | math round | into int)
+    g: (($base.1 + $offset) * 255 | math round | into int)
+    b: (($base.2 + $offset) * 255 | math round | into int)
+  }
+}
+
+def colorful [] {
+  let value = $in
+  let type = $value | describe
+
+  if ($type == "nothing") or ($type == "bool") or ($type | str starts-with "record") {
+    return $value
+  }
+
+  if ($type == "string") and ($value == "") {
+    return $value
+  }
+
+  let text = $value | into string
+  let digest = $text | hash sha256 | str substring 0..7
+  let hue = (($"0x($digest)" | into int) mod 360)
+  let rgb = hsl2rgb $hue 38 70
+
+  $"(ansi --escape $'38;2;($rgb.r);($rgb.g);($rgb.b)m')($text)(ansi reset)"
+}
+
 def nb [branch] {
   try {
     git checkout $branch
@@ -150,9 +196,9 @@ def ucfirst [s] {
 
 def whatever [command: closure] {
   try {
-    do $command
+    let output = do $command
 
-    return { success: true }
+    return { success: true, output: $output }
   } catch { |err|
     return { success: false, err: $err }
   }
