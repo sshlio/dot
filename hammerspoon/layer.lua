@@ -56,6 +56,7 @@ SudoLayer:bind({}, 'f', function()
 
     local floatingApps = {
       ["1Password"] = true,
+      ["Calendar"] = true,
       ["Messages"] = true,
       ["Reminders"] = true,
       ["Things"] = true,
