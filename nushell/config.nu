@@ -242,6 +242,3 @@ def pp [path?: string@"p-path-compl"] {
 def boostrap [] {
   project Dotfiles
 }
-
-
-

@@ -176,6 +176,8 @@ local once = function(id, fn)
   return _G.__once_flags[id].result
 end
 
+_G.once = once
+
 function normalizedVisual(command, wrap, inversed)
   if wrap == nil then wrap = true end
 

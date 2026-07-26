@@ -13,10 +13,9 @@ local last = nil
 vim.keymap.set('t', '<c-e>', '<C-\\><C-n>kj0f l')
 vim.keymap.set('t', '<c-e>', '<C-\\><C-n>kj0f l')
 
-local bufState = {}
-local spins = { "" }
-local timer = vim.loop.new_timer()
+local bufState = once("term_bufstate", function() return {} end)
 
+local timer = vim.loop.new_timer()
 
 local ExtmarkState = require('config.extmark')
 
@@ -673,6 +672,11 @@ _G.bindExecuteCommand = function(buffer)
   vim.keymap.set('n', 'q<cr>', function() stopAndExecute({ silent = true }) end, { desc = 'Execute line in shell and paste output below', buffer = buffer })
   vim.keymap.set('n', 'qn', function() enqueue() end, { desc = 'Execute line in shell and paste output below', buffer = buffer })
   vim.keymap.set('n', 'sc', _G.stopCommandUnderTheCursor, { desc = 'Stop command and clear extmark', buffer = buffer })
+  vim.keymap.set('n', '<c-c>', function()
+    if not _G.stopCommandUnderTheCursor() then
+      vim.cmd.normal('gcc')
+    end
+  end, { desc = 'Stop command and toggle comment', buffer = buffer })
   vim.keymap.set('n', 'dd', function()
     local line = vim.api.nvim_win_get_cursor(0)[1]
 
@@ -726,7 +730,10 @@ _G.stopCommandUnderTheCursor = function(opts)
     end
 
     extmarks:clear(state)
+    return true
   end
+
+  return false
 end
 
 
