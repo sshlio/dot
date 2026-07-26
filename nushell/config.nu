@@ -55,7 +55,19 @@ $env.config = {
       modifier: control
       keycode: char_v
       mode: vi_insert
-      event: { edit: pastecutbufferbefore }
+      event: {
+        send: ExecuteHostCommand
+        cmd: 'commandline edit --insert (pbpaste)'
+      }
+    }
+    {
+      modifier: super
+      keycode: char_v
+      mode: vi_insert
+      event: {
+        send: ExecuteHostCommand
+        cmd: 'commandline edit --insert (pbpaste)'
+      }
     }
 
     {
