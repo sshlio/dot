@@ -83,6 +83,12 @@ $env.config = {
       mode: vi_insert
       event: { send: ExecuteHostCommand, cmd: 'exit' }
     }
+    {
+      modifier: super
+      keycode: char_w
+      mode: vi_insert
+      event: { send: ExecuteHostCommand, cmd: 'exit' }
+    }
 
     {
       modifier: super
