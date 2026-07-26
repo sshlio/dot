@@ -24,17 +24,17 @@ function Chrome:focus(work)
 
   local wins = {}
 
-  print("----------------")
-  print("----------------")
-  print("")
+  -- print("----------------")
+  -- print("----------------")
+  -- print("")
 
   for i, win in ipairs(windows) do
     if win:isMaximizable() then
-      print("----------------", idx)
-      print("title:", win:title():lower())
+      -- print("----------------", idx)
+      -- print("title:", win:title():lower())
 
       local private = (win:title():lower():find("private%)?$") ~= nil)
-      print("private:", private)
+      -- print("private:", private)
 
       table.insert(wins, {
         private = private,
