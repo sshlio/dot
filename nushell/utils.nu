@@ -125,6 +125,31 @@ def hsl2rgb [hue: number, saturation: number, lightness: number] {
   }
 }
 
+def "color hex2rgb" [color: string] {
+  let hex = $color | str replace --regex '^#' ''
+
+  if $hex !~ '^[0-9a-fA-F]{6}$' {
+    error make {msg: $"invalid RGB hex color: ($color)"}
+  }
+
+  {
+    r: ($"0x($hex | str substring 0..<2)" | into int)
+    g: ($"0x($hex | str substring 2..<4)" | into int)
+    b: ($"0x($hex | str substring 4..<6)" | into int)
+  }
+}
+
+def "ansi rgb" [color] {
+  let text = $in
+  let rgb = if ($color | describe) == "string" {
+    color hex2rgb $color
+  } else {
+    $color
+  }
+
+  $"(ansi --escape $'38;2;($rgb.r);($rgb.g);($rgb.b)m')($text)(ansi reset)"
+}
+
 def colorful [] {
   let value = $in
   let type = $value | describe
@@ -142,7 +167,7 @@ def colorful [] {
   let hue = (($"0x($digest)" | into int) mod 360)
   let rgb = hsl2rgb $hue 38 70
 
-  $"(ansi --escape $'38;2;($rgb.r);($rgb.g);($rgb.b)m')($text)(ansi reset)"
+  $text | ansi rgb $rgb
 }
 
 def nb [branch] {
@@ -936,3 +961,4 @@ def "from epoch" [] { $in | into datetime -f '%s' }
 def "from entries" [] { $in | transpose -d -r }
 
 def "from jsonl" [] { $in | lines | each { $in | from json }}
+

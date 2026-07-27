@@ -622,7 +622,7 @@ local buffersCache = once("buffersCache", function() return {} end)
 
 -- Commands to run for specific terminal marks
 local termCommands = {
-  y = "y" -- yazi
+  Y = "y" -- yazi
 }
 
 local defaultMarks = {
