@@ -6,6 +6,7 @@ vim.api.nvim_create_augroup('_billy_file', { clear = true })
 _G.billy = {
   harness = "cl",
   nvr_commands = {},
+  term_env = {},
 }
 
 _G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
@@ -683,7 +684,11 @@ function _G.mark(name)
     if cleanupTmpBuf or not buf_id then
       -- If opened new window go to random terminal
       -- It fixes werid cursor moves
-      vim.cmd.term("nu")
+      local term_env = _G.billy.term_env[name]
+      vim.fn.jobstart({ "nu" }, {
+        term = true,
+        env = term_env,
+      })
     end
 
 
