@@ -4,6 +4,12 @@
 source ~/.config/nushell/boot.nu
 source ~/.config/nushell/git.nu
 
+def --wrapped open [...args] {
+  ^open ...$args
+}
+
+alias opn = %open
+
 $env.config.table.mode = "light"
 
 $env.DOCKER_BUILDKIT_PROGRESS = "plain"
@@ -66,11 +72,6 @@ def rv [path] {
   app Finder
   ^open -R ($path | path expand);
 }
-
-def --wrapped opn [...args] {
-  /usr/bin/open ...$args
-}
-
 
 def pull [] {
   git pull
