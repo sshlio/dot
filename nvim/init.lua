@@ -1212,7 +1212,6 @@ vim.keymap.set('x', '<d-g>', ":'<,'>m $<cr>")
 
 -- xnushell
 u.ft({ "nu", "bash", "sh" }, function(buffer)
-
   vim.keymap.set('i', '`', '$""<left>', { buffer = buffer })
   vim.keymap.set('i', ';q', '``<left>', { buffer = buffer })
   vim.keymap.set('i', ';jq', '"``"<left><left>', { buffer = buffer })
@@ -1222,6 +1221,8 @@ u.ft({ "nu", "bash", "sh" }, function(buffer)
   vim.keymap.set('i', ';i', '()<left>', { buffer = buffer })
   vim.keymap.set('i', ';d', 'def --wrapped foo [...args] {}<esc>3Bvt ', { buffer = buffer })
   vim.keymap.set('i', ';m', 'def foo [] {}<esc>3bvt ', { buffer = buffer })
+  vim.keymap.set('i', ';n', '$in', { buffer = buffer })
+  vim.keymap.set('i', ';`', '``<left>', { buffer = buffer })
   -- vim.keymap.set('i', ';c', _G.billy.harness .. ' "<esc>i', { buffer = buffer })
   vim.keymap.set('i', ';c', _G.billy.harness .. ' ""<esc>i', { buffer = buffer })
 
