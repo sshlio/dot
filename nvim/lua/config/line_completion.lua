@@ -71,10 +71,10 @@ function M.updateLines()
   lines = vim.tbl_filter(function(line)
     return (
       (not line:match("^%s$"))
-      and vim.fn.stridx("codex ", line) != 0
-      and vim.fn.stridx("/ ", line) != 0
-      and vim.fn.stridx(" ", line) != 0
-      and vim.fn.stridx("# ", line) != 0
+      and vim.fn.stridx("codex ", line) ~= 0
+      and vim.fn.stridx("/ ", line) ~= 0
+      and vim.fn.stridx(" ", line) ~= 0
+      and vim.fn.stridx("# ", line) ~= 0
     )
   end, lines)
 
