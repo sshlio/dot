@@ -89,7 +89,7 @@ end
 
 function M.candidates(line)
   return vim.tbl_filter(function(value)
-    return vim.fn.stridx(value, line) == 0 and value != line
+    return vim.fn.stridx(value, line) == 0 and value ~= line
   end, u.uniq(vim.list_extend({trail}, lines)))
 end
 
@@ -192,7 +192,7 @@ function M.fill()
     return
   end
 
-  if first != found then
+  if first ~= found then
     first = first .. " "
   end
 
