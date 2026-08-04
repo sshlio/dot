@@ -384,7 +384,7 @@ def keyval [key, val?] {
 
 def open_safe [path] {
   if ($path | path exists) {
-    open ($path | path expand)
+    opn ($path | path expand)
   }
 }
 
@@ -660,7 +660,7 @@ def persist_clipboard [$prefix = "cp"] {
 }
 
 def cp_restore [$id] {
-  open $"/tmp/cp/($id)"
+  opn $"/tmp/cp/($id)"
 }
 
 def status_color [] {
@@ -800,7 +800,7 @@ def filesw [path = "."] {
 }
 
 def app [name] {
-  ^open -a $name
+  open -a $name
 }
 
 # cheatsheet:
@@ -847,7 +847,7 @@ def once [id: string, cl: closure] {
   let file = $"/tmp/($id | md5)";
 
   if ($file | path exists) {
-    open --raw $file | from json | gt value
+    opn --raw $file | from json | gt value
   } else {
     let output = (do $cl)
 
@@ -858,7 +858,7 @@ def once [id: string, cl: closure] {
 }
 
 def free_port [] {
-  let last = (open /Users/billy/p/_billy/free_port | into int)
+  let last = (opn /Users/billy/p/_billy/free_port | into int)
 
   $last + 1 | sv /Users/billy/p/_billy/free_port
 }
@@ -962,3 +962,11 @@ def "from entries" [] { $in | transpose -d -r }
 
 def "from jsonl" [] { $in | lines | each { $in | from json }}
 
+
+def --wrapped ssh_exec [host, ...args] {
+  let $argsStr = (bash -c 'printf "%q " "$@"' 0 ...$args)
+
+  mut args = []
+
+  ssh -qt $host $argsStr
+}

@@ -1066,6 +1066,7 @@ function snip(exp)
   return function() vim.snippet.expand(exp) end
 end
 
+-- xlua
 u.ft({ "lua" }, function(buffer)
   vim.opt_local.indentexpr = "v:lua.FirstNonEmptyIndent()"
 
@@ -1177,6 +1178,8 @@ u.ft({ "openscad" }, function(buffer)
   vim.api.nvim_buf_set_option(buffer, "commentstring", "// %s")
 end)
 
+
+-- xmarkdown xmd
 u.ft({ "markdown" }, function(buffer)
   vim.keymap.set('i', ';t', "- [ ] ", { buffer = buffer })
   vim.keymap.set('i', ';l', "[](<c-r>+)<esc>^a", { buffer = buffer })
