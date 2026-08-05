@@ -76,7 +76,7 @@ pcall(vim.keymap.del, "x", "<c-s>")
 vim.opt.guicursor = {
   "i:ver25",
   "v-o:hor20",
-  "t:block",
+  "t:block-TermCursor",
 }
 
 _G.u = {}
