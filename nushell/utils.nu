@@ -964,7 +964,7 @@ def "from entries" [] { $in | transpose -d -r }
 def "from jsonl" [] { $in | lines | each { $in | from json }}
 
 
-def --wrapped ssh_exec [host, ...args] {
+def --wrapped "ssh exec" [host, ...args] {
   let $argsStr = (bash -c 'printf "%q " "$@"' 0 ...$args)
 
   mut args = []

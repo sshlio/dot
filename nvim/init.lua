@@ -1215,6 +1215,19 @@ vim.keymap.set('x', '<d-g>', ":'<,'>m $<cr>")
 
 -- xnushell
 u.ft({ "nu", "bash", "sh" }, function(buffer)
+  vim.keymap.set('i', '+', ' + ', { buffer = buffer })
+  vim.keymap.set('i', ';+', '+', { buffer = buffer })
+
+  vim.keymap.set('i', '/', ' / ', { buffer = buffer })
+  vim.keymap.set('i', ';/', '/', { buffer = buffer })
+
+  vim.keymap.set('i', '-', ' - ', { buffer = buffer })
+  vim.keymap.set('i', ';-', '-', { buffer = buffer })
+
+  vim.keymap.set('i', '*', ' * ', { buffer = buffer })
+  vim.keymap.set('i', ';*', '*', { buffer = buffer })
+
+
   vim.keymap.set('i', '`', '$""<left>', { buffer = buffer })
   vim.keymap.set('i', ';q', '``<left>', { buffer = buffer })
   vim.keymap.set('i', ';jq', '"``"<left><left>', { buffer = buffer })
