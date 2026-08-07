@@ -865,7 +865,7 @@ vim.keymap.set('n', 'O', function()
 end)
 
 vim.keymap.set('n', '<c-o>', "<C-^>")
-vim.keymap.set('n', '/', "mz/")
+-- vim.keymap.set('n', '/', "mz/")
 
 -- Esc in search mode keep searchs state
 vim.keymap.set('c', '<Esc>', '<CR>', { noremap = true })
@@ -2176,3 +2176,5 @@ if _G.is_open_mode then
   vim.keymap.set({ 'i', 'n' }, '<c-c>', ':qa!<cr>')
   vim.keymap.set({ 'i', 'n' }, '<c-s>', ':x<cr>')
 end
+
+vim.keymap.set('n', '\\', 'f|"')

@@ -9,9 +9,10 @@ def --wrapped open [...args] {
 }
 
 alias opn = %open
+alias sel = move --first
 
 $env.config.table.mode = "light"
-
+# $env.config.table.index_mode = "never"
 $env.DOCKER_BUILDKIT_PROGRESS = "plain"
 
 def in [path, what: closure] {
@@ -150,7 +151,7 @@ def "ansi rgb" [color] {
   $"(ansi --escape $'38;2;($rgb.r);($rgb.g);($rgb.b)m')($text)(ansi reset)"
 }
 
-def colorful [] {
+def colorful [--offset = 0, --seed = "2j"] {
   let value = $in
   let type = $value | describe
 
@@ -163,9 +164,9 @@ def colorful [] {
   }
 
   let text = $value | into string
-  let digest = $text | hash sha256 | str substring 0..7
-  let hue = (($"0x($digest)" | into int) mod 360)
-  let rgb = hsl2rgb $hue 38 70
+  let digest = $"($text)($seed)" | hash sha256 | str substring 0..7
+  let hue = ((($"0x($digest)" | into int) / 255 * 360 + $offset) mod 360)
+  let rgb = hsl2rgb $hue 29 62
 
   $text | ansi rgb $rgb
 }
