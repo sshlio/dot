@@ -1,5 +1,4 @@
 local M = {
-  ns = vim.api.nvim_create_namespace("motion"),
   labels = "jklhasdfgqwertyuiopcvbnmzx",
   label_highlights = {
     j = "DiffDelete",
@@ -7,9 +6,22 @@ local M = {
     l = "MoreMsg",
   },
   special_mode = "j",
+  special_pattern = "[[:punct:]]",
   exit_keys = { "<Left>", "<Right>", "<C-w>", "<Esc>", "<CR>", "<c-c>" },
   hidden_guicursor = "a:block-blinkon0-MotionHiddenCursor",
 }
+
+function M.reset_namespace()
+  if M.ns then
+    for _, buf in ipairs({ M.origin_buf, M.input_buf }) do
+      if buf and vim.api.nvim_buf_is_valid(buf) then
+        vim.api.nvim_buf_clear_namespace(buf, M.ns, 0, -1)
+      end
+    end
+    vim.api.nvim__ns_set(M.ns, { wins = {} })
+  end
+  M.ns = vim.api.nvim_create_namespace("")
+end
 
 function M.origin_is_valid()
   return vim.api.nvim_win_is_valid(M.origin_win)
@@ -40,9 +52,13 @@ function M.finish(restore_cursor, target)
   if vim.o.guicursor == M.hidden_guicursor then
     vim.o.guicursor = M.original_guicursor
   end
-  if vim.api.nvim_buf_is_valid(M.origin_buf)
-      and vim.b[M.origin_buf]._specialMode == M.special_mode then
-    vim.b[M.origin_buf]._specialMode = nil
+  if vim.api.nvim_buf_is_valid(M.origin_buf) then
+    local special_mode = vim.b[M.origin_buf]._specialMode
+    if type(special_mode) == "table"
+        and special_mode.mode == M.special_mode
+        and special_mode.winnr == M.origin_win then
+      vim.b[M.origin_buf]._specialMode = nil
+    end
   end
 
   if M.origin_is_valid() then
@@ -60,7 +76,9 @@ function M.finish(restore_cursor, target)
 end
 
 function M.prefix_pattern()
-  return vim.fn.escape(M.chain, [[\^$~[]]):gsub("0", "[0-9]")
+  return vim.fn.escape(M.chain, [[\^$~[]])
+    :gsub("0", "[0-9]")
+    :gsub("%.", M.special_pattern)
 end
 
 function M.find_matches()
@@ -71,8 +89,7 @@ function M.find_matches()
   end)
   local first, last = unpack(viewport)
   local lines = vim.api.nvim_buf_get_lines(M.origin_buf, first - 1, last, false)
-  local prefix_pattern = M.prefix_pattern()
-  local pattern = prefix_pattern .. [[\k*]]
+  local pattern = M.prefix_pattern()
   local matches = {}
 
   for line_offset, line in ipairs(lines) do
@@ -81,12 +98,11 @@ function M.find_matches()
       local text, col_start, col_stop = unpack(vim.fn.matchstrpos(line, pattern, search_from))
       if text == "" then break end
 
-      local prefix_stop = vim.fn.matchend(line, prefix_pattern, col_start)
       matches[#matches + 1] = {
         line = first + line_offset - 1,
         col_start = col_start,
-        prefix = line:sub(col_start + 1, prefix_stop),
-        next_char = line:sub(prefix_stop + 1, prefix_stop + 1),
+        prefix = text,
+        next_char = line:sub(col_stop + 1, col_stop + 1),
       }
 
       if col_stop <= search_from then break end
@@ -101,7 +117,7 @@ function M.available_labels(matches)
   local next_chars = {}
   for _, match in ipairs(matches) do
     if match.next_char ~= "" then
-      next_chars[match.next_char] = true
+      next_chars[match.next_char:lower()] = true
     end
   end
   return M.labels:gsub(".", function(label)
@@ -148,7 +164,6 @@ function M.assign_labels(matches)
     match.label = label
     M.jump_targets[label] = match
   end
-  return ordered[1]
 end
 
 function M.render_matches(matches)
@@ -181,12 +196,8 @@ function M.update()
   local matches = M.find_matches()
 
   M.clear_matches()
-  local nearest = M.assign_labels(matches)
+  M.assign_labels(matches)
   M.render_matches(matches)
-
-  if nearest then
-    M.move_origin({ nearest.line, nearest.col_start })
-  end
 
   vim.cmd.redraw()
 end
@@ -220,7 +231,6 @@ function M.handle_backspace()
   M.render_chain()
   if M.chain == "" then
     M.clear_matches()
-    M.move_origin(M.origin_cursor)
   else
     M.update()
   end
@@ -247,6 +257,7 @@ function M.open_input_window()
     hide = true,
     zindex = 1,
   })
+  vim.api.nvim__ns_set(M.ns, { wins = { M.origin_win, M.input_win } })
 
   vim.wo[M.input_win].winhighlight = "Normal:NormalFloat,Cursor:NormalFloat"
   local normal_float = vim.api.nvim_get_hl(0, { name = "NormalFloat", link = false })
@@ -287,6 +298,7 @@ function M.bind_input_keys()
 end
 
 function M.motion(insert, backward)
+  M.reset_namespace()
   M.origin_buf = vim.api.nvim_get_current_buf()
   M.origin_win = vim.api.nvim_get_current_win()
   M.origin_cursor = vim.api.nvim_win_get_cursor(M.origin_win)
@@ -297,7 +309,10 @@ function M.motion(insert, backward)
   M.backward = backward == true
   M.original_guicursor = vim.o.guicursor
 
-  vim.b[M.origin_buf]._specialMode = M.special_mode
+  vim.b[M.origin_buf]._specialMode = {
+    mode = M.special_mode,
+    winnr = M.origin_win,
+  }
   M.prepare_input_buffer()
   M.open_input_window()
   M.bind_input_keys()

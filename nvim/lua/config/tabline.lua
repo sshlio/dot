@@ -41,7 +41,10 @@ function _G.statusline()
   local special_mode
   if statusline_win and vim.api.nvim_win_is_valid(statusline_win) then
     local statusline_buf = vim.api.nvim_win_get_buf(statusline_win)
-    special_mode = vim.b[statusline_buf]._specialMode
+    local buffer_mode = vim.b[statusline_buf]._specialMode
+    if type(buffer_mode) == "table" and buffer_mode.winnr == statusline_win then
+      special_mode = buffer_mode.mode
+    end
   end
   local mode_info
   if is_active then
