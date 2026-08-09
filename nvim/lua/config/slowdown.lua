@@ -2,7 +2,7 @@
 _G.directional_motion = { key = nil, count = 0, generation = 0 }
 
 for _, key in ipairs({ 'h', 'j', 'k', 'l' }) do
-  vim.keymap.set('n', key, function()
+  vim.keymap.set({'n', 'x'}, key, function()
     local motion = _G.directional_motion
 
     if motion.key == key then

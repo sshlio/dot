@@ -10,9 +10,10 @@ def --wrapped open [...args] {
 
 alias opn = %open
 alias sel = move --first
+alias "http post" = http post --content-type application/json
+alias "gt" = get -o
 
 $env.config.table.mode = "light"
-# $env.config.table.index_mode = "never"
 $env.DOCKER_BUILDKIT_PROGRESS = "plain"
 
 def in [path, what: closure] {
@@ -955,8 +956,6 @@ def s [] {
   git diff --stat HEAD
 }
 
-alias "http post" = http post --content-type application/json
-alias "gt" = get -o
 
 def "from epoch" [] { $in | into datetime -f '%s' }
 def "from entries" [] { $in | transpose -d -r }

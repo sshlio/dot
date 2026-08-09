@@ -1,5 +1,5 @@
 local M = {
-  labels = "jklhasdfgqwertyuiopcvbnmzx",
+  labels = "jklhasdfgqwertuiopcvbnmzxy",
   label_highlights = {
     j = "DiffDelete",
     k = "MoreMsg",
@@ -7,7 +7,7 @@ local M = {
   },
   special_mode = "j",
   special_pattern = "[[:punct:]]",
-  exit_keys = { "<Left>", "<Right>", "<C-w>", "<Esc>", "<CR>", "<c-c>" },
+  exit_keys = { "<Left>", "<Right>", "<C-w>", "<Esc>", "<CR>", "<c-c>", "<c-v>" },
   hidden_guicursor = "a:block-blinkon0-MotionHiddenCursor",
 }
 
@@ -32,6 +32,12 @@ function M.move_origin(cursor)
   if M.origin_is_valid() then
     vim.api.nvim_win_set_cursor(M.origin_win, cursor)
   end
+end
+
+function M.select_from_origin(cursor)
+  M.move_origin(M.visual_anchor)
+  vim.cmd.normal({ M.visual_mode, bang = true })
+  M.move_origin(cursor)
 end
 
 function M.clear_matches()
@@ -62,13 +68,19 @@ function M.finish(restore_cursor, target)
   end
 
   if M.origin_is_valid() then
-      vim.api.nvim_set_current_win(M.origin_win)
-      if target then
+    vim.api.nvim_set_current_win(M.origin_win)
+    if target then
+      if M.visual_mode then
+        M.select_from_origin({ target.line, target.col_start })
+      else
         M.move_origin({ target.line, target.col_start })
-        if M.insert then
-          vim.cmd.startinsert()
-        end
-      elseif restore_cursor then
+      end
+      if M.insert then
+        vim.cmd.startinsert()
+      end
+    elseif M.visual_mode then
+      M.select_from_origin(M.origin_cursor)
+    elseif restore_cursor then
       M.move_origin(M.origin_cursor)
     end
   end
@@ -302,6 +314,15 @@ function M.motion(insert, backward)
   M.origin_buf = vim.api.nvim_get_current_buf()
   M.origin_win = vim.api.nvim_get_current_win()
   M.origin_cursor = vim.api.nvim_win_get_cursor(M.origin_win)
+  local mode = vim.fn.mode(1)
+  if mode == "v" or mode == "V" or mode == "\22" then
+    local anchor = vim.fn.getpos("v")
+    M.visual_mode = mode
+    M.visual_anchor = { anchor[2], anchor[3] - 1 }
+  else
+    M.visual_mode = nil
+    M.visual_anchor = nil
+  end
   M.chain = ""
   M.jump_targets = {}
   M.finished = false
@@ -321,9 +342,19 @@ end
 vim.keymap.set("n", "f", function()
   M.motion(false, false)
 end)
+
+vim.keymap.set("x", "f", function()
+  M.motion(false, false)
+end)
+
 vim.keymap.set("n", "F", function()
   M.motion(false, true)
 end)
+
+vim.keymap.set("x", "F", function()
+  M.motion(false, true)
+end)
+
 vim.keymap.set("i", "<C-f>", function()
   vim.cmd.stopinsert()
   M.motion(true, false)
