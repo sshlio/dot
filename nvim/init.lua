@@ -852,6 +852,29 @@ vim.keymap.set('x', '<C-K>', cmd("'<,'>m+1"))
 
 
 -- NAVIGATION
+-- Prevent press-and-hold motions and discourage bad navigation habits.
+_G.directional_motion_dead = {}
+
+for _, key in ipairs({ 'h', 'j', 'k', 'l' }) do
+  vim.keymap.set('n', key, function()
+    if _G.directional_motion_dead[key] then
+      return ''
+    end
+
+    _G.directional_motion_dead = {}
+
+    _G.directional_motion_dead[key] = true
+
+    vim.defer_fn(function()
+      _G.directional_motion_dead[key] = false
+    end, 200)
+
+    return key
+  end, { expr = true, remap = false })
+end
+
+vim.keymap.set('n', 'gf', 'f')
+vim.keymap.set('n', 'gF', 'F')
 vim.keymap.set('n', 'o', function()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   vim.api.nvim_buf_set_lines(0, row, row, false, {""})
