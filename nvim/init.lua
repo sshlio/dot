@@ -899,7 +899,8 @@ end)
 
 vim.keymap.set('n', 'G', 'Gzz')
 vim.keymap.set('n', '<c-d>', '<c-d>zz')
-vim.keymap.set('n', '<c-u>', '<c-u>zz')
+vim.keymap.set('x', '<d-u>', '<c-u>zz')
+vim.keymap.set('x', '<d-d>', '<c-d>zz')
 
 vim.keymap.set('n', '<esc>', function()
   vim.api.nvim_exec_autocmds('User', { pattern = 'NormalEsc' })
@@ -1218,11 +1219,11 @@ u.ft({ "nu", "bash", "sh" }, function(buffer)
   vim.keymap.set('i', '+', ' + ', { buffer = buffer })
   vim.keymap.set('i', ';+', '+', { buffer = buffer })
 
-  vim.keymap.set('i', '/', ' / ', { buffer = buffer })
-  vim.keymap.set('i', ';/', '/', { buffer = buffer })
+  -- vim.keymap.set('i', '/', ' / ', { buffer = buffer })
+  -- vim.keymap.set('i', ';/', '/', { buffer = buffer })
 
-  vim.keymap.set('i', '-', ' - ', { buffer = buffer })
-  vim.keymap.set('i', ';-', '-', { buffer = buffer })
+  -- vim.keymap.set('i', '-', ' - ', { buffer = buffer })
+  vim.keymap.set('i', ';-', ' - ', { buffer = buffer })
 
   vim.keymap.set('i', '*', ' * ', { buffer = buffer })
   vim.keymap.set('i', ';*', '*', { buffer = buffer })

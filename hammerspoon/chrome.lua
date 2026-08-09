@@ -1,6 +1,6 @@
 Chrome = {}
 
-local app = "Google Chrome"
+local app = G.chromiumApp or "Google Chrome"
 
 function filter(tbl, predicate)
   local out = {}

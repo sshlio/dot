@@ -31,15 +31,24 @@ local mode_map = {
   ["\22"] = { "V-BLCK", "Visual" },
   c = { "COMMAND", "IncSearch" },
   R = { "REPLACE", "WarningMsg" },
+  j = { "  JMP  ", "StatusInsert" },
   nt = { "VISIBLE", "Comment" },
 }
 
 function _G.statusline()
-  local is_active = vim.g.statusline_winid == vim.fn.win_getid()
+  local statusline_win = vim.g.statusline_winid
+  local is_active = statusline_win == vim.fn.win_getid()
+  local special_mode
+  if statusline_win and vim.api.nvim_win_is_valid(statusline_win) then
+    local statusline_buf = vim.api.nvim_win_get_buf(statusline_win)
+    special_mode = vim.b[statusline_buf]._specialMode
+  end
   local mode_info
   if is_active then
     local m = vim.fn.mode()
     mode_info = mode_map[m] or { m, "StatusLine" }
+  elseif special_mode then
+    mode_info = mode_map[special_mode] or { special_mode, "IncSearch" }
   else
     mode_info = { "------", "Comment" }
   end

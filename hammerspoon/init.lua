@@ -19,6 +19,7 @@ local load = function(name)
   end
 end
 
+load("init.local")
 load("signal")
 load("local")
 load("ui")
@@ -255,7 +256,7 @@ w = hs.application.watcher.new(function(name, ev)
   print("APP", name, ev == hs.application.watcher.activated)
 
   if ev == hs.application.watcher.activated then
-    if name == "Google Chrome" or name == "Slack" then
+    if name == "Google Chrome" or name == "Helium" or name == "Slack" then
       chromebinding:enable()
       chromebinding2:enable()
       chromebinding3:enable()
