@@ -23,16 +23,16 @@ function _G.tabline()
 end
 
 local mode_map = {
-  n = { "NORMAL", "StatusNormal" },
-  i = { "INSERT", "StatusInsert" },
-  t = { " TERM ", "StatusInsert" },
-  v = { "VISUAL", "StatusVisual" },
-  V = { "V-LINE", "StatusVisual" },
-  ["\22"] = { "V-BLCK", "Visual" },
-  c = { "COMMAND", "IncSearch" },
-  R = { "REPLACE", "WarningMsg" },
-  j = { "  JMP  ", "StatusInsert" },
+  n =  { "NORMAL", "StatusNormal" },
+  i =  { "INSERT", "StatusInsert" },
+  t =  { " TERM ", "StatusInsert" },
+  v =  { "VISUAL", "StatusVisual" },
+  V =  { "V-LINE", "StatusVisual" },
+  c =  { "COMMAND", "IncSearch" },
+  R =  { "REPLACE", "WarningMsg" },
+  j =  { "JUMP   ", "StatusInsert" },
   nt = { "VISIBLE", "Comment" },
+  ["\22"] = { "V-BLCK", "Visual" },
 }
 
 function _G.statusline()

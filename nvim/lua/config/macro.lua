@@ -25,7 +25,8 @@ function M.execute()
 
   vim.o.lazyredraw = true
   local ok, err = pcall(vim.api.nvim_feedkeys,
-    vim.api.nvim_replace_termcodes(M.currentMacro .. "<f13>", true, true, true), "mx", false)
+  vim.api.nvim_replace_termcodes(M.currentMacro .. "<f13>", true, true, true), "mx", false)
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", true) -- ok
   vim.o.lazyredraw = lazyredraw
 
   if not ok then
@@ -34,24 +35,20 @@ function M.execute()
 end
 
 vim.keymap.set('x', 'sq', function()
-  -- TODO This is not defined yet in the utils maaan
   local sel = u.getVisualLine()
-
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true) -- ok
 
   if not sel[3] then
     vim.api.nvim_command('normal! o')
   end
 
-  local times = sel[2] - sel[1] + 1;
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", true) -- ok
 
-  for i = 1, times do
+  local times = sel[2] - sel[1];
+
+  for i = 0, times do
+    vim.api.nvim_win_set_cursor(0, { sel[1] + i, 0 })
     M.execute()
   end
-
-  -- vim.schedule(function()
-  --   vim.api.nvim_command('normal! gv')
-  -- end)
 end)
 
 vim.keymap.set('n', 'qq', M.execute, { desc = "Execute macro" })

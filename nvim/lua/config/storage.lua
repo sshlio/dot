@@ -20,7 +20,7 @@ local function save(tbl)
   f:close()
 end
 
-local cache = load()
+local cache = _G.is_open_mode and {} or load()
 
 local function kget(key, default)
   return cache[key] or default
@@ -28,9 +28,10 @@ end
 
 local function kset(key, value)
   cache[key] = value
-  save(cache)
+  if not _G.is_open_mode then
+    save(cache)
+  end
 end
 
 _G.kset = kset
 _G.kget = kget
-

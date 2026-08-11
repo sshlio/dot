@@ -1,6 +1,6 @@
 Chrome = {}
 
-local app = G.chromiumApp or "Google Chrome"
+local defapp = G.chromiumApp or "Google Chrome"
 
 function filter(tbl, predicate)
   local out = {}
@@ -12,7 +12,8 @@ function filter(tbl, predicate)
   return out
 end
 
-function Chrome:focus(work)
+function Chrome:focus(work, app)
+  app = app or defapp
   local chrome = hs.application.get(app)
 
   if not chrome then

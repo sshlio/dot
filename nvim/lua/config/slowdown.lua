@@ -22,7 +22,7 @@ for _, key in ipairs({ 'h', 'j', 'k', 'l' }) do
       end
     end, 200)
 
-    if motion.count > 3 then
+    if motion.count > 5 then
       return ''
     end
 

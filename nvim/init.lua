@@ -39,7 +39,15 @@ _G.last_linenumber = nil
 
 local cwd = vim.fn.getcwd()
 _G.data_dir = vim.fn.stdpath("data")
-if not is_windows then
+if _G.is_open_mode then
+  -- Open mode is used for sensitive files: keep editor state in memory only.
+  vim.o.undofile = false
+  vim.o.swapfile = false
+  vim.o.backup = false
+  vim.o.writebackup = false
+  vim.o.shadafile = "NONE"
+  vim.o.viminfofile = "NONE"
+elseif not is_windows then
   local nvim_data_dir = cwd .. '/.nvim'
 
 
@@ -55,13 +63,17 @@ if not is_windows then
   vim.o.undodir = nvim_data_dir .. '/undo'
 end
 
-vim.o.undofile = true
+if not _G.is_open_mode then
+  vim.o.undofile = true
+end
 
 pcall(vim.fn.histdel, ":")   -- command-line
 pcall(vim.fn.histdel, "/")   -- search
 pcall(vim.fn.histdel, "=")   -- expressions
 pcall(vim.fn.histdel, "@")   -- input/registers (safe)
-pcall(vim.cmd, "silent! rshada!")  -- read project-local ShaDa
+if not _G.is_open_mode then
+  pcall(vim.cmd, "silent! rshada!")  -- read project-local ShaDa
+end
 
 for _, key in ipairs({
   "c", "n", "q", "s", "v", "x", "w", "W", "=", ">", "<", "t", "T", "K", "H", "J", "L", "r", "R",
@@ -179,7 +191,7 @@ end
 
 _G.once = once
 
-function normalizedVisual(command, wrap, inversed)
+local function normalizedVisual(command, wrap, inversed)
   if wrap == nil then wrap = true end
 
   return function()
@@ -190,7 +202,16 @@ function normalizedVisual(command, wrap, inversed)
 
     local cursor_is_before_anchor = (c[2] < v[2]) or (c[2] == v[2] and c[3] < v[3])
 
-    if cursor_is_before_anchor or inversed then
+    print(
+      "cursor_is_before_anchor",
+      cursor_is_before_anchor
+    )
+
+    if inversed then
+      cursor_is_before_anchor = !cursor_is_before_anchor
+    end
+
+    if cursor_is_before_anchor then
       keys = "o"
     end
 
@@ -1198,7 +1219,8 @@ end)
 
 -- xvim
 u.ft({ "vim" }, function(buffer)
-  vim.keymap.set('i', ';m', "Macro esc>j<esc>bbi0<<left>", { buffer = buffer })
+  vim.keymap.set('i', ';m', "Macro H", { buffer = buffer })
+  -- vim.keymap.set('i', ';m', "Macro esc>j<esc>bbi0<<left>", { buffer = buffer })
   vim.keymap.set('i', ';e', "<esc<left><right>>", { buffer = buffer })
   vim.keymap.set('i', ';f', "<c-r>f", { buffer = buffer })
   vim.keymap.set('i', ';d', "<c-r>d", { buffer = buffer })
@@ -1218,19 +1240,6 @@ vim.keymap.set('x', '<d-g>', ":'<,'>m $<cr>")
 
 -- xnushell
 u.ft({ "nu", "bash", "sh" }, function(buffer)
-  vim.keymap.set('i', '+', ' + ', { buffer = buffer })
-  vim.keymap.set('i', ';+', '+', { buffer = buffer })
-
-  -- vim.keymap.set('i', '/', ' / ', { buffer = buffer })
-  -- vim.keymap.set('i', ';/', '/', { buffer = buffer })
-
-  -- vim.keymap.set('i', '-', ' - ', { buffer = buffer })
-  vim.keymap.set('i', ';-', ' - ', { buffer = buffer })
-
-  vim.keymap.set('i', '*', ' * ', { buffer = buffer })
-  vim.keymap.set('i', ';*', '*', { buffer = buffer })
-
-
   vim.keymap.set('i', '`', '$""<left>', { buffer = buffer })
   vim.keymap.set('i', ';q', '``<left>', { buffer = buffer })
   vim.keymap.set('i', ';jq', '"``"<left><left>', { buffer = buffer })
@@ -1684,8 +1693,8 @@ vim.keymap.set('x', 'H', normalizedVisual('holo'), { expr = true })
 vim.keymap.set("v", "x", normalizedVisual("<esc>lxgvo<esc>Xgvhoh"), { expr = true })
 vim.keymap.set("v", "X", normalizedVisual("<esc>xgvo<esc>xgvohh"), { expr = true })
 vim.keymap.set("x", "A", normalizedVisual("A", false), { expr = true, noremap = true })
-vim.keymap.set("x", "I", normalizedVisual("A<left>", false, true), { expr = true })
 vim.keymap.set('x', 'sd', normalizedVisual('mx"xy`xo<esc>"xp', false), { expr = true })
+vim.keymap.set("x", "I", normalizedVisual("<esc>i", false, true), { expr = true })
 
 -- "(word)" two
 -- "(word)" two

@@ -229,8 +229,6 @@ function M.handle_char(char)
 
   if target then
     M.finish(false, target)
-  elseif char == ";" then
-    M.finish(false)
   else
     M.chain = M.chain .. char
     M.render_chain()
@@ -334,28 +332,29 @@ function M.motion(insert, backward)
     mode = M.special_mode,
     winnr = M.origin_win,
   }
+
   M.prepare_input_buffer()
   M.open_input_window()
   M.bind_input_keys()
 end
 
-vim.keymap.set("n", "f", function()
+vim.keymap.set({ "n" }, "e", function()
   M.motion(false, false)
 end)
 
-vim.keymap.set("x", "f", function()
+vim.keymap.set({ "n" }, "<c-e>", function()
   M.motion(false, false)
 end)
 
-vim.keymap.set("n", "F", function()
+vim.keymap.set({ "n" }, "E", function()
   M.motion(false, true)
 end)
 
-vim.keymap.set("x", "F", function()
-  M.motion(false, true)
+vim.keymap.set({ "x" }, "<d-e>", function()
+  M.motion(false, false)
 end)
 
-vim.keymap.set("i", "<C-f>", function()
+vim.keymap.set("i", "<C-e>", function()
   vim.cmd.stopinsert()
   M.motion(true, false)
 end)

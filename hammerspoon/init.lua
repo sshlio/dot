@@ -169,7 +169,7 @@ Layer:bind({"cmd"}, "2", function()
 end)
 
 Layer:bind({"cmd"}, "4", function()
-  Chrome:focus(false)
+  Chrome:focus(false, "Google Chrome")
 end)
 
 hs.hotkey.bind({"cmd"}, "l", function()
