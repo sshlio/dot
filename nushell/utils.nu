@@ -736,10 +736,6 @@ def defnull [defval] {
 
 def dt [fmt?: string] { date now | format date ($fmt | default "%D" ) }
 
-def gt [name, def?: any] {
-  $in | get -o $name | default $def
-}
-
 def --wrapped build [--args: any, ...rest] {
   mut eargs = []
 
@@ -969,4 +965,12 @@ def --wrapped "ssh exec" [host, ...args] {
   mut args = []
 
   ssh -qt $host $argsStr
+}
+
+def imgpaste [pathArg?] {
+  let $path = $pathArg | default ($"images/(date now | format date "%Y-%m-%d")-(random pass -s).png")
+
+  osascript -e 'set pngData to the clipboard as «class PNGf»' -e 'set f to open for access POSIX file "/tmp/clipboard.png" with write permission' -e 'write pngData to f' -e 'close access f'
+  mv /tmp/clipboard.png ($path | path expand)
+  $path | copy
 }

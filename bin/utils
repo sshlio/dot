@@ -31,3 +31,4 @@ def "main command_notify" [$message] {
 }
 
 def main [] {}
+
