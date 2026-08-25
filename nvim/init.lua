@@ -208,7 +208,7 @@ local function normalizedVisual(command, wrap, inversed)
     )
 
     if inversed then
-      cursor_is_before_anchor = !cursor_is_before_anchor
+      cursor_is_before_anchor = not cursor_is_before_anchor
     end
 
     if cursor_is_before_anchor then
