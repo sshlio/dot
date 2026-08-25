@@ -952,12 +952,9 @@ def s [] {
   git diff --stat HEAD
 }
 
-
 def "from epoch" [] { $in | into datetime -f '%s' }
 def "from entries" [] { $in | transpose -d -r }
-
 def "from jsonl" [] { $in | lines | each { $in | from json }}
-
 
 def --wrapped "ssh exec" [host, ...args] {
   let $argsStr = (bash -c 'printf "%q " "$@"' 0 ...$args)
