@@ -920,6 +920,11 @@ vim.keymap.set('n', 'gx', function()
   end
 end)
 
+local function clear_multicursors()
+  local ns = vim.api.nvim_create_namespace("nvim.multicursor")
+  vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
+end
+
 vim.keymap.set('n', 'G', 'Gzz')
 vim.keymap.set('n', '<c-d>', '<c-d>zz')
 vim.keymap.set('x', '<d-u>', '<c-u>zz')
@@ -929,6 +934,7 @@ vim.keymap.set('n', '<esc>', function()
   vim.api.nvim_exec_autocmds('User', { pattern = 'NormalEsc' })
   vim.cmd.noh()
   vim.snippet.stop()
+  clear_multicursors()
 
   -- Closing diagnostics
   for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -2084,52 +2090,52 @@ end, { desc = 'Copy selection as Claude Code context' })
 
 -- o.cmdheight = 0
 
-require('vim._core.ui2').enable({
-  enable = false,
-  msg = {
-    targets = {
-      [''] = 'msg',
-      empty = 'cmd',
-      bufwrite = 'msg',
-      confirm = 'cmd',
-      emsg = 'pager',
-      echo = 'msg',
-      echomsg = 'msg',
-      echoerr = 'pager',
-      completion = 'cmd',
-      list_cmd = 'pager',
-      lua_error = 'pager',
-      lua_print = 'msg',
-      progress = 'pager',
-      rpc_error = 'pager',
-      quickfix = 'msg',
-      search_cmd = 'cmd',
-      search_count = 'cmd',
-      shell_cmd = 'pager',
-      shell_err = 'pager',
-      shell_out = 'pager',
-      shell_ret = 'msg',
-      undo = 'cmd',
-      verbose = 'pager',
-      wildlist = 'cmd',
-      wmsg = 'msg',
-      typed_cmd = 'cmd',
-    },
-    cmd = {
-      height = 0.5,
-    },
-    dialog = {
-      height = 0.5,
-    },
-    msg = {
-      height = 0.3,
-      timeout = 5000,
-    },
-    pager = {
-      height = 0.5,
-    },
-  },
-})
+-- require('vim._core.ui2').enable({
+--   enable = false,
+--   msg = {
+--     targets = {
+--       [''] = 'msg',
+--       empty = 'cmd',
+--       bufwrite = 'msg',
+--       confirm = 'cmd',
+--       emsg = 'pager',
+--       echo = 'msg',
+--       echomsg = 'msg',
+--       echoerr = 'pager',
+--       completion = 'cmd',
+--       list_cmd = 'pager',
+--       lua_error = 'pager',
+--       lua_print = 'msg',
+--       progress = 'pager',
+--       rpc_error = 'pager',
+--       quickfix = 'msg',
+--       search_cmd = 'cmd',
+--       search_count = 'cmd',
+--       shell_cmd = 'pager',
+--       shell_err = 'pager',
+--       shell_out = 'pager',
+--       shell_ret = 'msg',
+--       undo = 'cmd',
+--       verbose = 'pager',
+--       wildlist = 'cmd',
+--       wmsg = 'msg',
+--       typed_cmd = 'cmd',
+--     },
+--     cmd = {
+--       height = 0.5,
+--     },
+--     dialog = {
+--       height = 0.5,
+--     },
+--     msg = {
+--       height = 0.3,
+--       timeout = 5000,
+--     },
+--     pager = {
+--       height = 0.5,
+--     },
+--   },
+-- })
 
 vim.keymap.set('n', 'sm', '<cmd>messages<cr>',                        {  desc = "Show messages" })
 vim.keymap.set('n', 'sM', '<cmd>messages clear | echo "cleared"<cr>', {  desc = "Clear essages" })
@@ -2203,3 +2209,24 @@ if _G.is_open_mode then
 end
 
 vim.keymap.set('n', '\\', 'f|"')
+
+print('')
+
+vim.keymap.set('n', 'Q', 'Q')
+vim.keymap.set('n', 'q=', 'q=')
+
+
+vim.keymap.set('n', 'q0', clear_multicursors)
+vim.keymap.set('n', '<D-J>', function()
+  vim.schedule(function()
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('1q=', true, false, true), 'n', false)
+  end)
+  return 'Q2q=j'
+end, { expr = true, desc = "Add cursor and move down" })
+
+vim.keymap.set('n', '<D-K>', function()
+  vim.schedule(function()
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('1q=', true, false, true), 'n', false)
+  end)
+  return 'Q2q=k'
+end, { expr = true, desc = "Add cursor and move down" })

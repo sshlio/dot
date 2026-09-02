@@ -134,6 +134,68 @@ button4Watcher = eventtap.new({ eventTypes.otherMouseDown }, function(event)
   return false
 end)
 
+local middleClickInProgress = false
+local pointerFreezeTimer
+
+local pointerFreezeWatcher = eventtap.new({
+  eventTypes.mouseMoved,
+  eventTypes.leftMouseDragged,
+  eventTypes.rightMouseDragged,
+  eventTypes.otherMouseDragged,
+}, function()
+  return true
+end)
+
+local function freezePointer()
+  pointerFreezeWatcher:start()
+
+  if pointerFreezeTimer then
+    pointerFreezeTimer:stop()
+  end
+
+  pointerFreezeTimer = hs.timer.doAfter(1, function()
+    pointerFreezeWatcher:stop()
+    pointerFreezeTimer = nil
+  end)
+end
+
+local function middleMouseEvent(eventType, event)
+  return eventtap.event.newMouseEvent(eventType, event:location(), {})
+      :setProperty(eventtap.event.properties.mouseEventButtonNumber, 2)
+end
+
+local cmdClickWatcher = eventtap.new({
+  eventTypes.leftMouseDown,
+  eventTypes.leftMouseDragged,
+  eventTypes.leftMouseUp,
+}, function(event)
+  local eventType = event:getType()
+
+  if eventType == eventTypes.leftMouseDown then
+    if not event:getFlags().cmd then
+      return false
+    end
+
+    middleClickInProgress = true
+    return true, { middleMouseEvent(eventTypes.otherMouseDown, event) }
+  end
+
+  if not middleClickInProgress then
+    return false
+  end
+
+  local middleEventType = eventType == eventTypes.leftMouseUp
+      and eventTypes.otherMouseUp
+      or eventTypes.otherMouseDragged
+
+  if eventType == eventTypes.leftMouseUp then
+    middleClickInProgress = false
+    freezePointer()
+  end
+
+  return true, { middleMouseEvent(middleEventType, event) }
+end)
+
 hs.hotkey.bind({"cmd"}, "1", function()
   hs.application.launchOrFocus("kitty")
 end)
@@ -283,6 +345,7 @@ end)
 w:start()
 scrollWatcher:start()
 button4Watcher:start()
+cmdClickWatcher:start()
 
 -- "world "
 -- "world "
