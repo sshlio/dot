@@ -314,6 +314,7 @@ o.cindent = false     -- Keep same indent as current line
 
 o.scrolloff = 10 -- Automatically indent new lines
 o.sidescrolloff = 20
+o.scrolloffpad = 20
 o.cmdwinheight = 20 -- Automatically indent new lines
 
 o.wrap = false -- Disable line wrapping
@@ -924,11 +925,6 @@ local function clear_multicursors()
   local ns = vim.api.nvim_create_namespace("nvim.multicursor")
   vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
 end
-
-vim.keymap.set('n', 'G', 'Gzz')
-vim.keymap.set('n', '<c-d>', '<c-d>zz')
-vim.keymap.set('x', '<d-u>', '<c-u>zz')
-vim.keymap.set('x', '<d-d>', '<c-d>zz')
 
 vim.keymap.set('n', '<esc>', function()
   vim.api.nvim_exec_autocmds('User', { pattern = 'NormalEsc' })
