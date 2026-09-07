@@ -313,6 +313,7 @@ o.autoindent = false     -- Keep same indent as current line
 o.cindent = false     -- Keep same indent as current line
 
 o.scrolloff = 10 -- Automatically indent new lines
+o.scrolloffpad = 0
 o.sidescrolloff = 20
 o.cmdwinheight = 20 -- Automatically indent new lines
 
@@ -1203,6 +1204,11 @@ u.ft({ "python" }, function(buffer)
   vim.keymap.set('i', ';f', "(lambda x: )<left>", {})
   vim.keymap.set('i', '`', 'f""<left>', {})
   vim.keymap.set('i', ';i', "{}<left>")
+  vim.keymap.set('i', ';p', "pure()<left>")
+  vim.keymap.set('i', ';t', "True")
+  vim.keymap.set('i', ';af', "False")
+  vim.keymap.set('i', '; ', "<right>, ''<left>")
+  vim.keymap.set('i', ';g', " | fg")
 end)
 
 u.ft({ "openscad" }, function(buffer)
@@ -2198,7 +2204,7 @@ end, {
 vim.keymap.set({ "o", "x" }, "u", function()
   local save = vim.bo.iskeyword
 
-  vim.opt_local.iskeyword = "48-57,65-90,97-122"  -- 0-9, A-Z, a-z only
+  vim.opt_local.iskeyword = "48-57,65-90,97-122"
 
   vim.schedule(function()
     vim.bo.iskeyword = save
@@ -2233,3 +2239,7 @@ vim.keymap.set('n', '<D-K>', function()
   end)
   return 'Q2q=k'
 end, { expr = true, desc = "Add cursor and move down" })
+
+vim.keymap.set({ 'n', 'x' }, 'J', '8j')
+vim.keymap.set({ 'n', 'x' }, 'K', '8k')
+
