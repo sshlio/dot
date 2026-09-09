@@ -342,10 +342,6 @@ vim.keymap.set({ "n" }, "e", function()
   M.motion(false, false)
 end)
 
-vim.keymap.set({ "n" }, "<c-e>", function()
-  M.motion(false, false)
-end)
-
 vim.keymap.set({ "n" }, "E", function()
   M.motion(false, true)
 end)

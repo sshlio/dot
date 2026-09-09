@@ -44,3 +44,15 @@ def ghb [] {
     ^open $"($repoUrl)/compare/($currentBranch)"
   }
 }
+
+def c [...$msg] {
+  let branch = (git branch --show-current | str trim)
+
+  if ($branch in [main development master]) and ($env.ALLOW_COMMIT_MAIN? != "yes") {
+    danger $"commit and push directly to '($branch)'? \(y/n)"
+  }
+
+  git add .
+  git commit -m $"($msg | str join ' ')"
+  git push
+}

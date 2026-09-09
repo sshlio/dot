@@ -76,6 +76,22 @@ vim.keymap.set('t', ';:', ':')
 
 local augroup = vim.api.nvim_create_augroup("billy_term", { clear = true })
 
+vim.api.nvim_create_autocmd("TermClose", {
+  group = augroup,
+  callback = function(event)
+    local exit_code = vim.v.event.status
+
+    vim.keymap.set('n', 'i', function()
+      print(("command exited with exit code %d"):format(exit_code))
+    end, { buffer = event.buf })
+
+    if event.buf == vim.api.nvim_get_current_buf() and vim.api.nvim_get_mode().mode == 't' then
+      local keys = vim.api.nvim_replace_termcodes('<C-\\><C-n>', true, false, true)
+      vim.api.nvim_feedkeys(keys, 'n', false)
+    end
+  end,
+})
+
 local function job_is_running(job_id)
   if not job_id then
     return false

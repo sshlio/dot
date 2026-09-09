@@ -299,11 +299,6 @@ def curl_paste [label = ""] {
 }
 
 
-def c [...$msg] {
-  git add .
-  git commit -m $"($msg | str join ' ')"
-  git push
-}
 
 def cln [] {
   tmux clear-history;
@@ -865,8 +860,8 @@ def execute_curl [curlBody] {
   bash -c ($curlBody | str replace "curl" "curl -is" | tee { $in | bat -l bash })
 }
 
-def danger [] {
-  print "the action is dangerous, do you want to continue? (y/n)"
+def danger [$msg = "the action is dangerous, do you want to continue? (y/n)"] {
+  print $msg
   let response = input
   if $response != "y" {
     exit 1
