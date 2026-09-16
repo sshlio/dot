@@ -966,3 +966,13 @@ def imgpaste [pathArg?] {
   mv /tmp/clipboard.png ($path | path expand)
   $path | copy
 }
+
+def edit_clip [] {
+  let path = (mktemp --suffix ".json" --dry)
+
+  pbpaste | sv $path
+
+  nvim $path
+
+  cat $path | pbcopy
+}
