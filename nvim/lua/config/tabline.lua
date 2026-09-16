@@ -57,5 +57,5 @@ function _G.statusline()
   end
   return " "
     .. colorful(" " .. mode_info[1] .. " ", mode_info[2])
-    .. " %{expand('%:.')}"
+    .. " %{expand('%:.')}%= #%n %y "
 end
