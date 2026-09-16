@@ -976,3 +976,15 @@ def edit_clip [] {
 
   cat $path | pbcopy
 }
+
+def parse_all [parsers] {
+  let input = $in
+
+  for p in $parsers {
+    let result = $input | parse $p
+
+    if ($result | length) != 0 {
+      return $result | first
+    }
+  }
+}
