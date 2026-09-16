@@ -1349,10 +1349,6 @@ local before = ""
 --   desc = "Print first line of yanked text (truncated to 100 chars)"
 -- })
 
-vim.keymap.set({'o', 'x'}, 'il', ':<C-u>normal! ^vg_<CR>', {
-   silent = true, desc = 'Inner line'
-})
-
 local function ii(reverse, inner)
   local cur_indent = vim.fn.indent(".")
 
@@ -1375,7 +1371,7 @@ local function ii(reverse, inner)
     line_num = vim.fn.line(".")
     local ind = vim.fn.indent(line_num)
 
-    if ind == cur_indent then
+    if ind <= cur_indent then
       if not_zero or (vim.api.nvim_get_current_line() ~= '') then
         break
       end
@@ -1392,12 +1388,8 @@ local function ii(reverse, inner)
 end
 
 vim.keymap.set({'o', 'x'}, 'ii', function() ii(false) end)
--- vim.keymap.set({'o', 'x'}, 'I', function() ii(true) end)
-
 vim.keymap.set({'o', 'x'}, 'ai', function() ii(false, true) end)
 vim.keymap.set({'o', 'x'}, 'ao', function() ii(true, true) end)
-
--- vim.keymap.set({'o', 'x'}, 'o', function() ii(false, true) end)
 vim.keymap.set({'o', 'x'}, 'O', function() ii(true, true) end)
 
 vim.keymap.set('n', 's.', '>ap', { remap = true, desc = "Indent pasted text" })
