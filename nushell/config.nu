@@ -23,7 +23,7 @@ $env.config = {
 
   keybindings: [
     {
-      name: forward
+      name: forward_word_or_complete
       modifier: control
       keycode: char_f
       mode: vi_insert
@@ -35,7 +35,7 @@ $env.config = {
       }
     }
     {
-      name: forward
+      name: complete_history_word
       modifier: super
       keycode: char_f
       mode: vi_insert
@@ -43,7 +43,7 @@ $env.config = {
     }
 
     {
-      name: forward
+      name: open_buffer_editor
       modifier: control
       keycode: char_g
       mode: vi_insert
@@ -51,7 +51,7 @@ $env.config = {
     }
 
     {
-      name: forward
+      name: paste_clipboard_control
       modifier: control
       keycode: char_v
       mode: vi_insert
