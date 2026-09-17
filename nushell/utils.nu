@@ -988,3 +988,16 @@ def parse_all [parsers] {
     }
   }
 }
+
+def link [source: path, path: path] {
+  if ($path | path exists) {
+    error make { msg: $"path already exists: ($path)" }
+  }
+
+  let parent = $path | path parse | get parent
+  if ($parent | is-not-empty) {
+    mkdir $parent
+  }
+
+  ln -s $source $path
+}

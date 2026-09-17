@@ -1353,11 +1353,14 @@ local before = ""
 
 local function ii(reverse, inner)
   local cur_indent = vim.fn.indent(".")
+  local ft = vim.bo.filetype
+  local python = vim.tbl_contains({ "yaml", "python" }, ft)
 
   local line_count = vim.fn.line("$")
   local line_num = vim.fn.line(".")
   local start_line = line_num
   local not_zero = cur_indent ~= 0
+  local last_non_zero_line = line_num
 
   -- Start visual line selection
   vim.cmd("normal! V")
@@ -1374,7 +1377,17 @@ local function ii(reverse, inner)
     local ind = vim.fn.indent(line_num)
 
     if ind <= cur_indent then
-      if not_zero or (vim.api.nvim_get_current_line() ~= '') then
+      if (vim.api.nvim_get_current_line() ~= '') then
+        if python and (not inner) then
+          -- walk inverse
+          vim.cmd("normal! k")
+          if (vim.api.nvim_get_current_line() == '') then
+            vim.cmd("normal! k")
+          end
+          if (vim.api.nvim_get_current_line() == '') then
+            vim.cmd("normal! k")
+          end
+        end
         break
       end
     end
