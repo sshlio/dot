@@ -18,7 +18,11 @@ def nvr_notify [$message] {
   if $message.message == "stopped" {
     terminal-notifier -sound Blow -message "Agent answered"
   }
+}
 
+
+def "main edit" [path] {
+  print $"(ansi -o "7123")($path | path expand | base64)(ansi string_terminator)"
 }
 
 # ~/p/dot/bin/utils command_notify working

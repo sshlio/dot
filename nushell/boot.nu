@@ -12,3 +12,5 @@ def "notify nvim" [message] {
 def _nvim_sync_clipboard [] {
   print $"(ansi -o "7124")clipboard(ansi string_terminator)"
 }
+
+
