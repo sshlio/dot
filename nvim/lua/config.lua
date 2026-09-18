@@ -3,7 +3,7 @@
 
 
 for _, file in ipairs(vim.fn.readdir(vim.fn.stdpath('config')..'/lua/config', [[v:val =~ '\.lua\(\.off\)\?$']])) do
-  if not file:match('%.off.lua$') then
+  if (not file:match('%.off.lua$')) and (not file:match('conflict')) then
     require('config.'..file:gsub('%.lua$', ''))
   end
 end
