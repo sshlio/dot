@@ -989,9 +989,15 @@ def parse_all [parsers] {
   }
 }
 
-def link [source: path, path: path] {
-  if ($path | path exists) {
-    error make { msg: $"path already exists: ($path)" }
+def link [--force(-f), source: path, path: path] {
+  let target_type = $path | path type
+
+  if ($target_type | is-not-empty) {
+    if $force and $target_type == "symlink" {
+      rm $path
+    } else {
+      error make { msg: $"path already exists: ($path)" }
+    }
   }
 
   let parent = $path | path parse | get parent

@@ -346,6 +346,7 @@ end, { expr = true })
 
 vim.keymap.set("n", "Q", "<nop>", { noremap = true, silent = true })
 
+vim.keymap.set('n', 'sq', 'qa!', { desc = "Quit vim" })
 vim.keymap.set('n', 'sQ', function()
   pcall(function() vim.cmd [[ w! ]] end)
   vim.cmd [[ quitall! ]]
