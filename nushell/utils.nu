@@ -8,6 +8,8 @@ def --wrapped open [...args] {
   ^open ...$args
 }
 
+let $dw = ("~/Downloads" | path expand)
+
 alias opn = %open
 alias sel = move --first
 alias "http post" = http post --content-type application/json
@@ -959,8 +961,8 @@ def --wrapped "ssh exec" [host, ...args] {
   ssh -qt $host $argsStr
 }
 
-def imgpaste [pathArg?] {
-  let $path = $pathArg | default ($"images/(date now | format date "%Y-%m-%d")-(random pass -s).png")
+def imgpaste [path = "images"] {
+  let $path = default ($"($path)/(date now | format date "%Y-%m-%d")-(random pass -s).png")
 
   osascript -e 'set pngData to the clipboard as «class PNGf»' -e 'set f to open for access POSIX file "/tmp/clipboard.png" with write permission' -e 'write pngData to f' -e 'close access f'
   mv /tmp/clipboard.png ($path | path expand)
