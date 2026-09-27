@@ -8,6 +8,8 @@ vim.api.nvim_create_autocmd("BufNewFile", {
   callback = function(args)
     local file = vim.api.nvim_buf_get_name(args.buf)
     local extension = vim.fn.fnamemodify(file, ":e")
+    local name = vim.fn.expand("%:t")
+    print("name", name)
 
     if extension == "" then
       return

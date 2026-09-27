@@ -59,20 +59,27 @@ def _sample():
 
     # Free and inactive pages can be reclaimed; the rest is shown as used RAM.
     used = max(0, _total_ram - (vm[0] + vm[2]) * _page_size)
-    gib = 1024**3
-    ram_width = len(f"{_total_ram / gib:.1f}")
+    disk = os.statvfs("/")
+    disk_total = disk.f_blocks * disk.f_frsize
+    disk_used = (disk.f_blocks - disk.f_bfree) * disk.f_frsize
     cpu_filled = round(_bar_width * cpu_usage)
     ram_filled = round(_bar_width * min(1, used / _total_ram))
+    disk_filled = round(_bar_width * disk_used / disk_total) if disk_total else 0
+    ram_percent = round(100 * used / _total_ram)
+    disk_percent = round(100 * disk_used / disk_total) if disk_total else 0
     now = datetime.now().astimezone()
-    local_time = now.strftime("%d.%m %H:%M")
+    local_date = now.strftime("%d.%m")
+    local_clock = now.strftime("%H:%M")
     utc_time = now.astimezone(UTC).strftime("%H:%M")
     return (
         (("  ", True), (f"{cpu_text:>3}%", False), (" ", True),
-         ("▮" * cpu_filled, "bar"), ("▯" * (_bar_width - cpu_filled), "track")),
-        ((" │ ", True), (f"{used / gib:{ram_width}.1f}/{_total_ram / gib:.0f}G", False),
-         (" ", True), ("▮" * ram_filled, "bar"), ("▯" * (_bar_width - ram_filled), "track")),
-        ((" │ ", True), (local_time, False)),
-        ((" │ UTC ", True), (utc_time, False)),
+         ("━" * cpu_filled, "bar"), ("─" * (_bar_width - cpu_filled), "track")),
+        ((" · m ", True), (f"{ram_percent}%", False),
+         (" ", True), ("━" * ram_filled, "bar"), ("─" * (_bar_width - ram_filled), "track")),
+        ((" · / ", True), (f"{disk_percent}%", False),
+         (" ", True), ("━" * disk_filled, "bar"), ("─" * (_bar_width - disk_filled), "track")),
+        ((" · ", True), (local_date, True), (" ", True), (local_clock, False)),
+        ((" · UTC ", True), (utc_time, False)),
     )
 
 
@@ -86,8 +93,12 @@ def _refresh(_):
 def _visible_status(columns):
     if not _status:
         return ()
-    cpu, ram, local_time, utc_time = _status
+    cpu, ram, disk, local_time, utc_time = _status
     for groups in (
+        (cpu, ram, disk, local_time, utc_time),
+        (cpu, ram, disk, local_time),
+        (cpu, ram, disk, utc_time),
+        (cpu, ram, disk),
         (cpu, ram, local_time, utc_time),
         (cpu, ram, local_time),
         (cpu, ram, utc_time),

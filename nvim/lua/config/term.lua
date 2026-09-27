@@ -255,6 +255,7 @@ _G.executeCommandUnderTheCursor = function(opts)
   local cwd = vim.fn.getcwd()
   local trusted_paths = _G.TRUSTED
   local is_trusted = trusted_paths ~= nil and vim.tbl_contains(trusted_paths, cwd)
+
   local local_nu_config = "_billy/.env.nu"
   local has_local_nu_config = vim.uv.fs_stat(local_nu_config) ~= nil
 

@@ -23,14 +23,14 @@ function _G.tabline()
 end
 
 local mode_map = {
-  n =  { "NORMAL", "StatusNormal" },
-  i =  { "INSERT", "StatusInsert" },
-  t =  { " TERM ", "StatusInsert" },
-  v =  { "VISUAL", "StatusVisual" },
-  V =  { "V-LINE", "StatusVisual" },
-  c =  { "COMMAND", "IncSearch" },
-  R =  { "REPLACE", "WarningMsg" },
-  j =  { "JUMP   ", "StatusInsert" },
+  n  = { "NORMAL", "StatusNormal" },
+  i  = { "INSERT", "StatusInsert" },
+  t  = { " TERM ", "StatusInsert" },
+  v  = { "VISUAL", "StatusVisual" },
+  V  = { "V-LINE", "StatusVisual" },
+  c  = { "COMMAND", "IncSearch" },
+  R  = { "REPLACE", "WarningMsg" },
+  j  = { " JUMP  ", "StatusInsert" },
   nt = { "VISIBLE", "Comment" },
   ["\22"] = { "V-BLCK", "Visual" },
 }
@@ -39,6 +39,7 @@ function _G.statusline()
   local statusline_win = vim.g.statusline_winid
   local is_active = statusline_win == vim.fn.win_getid()
   local special_mode
+
   if statusline_win and vim.api.nvim_win_is_valid(statusline_win) then
     local statusline_buf = vim.api.nvim_win_get_buf(statusline_win)
     local buffer_mode = vim.b[statusline_buf]._specialMode

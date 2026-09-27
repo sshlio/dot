@@ -338,12 +338,8 @@ function M.motion(insert, backward)
   M.bind_input_keys()
 end
 
-vim.keymap.set({ "n" }, "e", function()
+vim.keymap.set({ "n" }, "<c-[>", function()
   M.motion(false, false)
-end)
-
-vim.keymap.set({ "n" }, "E", function()
-  M.motion(false, true)
 end)
 
 vim.keymap.set({ "x" }, "<d-e>", function()

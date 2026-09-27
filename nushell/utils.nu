@@ -523,16 +523,19 @@ def --wrapped buildRun [path: string, ...args] {
   docker run -it (buildPath $path) ...$args
 }
 
-def sv [path] {
+def sv [path, --immutable(-i)] {
+  let content = $in
   let dir = ($path | path dirname)
 
   if $dir != "" {
     ^mkdir -p $dir
   }
 
-  $in | save --force $path
+  if not $immutable or not ($path | path exists) or $content != (^cat -- $path) {
+    $content | save --force $path
+  }
 
-  $in
+  $content
 }
 
 def tofile [

@@ -7,6 +7,7 @@ _G.billy = {
   harness = "cl",
   nvr_commands = {},
   term_env = {},
+  templates = {},
 }
 
 _G.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
@@ -1222,10 +1223,12 @@ end)
 -- xmarkdown xmd
 u.ft({ "markdown" }, function(buffer)
   vim.keymap.set('i', ';t', "- [ ] ", { buffer = buffer })
+  vim.keymap.set('i', ';d', function()
+    return os.date("[%d-%m-%Y]")
+  end, { buffer = buffer, expr = true })
   vim.keymap.set('i', ';l', "[](<c-r>+)<esc>^a", { buffer = buffer })
   vim.keymap.set('i', ';h1', "# ", { buffer = buffer })
   vim.keymap.set('i', ';h2', "## ", { buffer = buffer })
-  snip(";d", '[<date>] ', buffer)
   vim.keymap.set('i', ';b', "```<cr>```<esc>kA", { buffer = buffer })
 end)
 
@@ -1863,10 +1866,8 @@ vim.lsp.config['nu_ls'] = {
   settings = {}
 }
 
--- see https://gist.github.com/kr-alt/24aaf4bad50d603c3c6a270502e57209
-vim.lsp.config['ts_ls'] = {
-  init_options = { hostInfo = 'neovim' },
-  cmd = { 'typescript-language-server', '--stdio' },
+vim.lsp.config['tsc'] = {
+  cmd = { 'tsc', '--lsp', '--stdio' },
   filetypes = {
     'javascript',
     'javascriptreact',
@@ -1876,14 +1877,6 @@ vim.lsp.config['ts_ls'] = {
     'typescript.tsx',
   },
   root_markers = { '.git' },
-
-  init_options = {
-    preferences = {
-      importModuleSpecifierPreference = "non-relative",
-      includeCompletionsForModuleExports = true,
-      includeCompletionsForImportStatements = true,
-    },
-  },
 }
 
 vim.lsp.config['terraform_ls'] = {
@@ -1893,7 +1886,7 @@ vim.lsp.config['terraform_ls'] = {
 }
 
 vim.lsp.enable('nu_ls')
-vim.lsp.enable('ts_ls')
+vim.lsp.enable('tsc')
 vim.lsp.enable('terraform_ls')
 
 vim.keymap.set("n", "sk", vim.lsp.buf.hover, { desc = "LSP hover" })
@@ -2232,7 +2225,6 @@ print('')
 vim.keymap.set('n', 'Q', 'Q')
 vim.keymap.set('n', 'q=', 'q=')
 
-
 vim.keymap.set('n', 'q0', clear_multicursors)
 vim.keymap.set('n', '<D-J>', function()
   vim.schedule(function()
@@ -2248,6 +2240,34 @@ vim.keymap.set('n', '<D-K>', function()
   return 'Q2q=k'
 end, { expr = true, desc = "Add cursor and move down" })
 
+vim.keymap.set('n', '<c-n>', '2q=Qn1q=')
+
+vim.keymap.set('n', '*', '*N')
+vim.keymap.set('n', 'Q', '*N2q=Qn1q=')
+vim.keymap.set('n', 'qe', '<c-L><esc>1QnQ1q=')
+
+vim.keymap.set('x', 'Q', function()
+  if vim.fn.line('v') == vim.fn.line('.') then
+    local line = vim.api.nvim_get_current_line()
+
+    local anchor_col = vim.fn.col('v') - 1
+    local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
+
+    local first_col, last_col = math.min(anchor_col, cursor_col), math.max(anchor_col, cursor_col)
+    local first_char = vim.fn.charidx(line, first_col)
+    local last_char = vim.fn.charidx(line, last_col)
+
+    local text = vim.fn.strcharpart(line, first_char, last_char - first_char + 1)
+
+    vim.opt.hlsearch = false
+
+    vim.fn.setreg("/", "\\V" .. vim.fn.escape(text, "\\"))
+
+    return ("nN2q=Qn1q=")
+  end
+
+  return ("Q")
+end, { expr = true })
+
 vim.keymap.set({ 'n', 'x' }, 'J', '8j')
 vim.keymap.set({ 'n', 'x' }, 'K', '8k')
-
