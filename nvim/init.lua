@@ -2245,7 +2245,7 @@ end, { expr = true, desc = "Add cursor and move down" })
 vim.keymap.set('n', '<c-n>', '2q=Qn1q=')
 
 vim.keymap.set('n', '*', '*N')
-vim.keymap.set('n', 'Q', '*N2q=Qn1q=')
+vim.keymap.set('n', 'Q', '2q=*NQn1q=')
 vim.keymap.set('n', 'qe', '<c-L><esc>1QnQ1q=')
 
 vim.keymap.set('x', 'Q', function()
