@@ -30,6 +30,8 @@ vim.opt.grepprg = "rg --vimgrep --glob '!_billy' --glob '!CLAUDE.md'"
 vim.opt.complete = '.,w'
 vim.opt.completeopt = { 'menu', 'menuone', 'fuzzy' }
 vim.opt.shortmess = "asFqIAWTt"
+vim.opt.hlsearch = false
+
 if vim.fn.has('nvim-0.13') == 1 then
   vim.opt.shortmess:append('u')
 end
