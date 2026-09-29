@@ -1,57 +1,54 @@
 -- Copyright (c) 2026 Sławomir Laskowski
 -- SPDX-License-Identifier: MIT
 
+local baseindent = nil
+
 local patterns = {
   "%(%s*$",  -- line ends with '('
   "%{%s*$",  -- line ends with '{'
   "%[%s*$",  -- line ends with '['
-  " then$",   -- ends with 'then'
-  " else$",   -- ends with 'else'
+
+  " then$", "^then$",   -- ends with 'then'
+  " else$", "^else$",   -- ends with 'else'
+  " do$",   "^do$",   -- ends with 'else'
+
+  "^%s*function",   -- ends with 'else'
   "%s*%<[^/][^%>]*[^/]%>$",   -- html tags, not</div>
 }
 
-function _G.FirstNonEmptyIndent()
+function _G.Flat()
   local lnum = vim.v.lnum
   local mode = vim.fn.mode()
+  local indent = vim.fn.indent(vim.v.lnum)
 
-  local line = vim.fn.getline(lnum)
-  local trimmed = line:match("^%s*(.-)%s*$")
+  if baseindent == nil then
+    local base = vim.fn.prevnonblank(lnum - 1)
 
-  local baseIndent = vim.fn.indent(lnum)
+    local linecontent = vim.fn.getline(base)
 
-  if baseIndent > 1 then
-    -- Dont mess wit it
-    return baseIndent
-  end
+    lastline = vim.fn.indent(base)
+    baseindent = lastline - indent
 
-  -- Search upwards for the first non-empty line
-  for i = lnum - 1, 1, -1 do
-    local line = vim.fn.getline(i)
-
-    if line ~= "" then
-      local extra = 0
-
-      if mode ~= "i" then
-        map(
-          patterns,
-          function(pat)
-            if line:match(pat) then
-              extra = 2
-            end
-          end
-        )
+    for _, pat in ipairs(patterns) do
+      if linecontent:match(pat) then
+        baseindent = baseindent + 2
+        break
       end
-
-      return vim.fn.indent(i) + extra
     end
+
+    -- print("prevnonblank", lnum, base, lastline, baseindent)
+
+    vim.schedule(function() baseindent = nil end)
   end
 
-  return vim.fn.indent(lnum - 1)
+  return indent + baseindent
 end
+
 
 vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
   callback = function(args)
-    vim.bo[args.buf].indentexpr = "v:lua.FirstNonEmptyIndent()"
+    vim.bo[args.buf].indentexpr = "v:lua.Flat()"
   end,
   desc = "Force custom indentexpr",
 })
+

@@ -205,11 +205,6 @@ local function normalizedVisual(command, wrap, inversed)
 
     local cursor_is_before_anchor = (c[2] < v[2]) or (c[2] == v[2] and c[3] < v[3])
 
-    print(
-      "cursor_is_before_anchor",
-      cursor_is_before_anchor
-    )
-
     if inversed then
       cursor_is_before_anchor = not cursor_is_before_anchor
     end
@@ -313,7 +308,8 @@ o.expandtab = true -- Convert tabs to spaces
 o.smarttab = false     -- Keep same indent as current line
 o.smartindent = false -- Automatically indent new lines
 o.autoindent = false     -- Keep same indent as current line
-o.cindent = false     -- Keep same indent as current line
+o.indentexpr = ""
+o.cindent = false     -- Keep same invim.opt.autoindent = false
 
 o.scrolloff = 10 -- Automatically indent new lines
 o.scrolloffpad = 0
@@ -403,7 +399,7 @@ vim.keymap.set('n', 'gV', function()
   _G.undo_version_view = vim.fn.winsaveview()
 end, { desc = 'Replace saved undo version' })
 
-vim.keymap.set('c', '<c-v>', "<c-r>+")
+vim.keymap.set('c', '<c-v>', "<c-r>0")
 
 local function count_normal_windows()
   local count = 0
@@ -435,7 +431,6 @@ end, { silent = true })
 -- Clipboard
 
 -- TODO ii but inner mode and backward (it worked)
--- TODO replace system clipboard only if register 0 has changed
 -- TODO civ
 
 vim.keymap.set("i", "<CR>", function()
@@ -503,81 +498,17 @@ vim.keymap.set('n', 'yP', function()
   fn.setreg('0', abspath)
 end, { desc = 'Yank absolute file path' })
 
-local function put(reg)
-  reg = reg or fn.getreg('+')
-
-  -- append newline only if not already ending with one
-  if not reg:match('\n$') then
-    reg = reg .. '\n'
-  end
-
-  fn.setreg('c', reg, 'V')  -- explicitly set as linewise
-
-  return '"c]p'
-end
-
 local backupRegister = "undf"
 
-vim.keymap.set('n', 'p', function() return put() end, { expr = true })
-vim.keymap.set('n', 'sp', function() return put(backupRegister) end, { expr = true })
+vim.keymap.set('n', 'p', 'o<esc>V"0p=\']')
+vim.keymap.set({ 'x' }, 'p', '"0p=\']')
+
 vim.keymap.set('c', '*', '.*')
 vim.keymap.set('o', 'l', '2l')
-
-vim.keymap.set('v', 'p', function()
-  local reg = fn.getreg('+'):gsub("\n$", "")
-
-
-  if (not reg:match('\n')) then
-    fn.setreg("x", reg)
-    return "\"xp"
-  end
-
-  fn.setreg('c', reg, 'V')  -- explicitly set as linewise
-
-  return 'dk"c]p'
-end, { expr = true })
-
--- vim.keymap.set('x', 'sp', function()
---   fn.setreg('c', reg, 'V')  -- explicitly set as linewise
---
---   if not reg:match('\n') then
---     return "\"0]p"
---   end
---
---   fn.setreg('c', reg, 'V')  -- explicitly set as linewise
---
---   return 'dk"c]p'
--- end, { expr = true })
-
--- Clipboard
--- vim.keymap.set('n', 'U', "<c-r>", { silent = true })
--- vim.keymap.set('n', 'u', "u", { silent = true })
-
--- Silent undo/redo that still supports counts like 100u or 5<C-r>
-
--- vim.keymap.set('n', 'u', function()
---   local count = vim.v.count1
---   u.normal(count .. "u")
--- end, { noremap = true, silent = true })
-
-
--- vim.keymap.set('n', 'U', cmd("silent! redo"))
--- vim.keymap.set('n', 'u', cmd("silent! undo"))
-
--- vim.keymap.set('i', '<C-c>', "<c-r>\"")
--- vim.keymap.set('i', '<D-c>', "<c-r>\"")
-
-vim.keymap.set('n', 'sj', function()
-  vim.fn.setreg('+', vim.fn.getreg('"'))
-end)
 
 
 vim.keymap.set('n', 'sh', function()
   backupRegister = vim.fn.getreg('0')
-end)
-
-vim.keymap.set('n', 'su', function()
-  vim.fn.setreg('+', vim.fn.getreg('0'))
 end)
 
 vim.keymap.set('n', 'sd', '<cmd>t.<cr>')
@@ -638,7 +569,7 @@ vim.keymap.set('i', '"', "\"\"<left>")
 
 vim.keymap.set('n', 'V', 'vg_')
 vim.keymap.set('n', 'C', 'cg_')
-vim.keymap.set('n', 'Y', '"+yg_')
+vim.keymap.set('n', 'Y', 'yg_')
 
 local termMarks = vim.list_extend(vim.split("QWERTYUP", ""), {})
 
@@ -953,19 +884,11 @@ vim.keymap.set('n', '<esc>', function()
 
 end)
 
-vim.keymap.set({'i'}, '<C-v>', function()
-  local pasted = vim.fn.getreg('+')
-  local oneliner = pasted:gsub("\n$", "")
+vim.keymap.set('n', 's=', '=gv')
+vim.keymap.set({'i'}, '<C-v>', "<c-r><c-p>0")
+-- vim.keymap.set("i", "<C-v>", [[<C-r>=getreg('0')<CR>]])
 
-  if not oneliner:find("\n", 1, true) then
-    vim.fn.setreg('z', oneliner:gsub("^[ \t]+", ""), 'c')
-    return "<c-r><c-p>z"
-  end
-
-  return "<c-r><c-p>+"
-end, { expr = true })
-
-vim.keymap.set({'i', 'c'}, '<C-c>', "<c-r><c-p>\"")
+vim.keymap.set({'i', 'c'}, '<C-c>', "<c-r>\"")
 
 -- vim.keymap.set('i', '<C-Return>', "<cr><esc>ko")
 -- vim.keymap.set('i', '<S-Backspace>', "<esc>kgJgJi")
@@ -1298,64 +1221,33 @@ u.ft({ "vim" }, function(buffer)
 end)
 
 
-local pack = {}
+local previous_yank = fn.getreg('0')
 
-local yank_before = fn.getreg('0');
+vim.api.nvim_create_autocmd("TextYankPost", {
+  group = augroup,
+  callback = function()
+    local yank = fn.getreg('0')
+    if yank == previous_yank then
+      return
+    end
 
--- vim.api.nvim_create_autocmd("TextYankPost", {
---   group = augroup,
---   callback = function()
---     local yank = fn.getreg('0')
---
---     if yank_before == yank then
---       return
---     end
---
---     if yank ~= pack.val then
---       vim.schedule(function()
---         fn.setreg('+', fn.getreg('0'))
---       end)
---       pack.val = yank
---     end
---   end,
--- })
+    previous_yank = yank
+    vim.schedule(function()
+      fn.setreg('+', yank:gsub('\n$', ''), 'v')
+    end)
+  end,
+})
 
-local before = ""
+vim.api.nvim_create_autocmd('FocusGained', {
+  group = augroup,
+  callback = function()
+    local clipboard = fn.getreg('+')
 
--- vim.api.nvim_create_autocmd("TextYankPost", {
---   group = augroup,
---   callback = function(event)
---     -- get the yanked text from unnamed register (")
---     local yanked = fn.getreg('0')
---
---     if yanked == before then
---       return
---     end
---     before = yanked
---
---     if not yanked or yanked == "" then
---       return
---     end
---
---     -- split into lines, take first line
---     local first_line = yanked:match("([^\r\n]*)")
---     if not first_line then
---       first_line = ""
---     end
---
---     first_line = vim.trim(first_line)
---
---     -- truncate to 100 chars
---     local maxlen = 100
---     if #first_line > maxlen then
---       first_line = first_line:sub(1, maxlen) .. "…"
---     end
---
---     -- print the result
---     print("Yanked: " .. first_line)
---   end,
---   desc = "Print first line of yanked text (truncated to 100 chars)"
--- })
+    fn.setreg('0', clipboard, fn.getregtype('+'))
+
+    previous_yank = clipboard
+  end,
+})
 
 local function ii(reverse, inner)
   local cur_indent = vim.fn.indent(".")
@@ -1615,8 +1507,9 @@ vim.api.nvim_create_autocmd("WinLeave", {
 vim.api.nvim_create_autocmd({"CursorHold"}, {
   group = augroup,
   callback = function(event)
-    pcall(vim.cmd, "silent! write!")
-    -- Clean status line..
+    if vim.bo[event.buf].modified then
+      pcall(vim.cmd, "silent! write!")
+    end
   end,
 })
 
@@ -1854,12 +1747,7 @@ vim.keymap.set('n', 'so', '<cmd>silent! w! | execute "luafile %"<cr>')
 vim.keymap.set('n', 'sd', '<cmd>t.<cr>')
 
 vim.keymap.set('n', 'so', '<cmd>silent! w! | execute "luafile %"<cr>')
-vim.keymap.set({ 'n', 'v' }, 'y', '"+y')
-vim.keymap.set({ 'n' }, 'yy', '"+yy')
-
-vim.keymap.set('n', 'sj', function()
-  vim.fn.setreg('+', vim.fn.getreg('"'))
-end)
+vim.keymap.set({ 'n' }, 'yy', 'yil')
 
 vim.lsp.config['nu_ls'] = {
   cmd = { 'nu', '--lsp' },
@@ -2073,7 +1961,7 @@ vim.keymap.set('n', 'g;', function()
     return count .. 'g;'
 end, { expr = true, silent = true, desc = "Jump to distant change" })
 
-vim.keymap.set('v', 'C', function()
+vim.keymap.set('x', 'C', function()
   vim.cmd('normal! \27')
 
   local start_pos = vim.fn.getpos("'<")
@@ -2094,9 +1982,9 @@ vim.keymap.set('v', 'C', function()
   local filepath = vim.fn.expand('%:.')
 
   if from_line == to_line then
-    vim.fn.setreg('+', '@' .. filepath .. ':' .. from_line)
+    vim.fn.setreg('0', '@' .. filepath .. ':' .. from_line)
   else
-    vim.fn.setreg('+', '@' .. filepath .. ':' .. from_line .. '-' .. to_line)
+    vim.fn.setreg('0', '@' .. filepath .. ':' .. from_line .. '-' .. to_line)
   end
 end, { desc = 'Copy selection as Claude Code context' })
 
@@ -2273,4 +2161,8 @@ end, { expr = true })
 
 vim.keymap.set({ 'n', 'x' }, 'J', '8j')
 vim.keymap.set({ 'n', 'x' }, 'K', '8k')
-vim.keymap.set('x', 'p', '"+p')
+
+vim.keymap.set('n', 'sj', function()
+  local text = vim.fn.getreg('"')
+  vim.fn.setreg('0', text)
+end)

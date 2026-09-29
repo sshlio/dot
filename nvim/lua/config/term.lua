@@ -693,12 +693,17 @@ _G.bindExecuteCommand = function(buffer)
       vim.cmd.normal('gcc')
     end
   end, { desc = 'Stop command and toggle comment', buffer = buffer })
+
   vim.keymap.set('n', 'dd', function()
     local line = vim.api.nvim_win_get_cursor(0)[1]
 
     _G.stopCommandUnderTheCursor()
-    vim.api.nvim_buf_set_lines(0, line - 1, line, false, {})
-  end, { desc = 'Stop command and delete line', buffer = buffer })
+
+    -- vim.api.nvim_buf_set_lines(0, line - 1, line, false, {})
+
+    return "dd"
+  end, { desc = 'Stop command and delete line', buffer = buffer, expr = true })
+
   vim.keymap.set('x', 'd', function()
     local first = math.min(vim.fn.line('v'), vim.fn.line('.'))
     local last = math.max(vim.fn.line('v'), vim.fn.line('.'))
