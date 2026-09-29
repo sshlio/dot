@@ -2273,3 +2273,4 @@ end, { expr = true })
 
 vim.keymap.set({ 'n', 'x' }, 'J', '8j')
 vim.keymap.set({ 'n', 'x' }, 'K', '8k')
+vim.keymap.set('x', 'p', '"+p')

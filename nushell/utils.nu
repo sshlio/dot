@@ -1012,3 +1012,28 @@ def link [--force(-f), source: path, path: path] {
 
   ln -s $source $path
 }
+
+def dua [dir: path] {
+  du -a ($dir | path join '*' | into glob) | reject apparent | sort-by -r physical
+}
+
+def summary [] {
+  let data = $in
+  $in | columns | each { |col|
+    {
+      col: $col
+      val: (whatever { $data | get $col | math sum })
+    }
+  }
+  | each {
+    if ($in.val.success) {
+       { col: $in.col, val: $in.val.output }
+    } else {
+      { col: $in.col, val: "-----" }
+    }
+  }
+  | from entries
+  | let patch
+
+  $data | append $patch
+}
