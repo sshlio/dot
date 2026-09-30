@@ -521,12 +521,30 @@ vim.keymap.set('n', 'P', function()
   return '"zyy"zpkV"0p=\']^'
 end, { expr = true })
 
-vim.keymap.set('n', 'o', '"zyy"zp0D$')
-vim.keymap.set('n', 'O', '"zyy"zP0D$')
 
--- Useful for multi cursor mode to keep indent of blank lines
-vim.keymap.set('n', 'qo', '"zyy"zp"_dil$')
-vim.keymap.set('n', 'qO', '"zyy"zP"_dil$')
+local function multicursor_count()
+  local ns = vim.api.nvim_create_namespace("nvim.multicursor")
+  local cursors = vim.api.nvim_buf_get_extmarks(0, ns, 0, -1, {})
+
+  -- +1 for the primary cursor
+  return #cursors + 1
+end
+
+vim.keymap.set('n', 'o', function()
+  if multicursor_count() > 1 then
+    return '"zyy"zp"_dil$'
+  end
+  return '"zyy"zp0D$'
+end, { expr = true })
+
+vim.keymap.set('n', 'O', function()
+  if multicursor_count() > 1 then
+    return '"zyy"zP"_dil$'
+  end
+  return '"zyy"zP0D$'
+end, { expr = true })
+
+vim.keymap.set('n', 'qo', function() print("reg", vim.fn.getreg('"')) end)
 
 vim.keymap.set({ 'x' }, 'p', '"0p=\']')
 
