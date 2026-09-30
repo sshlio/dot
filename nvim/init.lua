@@ -308,7 +308,6 @@ o.expandtab = true -- Convert tabs to spaces
 o.smarttab = false     -- Keep same indent as current line
 o.smartindent = false -- Automatically indent new lines
 o.autoindent = false     -- Keep same indent as current line
-o.indentexpr = ""
 o.cindent = false     -- Keep same invim.opt.autoindent = false
 
 o.scrolloff = 10 -- Automatically indent new lines
@@ -500,7 +499,35 @@ end, { desc = 'Yank absolute file path' })
 
 local backupRegister = "undf"
 
-vim.keymap.set('n', 'p', 'o<esc>V"0p=\']')
+vim.keymap.set('n', 'p', function()
+  local lazyredraw = vim.o.lazyredraw
+  vim.o.lazyredraw = true
+
+  vim.schedule(function()
+    vim.o.lazyredraw = lazyredraw
+  end)
+
+  return '"zyy"zpV"0p=\']^'
+end, { expr = true })
+
+vim.keymap.set('n', 'P', function()
+  local lazyredraw = vim.o.lazyredraw
+  vim.o.lazyredraw = true
+
+  vim.schedule(function()
+    vim.o.lazyredraw = lazyredraw
+  end)
+
+  return '"zyy"zpkV"0p=\']^'
+end, { expr = true })
+
+vim.keymap.set('n', 'o', '"zyy"zp0D$')
+vim.keymap.set('n', 'O', '"zyy"zP0D$')
+
+-- Useful for multi cursor mode to keep indent of blank lines
+vim.keymap.set('n', 'qo', '"zyy"zp"_dil$')
+vim.keymap.set('n', 'qO', '"zyy"zP"_dil$')
+
 vim.keymap.set({ 'x' }, 'p', '"0p=\']')
 
 vim.keymap.set('c', '*', '.*')
@@ -703,8 +730,8 @@ local function move_term(name)
 end
 
 for _, key in ipairs(vim.split("1234567890qwertyuiopasdfghjklzxcvbnm", "")) do
-  vim.keymap.set({ 'n' }, 'q' .. key, function() print("q"..key.." mapping is free to be used!") end, { desc = "<nop>" })
-  vim.keymap.set({ 'n', 'v', 's' }, 's' .. key, function() print("s"..key.." mapping is free to be used!") end, { desc = "<nop>" })
+  -- vim.keymap.set({ 'n' }, 'q' .. key, function() print("q"..key.." mapping is free to be used!") end, { desc = "<nop>" })
+  -- vim.keymap.set({ 'n', 'v', 's' }, 's' .. key, function() print("s"..key.." mapping is free to be used!") end, { desc = "<nop>" })
 
   vim.keymap.set('n', 'm' .. key, 'm' .. string.upper(key), { desc = "<nop>" })
 
@@ -811,17 +838,6 @@ vim.keymap.set('x', '<C-K>', cmd("'<,'>m+1"))
 -- NAVIGATION
 vim.keymap.set('n', 'gf', 'f')
 vim.keymap.set('n', 'gF', 'F')
-vim.keymap.set('n', 'o', function()
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  vim.api.nvim_buf_set_lines(0, row, row, false, {""})
-  vim.api.nvim_win_set_cursor(0, {row + 1, col})
-end)
-
-vim.keymap.set('n', 'O', function()
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  vim.api.nvim_buf_set_lines(0, row -1, row-1, false, {""})
-  vim.api.nvim_win_set_cursor(0, {row + 1, col})
-end)
 
 vim.keymap.set('n', '<c-o>', "<C-^>")
 -- vim.keymap.set('n', '/', "mz/")
@@ -1026,8 +1042,6 @@ end
 
 -- xlua
 u.ft({ "lua" }, function(buffer)
-  vim.opt_local.indentexpr = "v:lua.FirstNonEmptyIndent()"
-
   snip(";d", [[
     function()
       -- <date>
@@ -1233,7 +1247,15 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 
     previous_yank = yank
     vim.schedule(function()
-      fn.setreg('+', yank:gsub('\n$', ''), 'v')
+      local lines = vim.split(yank:gsub('\n$', ''), '\n', { plain = true })
+      local indent = #(lines[1]:match('^[ \t]*'))
+
+      for i, line in ipairs(lines) do
+        local leading = #(line:sub(1, indent):match('^[ \t]*'))
+        lines[i] = line:sub(leading + 1)
+      end
+
+      fn.setreg('+', table.concat(lines, '\n'), 'v')
     end)
   end,
 })
@@ -1747,7 +1769,6 @@ vim.keymap.set('n', 'so', '<cmd>silent! w! | execute "luafile %"<cr>')
 vim.keymap.set('n', 'sd', '<cmd>t.<cr>')
 
 vim.keymap.set('n', 'so', '<cmd>silent! w! | execute "luafile %"<cr>')
-vim.keymap.set({ 'n' }, 'yy', 'yil')
 
 vim.lsp.config['nu_ls'] = {
   cmd = { 'nu', '--lsp' },
@@ -1988,79 +2009,9 @@ vim.keymap.set('x', 'C', function()
   end
 end, { desc = 'Copy selection as Claude Code context' })
 
--- o.cmdheight = 0
-
--- require('vim._core.ui2').enable({
---   enable = false,
---   msg = {
---     targets = {
---       [''] = 'msg',
---       empty = 'cmd',
---       bufwrite = 'msg',
---       confirm = 'cmd',
---       emsg = 'pager',
---       echo = 'msg',
---       echomsg = 'msg',
---       echoerr = 'pager',
---       completion = 'cmd',
---       list_cmd = 'pager',
---       lua_error = 'pager',
---       lua_print = 'msg',
---       progress = 'pager',
---       rpc_error = 'pager',
---       quickfix = 'msg',
---       search_cmd = 'cmd',
---       search_count = 'cmd',
---       shell_cmd = 'pager',
---       shell_err = 'pager',
---       shell_out = 'pager',
---       shell_ret = 'msg',
---       undo = 'cmd',
---       verbose = 'pager',
---       wildlist = 'cmd',
---       wmsg = 'msg',
---       typed_cmd = 'cmd',
---     },
---     cmd = {
---       height = 0.5,
---     },
---     dialog = {
---       height = 0.5,
---     },
---     msg = {
---       height = 0.3,
---       timeout = 5000,
---     },
---     pager = {
---       height = 0.5,
---     },
---   },
--- })
-
 vim.keymap.set('n', 'sm', '<cmd>messages<cr>',                        {  desc = "Show messages" })
 vim.keymap.set('n', 'sM', '<cmd>messages clear | echo "cleared"<cr>', {  desc = "Clear essages" })
 vim.keymap.set('n', 'sI', '<cmd>Inspect<cr>',                         {  desc = "Inspect node under the cursor" })
-
-_G.diff = function()
-  local path = vim.fn.expand("%")
-  local output = vim.fn.systemlist("git show HEAD:" .. path)
-  local ft = vim.api.nvim_get_option_value("filetype", { buf = 0 })
-
-  vim.cmd.wincmd('o')
-
-  vim.cmd("enew")
-  vim.wo.relativenumber = false
-  vim.api.nvim_buf_set_lines(0, 0, -1, false, output)
-  vim.bo.filetype = "lua"
-  vim.wo.relativenumber = false
-
-  vim.cmd("vert diffsplit " .. path)
-
-  vim.cmd.wincmd('l')
-  vim.wo.relativenumber = false
-end
-vim.keymap.set('n', 'sD', _G.diff, { desc = "Show git diff of current file" })
-
 
 local function yank_keep_view(keys)
   local view = vim.fn.winsaveview()
@@ -2078,14 +2029,21 @@ local function yank_keep_view(keys)
 end
 
 vim.keymap.set("n", "yip", function()
-  yank_keep_view("\"+yip")
+  yank_keep_view("yip")
 end, {
   silent = true,
   desc = "Yank paragraph without moving view",
 })
 
 vim.keymap.set("n", "yaf", function()
-  yank_keep_view("gg\"+yG")
+  yank_keep_view("ggyG")
+end, {
+  silent = true,
+  desc = "Yank whole buffer without moving view",
+})
+
+vim.keymap.set("n", "yy", function()
+  yank_keep_view("yil")
 end, {
   silent = true,
   desc = "Yank whole buffer without moving view",

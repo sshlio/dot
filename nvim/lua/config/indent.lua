@@ -12,7 +12,10 @@ local patterns = {
   " else$", "^else$",   -- ends with 'else'
   " do$",   "^do$",   -- ends with 'else'
 
-  "^%s*function",   -- ends with 'else'
+  "^%s*function",
+  "%sfunction%(%)$",
+  "%(function%(%)$",
+  "%,function%(%)$",
   "%s*%<[^/][^%>]*[^/]%>$",   -- html tags, not</div>
 }
 
@@ -21,8 +24,16 @@ function _G.Flat()
   local mode = vim.fn.mode()
   local indent = vim.fn.indent(vim.v.lnum)
 
+  if mode == "i" then
+    return indent
+  end
+
   if baseindent == nil then
     local base = vim.fn.prevnonblank(lnum - 1)
+
+    if lnum == 1 then
+      base = 0
+    end
 
     local linecontent = vim.fn.getline(base)
 
@@ -36,10 +47,17 @@ function _G.Flat()
       end
     end
 
-    -- print("prevnonblank", lnum, base, lastline, baseindent)
 
-    vim.schedule(function() baseindent = nil end)
+
+
+    print("prevnonblank", lnum, base, lastline, baseindent)
+
+    vim.schedule(function()
+      baseindent = nil
+    end)
   end
+
+  -- print("idnent", lnum, indent + baseindent, indent, baseindent, vim.fn.mode())
 
   return indent + baseindent
 end
