@@ -1037,3 +1037,55 @@ def summary [] {
 
   $data | append $patch
 }
+
+def align [char = ":", --mode = "left"] {
+  $in | lines | each { $in | split row $char | each { $in | str trim } } | let parts
+
+  # let cols = ($parts | get 0 | length) - 1
+  let cols = (($parts | each { $in | length }) | math max) - 1
+
+  let sizes = 0..$cols | each { |idx| ($parts | each { $in | gt $idx | default "" | str length } | math max) }
+
+  $parts | each { |line|
+    let lastcol = ($line | length) - 1
+    0..$cols | each { |idx|
+      let last = $idx == ($lastcol)
+
+      if $idx > $lastcol { return "" }
+
+      let localchar = (
+        if ((not $last) and $mode == "left") { $char } else { "" }
+      )
+
+      let txt = $"($line | gt $idx)($localchar)"
+      let size = ($sizes | gt $idx) + ($localchar | str length)
+
+      let filled = $txt | fill -w $size -c " "
+
+      if ($mode == "right" and not $last) {
+        $"($filled) ($char)"
+      } else {
+        $filled
+      }
+
+
+    } | str join " "
+  } | str join "\n"
+}
+
+
+def clip [-p] {
+  if $p {
+    persist_clipboard
+    _nvim_sync_clipboard
+    return (pbpaste)
+  }
+
+  let input = $in
+  if ($in != null) {
+    $input | pbcopy
+    _nvim_sync_clipboard
+  } else {
+    pbpaste
+  }
+}

@@ -216,6 +216,7 @@ vim.api.nvim_create_autocmd('TermRequest', {
 })
 
 
+
 vim.keymap.set('t', '<c-l>', function()
   vim.fn.chansend(vim.b.terminal_job_id, "clear\r")
 end, { noremap = true, desc = 'Clear shell' })

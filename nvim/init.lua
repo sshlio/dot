@@ -1224,6 +1224,7 @@ u.ft({ "nu", "bash", "sh" }, function(buffer)
   vim.keymap.set('i', ';e', '$env.', { buffer = buffer })
   vim.keymap.set('i', ';je', 'nenv ', { buffer = buffer })
   vim.keymap.set('i', ';ai', 'if true {}<esc>bbviw', { buffer = buffer })
+  vim.keymap.set('i', ';al', 'clip | align | clip', { buffer = buffer })
   vim.keymap.set('i', ';i', '()<left>', { buffer = buffer })
   vim.keymap.set('i', ';d', 'def --wrapped foo [...args] {}<esc>3Bvt ', { buffer = buffer })
   vim.keymap.set('i', ';m', 'def foo [] {}<esc>3bvt ', { buffer = buffer })
@@ -1600,7 +1601,7 @@ local function select_value(inner)
   local line = vim.api.nvim_get_current_line()
 
   local withType = line:match(":.+[=] ?(.+)$");
-  local mat = line:match("[=:] ?(.+)$");
+  local mat = line:match("[=:]%s*(.+)$");
 
   if withType then
     mat = withType
@@ -2142,3 +2143,5 @@ vim.keymap.set('n', 'sj', function()
   local text = vim.fn.getreg('"')
   vim.fn.setreg('0', text)
 end)
+
+
