@@ -215,6 +215,26 @@ vim.api.nvim_create_autocmd('TermRequest', {
   end,
 })
 
+vim.api.nvim_create_autocmd('TermRequest', {
+ group = augroup,
+ callback = function(ev)
+   local val, n = string.gsub(ev.data.sequence, '\027]7124;', '')
+
+   if n > 0 then
+     local command = val
+
+     print('command', command)
+
+     if command == "clipboard" then
+       print("GETTING +")
+       local clipboard = fn.getreg('+')
+
+       fn.setreg('0', clipboard, fn.getregtype('+'))
+     end
+   end
+ end,
+})
+
 
 
 vim.keymap.set('t', '<c-l>', function()
