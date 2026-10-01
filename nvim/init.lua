@@ -1179,6 +1179,9 @@ end)
 
 -- xmarkdown xmd
 u.ft({ "markdown" }, function(buffer)
+  vim.keymap.set("x", "~", "c~<C-r>\"~<Esc>gvlolo", { noremap = true, silent = true, buffer = buffer })
+  vim.keymap.set("x", "-", "c-<C-r>\"-<Esc>gvlolo", { noremap = true, silent = true, buffer = buffer })
+  vim.keymap.set("x", "*", "c*<C-r>\"*<Esc>gvlolo", { noremap = true, silent = true, buffer = buffer })
   vim.keymap.set('i', ';t', "- [ ] ", { buffer = buffer })
   vim.keymap.set('i', ';d', function()
     return os.date("[%d-%m-%Y]")
@@ -1279,12 +1282,12 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 
-vim.api.nvim_create_autocmd('FocusGained', {
+vim.api.nvim_create_autocmd({'FocusGained', 'VimEnter'}, {
   group = augroup,
   callback = function()
-    local clipboard = fn.getreg('+')
+    local clipboard = fn.getreg('+'):gsub('\n$', '')
 
-    fn.setreg('0', clipboard, fn.getregtype('+'))
+    fn.setreg('0', clipboard, 'v')
 
     previous_yank = clipboard
   end,
@@ -1445,15 +1448,6 @@ vim.api.nvim_create_autocmd("WinLeave", {
     end)
   end,
 })
-
--- vim.api.nvim_create_autocmd({"FocusGained", "WinEnter"}, {
---   group = augroup,
---   callback = function()
---     vim.cmd.checktime()
---
---     fn.setreg('0', fn.getreg('+'))
---   end,
--- })
 
 _G.ignoreNextWinEnter = 0
 
@@ -1639,13 +1633,14 @@ _G.select_value = select_value
 
 vim.keymap.set({ 'v', 'o' }, 'iv', function() _G.select_value() end, { silent = true })
 
-vim.keymap.set("v", "(", "c()<Esc>Pgvlolo", { noremap = true, silent = true })
-vim.keymap.set("v", "s[", "c[]<Esc>Pgvlolo", { noremap = true, silent = true })
-vim.keymap.set("v", "{", "c{}<Esc>Pgvlolo", { noremap = true, silent = true })
-vim.keymap.set("v", " ", "c  <Esc>Pgvlolo", { noremap = true, silent = true })
-vim.keymap.set("v", "s'", "c''<Esc>Pgvlolo", { noremap = true, silent = true })
-vim.keymap.set("v", "`", "c``<Esc>Pgvlolo", { noremap = true, silent = true })
-vim.keymap.set("v", "\"", "c\"\"<Esc>Pgvlolo", { noremap = true, silent = true })
+vim.keymap.set("x", "(", "c(<C-r>\")<Esc>gvlolo", { noremap = true, silent = true })
+vim.keymap.set("x", "s[", "c[<C-r>\"]<Esc>gvlolo", { noremap = true, silent = true })
+vim.keymap.set("x", "{", "c{<C-r>\"}<Esc>gvlolo", { noremap = true, silent = true })
+vim.keymap.set("x", " ", "c <C-r>\" <Esc>gvlolo", { noremap = true, silent = true })
+vim.keymap.set("x", "s'", "c'<C-r>\"'<Esc>gvlolo", { noremap = true, silent = true })
+vim.keymap.set("x", "`", "c`<C-r>\"`<Esc>gvlolo", { noremap = true, silent = true })
+vim.keymap.set("x", "\"", "c\"<C-r>\"\"<Esc>gvlolo", { noremap = true, silent = true })
+
 -- vim.keymap.set({ "v", "o" }, "b", "ib", { noremap = false, silent = true })
 vim.keymap.set({ "v", "n" }, "'", ";", { noremap = true, silent = true })
 
@@ -1919,6 +1914,10 @@ vim.diagnostic.config({
 vim.api.nvim_set_hl(0, 'DiagnosticSignError', { link = 'SpellBad' })
 vim.api.nvim_set_hl(0, 'DiagnosticFloatingError', { link = 'StatusLine' })
 
+vim.api.nvim_set_hl(0, '@markup.italic.markdown_inline', { link = 'Number' })
+vim.api.nvim_set_hl(0, '@markup.raw.markdown_inline', { link = 'Macro' })
+vim.api.nvim_set_hl(0, '@markup.strong.markdown_inline', { link = 'Title' })
+
 vim.api.nvim_set_hl(0, "DiagnosticUnderlineError", {
   undercurl = true,
   sp = "#777777",
@@ -2143,5 +2142,4 @@ vim.keymap.set('n', 'sj', function()
   local text = vim.fn.getreg('"')
   vim.fn.setreg('0', text)
 end)
-
 
