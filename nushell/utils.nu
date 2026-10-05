@@ -995,7 +995,7 @@ def parse_all [parsers] {
 }
 
 def link [--force(-f), source: path, path: path] {
-  let target_type = $path | path type
+  let target_type = ($path | path type | default null)
 
   if ($target_type | is-not-empty) {
     if $force and $target_type == "symlink" {
