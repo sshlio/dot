@@ -1916,8 +1916,8 @@ vim.api.nvim_set_hl(0, 'DiagnosticFloatingError', { link = 'StatusLine' })
 
 vim.api.nvim_set_hl(0, '@markup.italic.markdown_inline', { link = 'Number' })
 vim.api.nvim_set_hl(0, '@markup.strong.markdown_inline', { link = 'Title' })
-vim.api.nvim_set_hl(0, '@markup.raw.markdown_inline', { link = 'TSField' })
-vim.api.nvim_set_hl(0, '@markup.link.url.markdown_inline', { link = 'LineNr' })
+vim.api.nvim_set_hl(0, '@markup.raw.markdown_inline', { link = 'Purple' })
+vim.api.nvim_set_hl(0, '@markup.link.url.markdown_inline', { link = 'Purple' })
 
 vim.api.nvim_set_hl(0, "DiagnosticUnderlineError", {
   undercurl = true,
