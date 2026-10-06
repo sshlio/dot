@@ -25,7 +25,8 @@ function _G.Flat()
   local indent = vim.fn.indent(vim.v.lnum)
 
   if mode == "i" then
-    return indent
+    local base = vim.fn.prevnonblank(lnum - 1)
+    return vim.fn.indent(base)
   end
 
   if baseindent == nil then

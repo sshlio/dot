@@ -454,7 +454,7 @@ vim.keymap.set("i", "<CR>", function()
     return "<CR>"
   else
     -- custom behavior
-    return "<CR><Esc>kA<cr><c-i>"
+    return "<CR><Esc>kA<cr>  "
   end
 end, { expr = true })
 
