@@ -2144,3 +2144,6 @@ vim.keymap.set('n', 'sj', function()
   vim.fn.setreg('0', text)
 end)
 
+
+vim.keymap.set('n', '-', 'f-')
+vim.keymap.set('n', '_', 'F-')
