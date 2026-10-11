@@ -544,8 +544,6 @@ vim.keymap.set('n', 'O', function()
   return '"zyy"zP0D$'
 end, { expr = true })
 
-vim.keymap.set('n', 'qo', function() print("reg", vim.fn.getreg('"')) end)
-
 vim.keymap.set({ 'x' }, 'p', '"0p=\']')
 
 vim.keymap.set('c', '*', '.*')
@@ -558,12 +556,6 @@ end)
 
 vim.keymap.set('n', 'sd', '<cmd>t.<cr>')
 vim.keymap.set('n', 'so', '<cmd>silent! w! | execute "luafile %"<cr>')
-
-vim.keymap.set('x', 'Y', function()
-  u.normal("y")
-
-  fn.setreg('"', fn.getreg('"'):gsub("\n", ""))
-end)
 
 -- vim.keymap.set({'o', 'x'}, 'iq', 'i"')
 
@@ -2114,6 +2106,9 @@ vim.keymap.set('n', 'Q', '2q=*NQn1q=')
 vim.keymap.set('n', 'qe', '<c-L><esc>1QnQ1q=')
 
 vim.keymap.set('x', 'Q', function()
+  -- local ns = vim.api.nvim_create_namespace("nvim.multicursor")
+  -- vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
+
   if vim.fn.line('v') == vim.fn.line('.') then
     local line = vim.api.nvim_get_current_line()
 
@@ -2130,7 +2125,11 @@ vim.keymap.set('x', 'Q', function()
 
     vim.fn.setreg("/", "\\V" .. vim.fn.escape(text, "\\"))
 
-    return ("nN2q=Qn1q=")
+    vim.schedule(function()
+      vim.cmd.normal("n")
+    end)
+
+    return ("2q=*<esc>NQ2q=")
   end
 
   return ("Q")

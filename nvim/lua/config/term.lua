@@ -42,7 +42,7 @@ function getFileName(str)
 end
 
 vim.keymap.set('t', '<C-v>', function()
-  local content = vim.fn.getreg('+')
+  local content = vim.fn.getreg('0')
   local first_line = content:match("^[^\n]*") or ""
   vim.fn.chansend(vim.b.terminal_job_id, first_line)
 end, { noremap = true })
@@ -160,6 +160,7 @@ vim.api.nvim_create_autocmd({"TermOpen"}, {
 
     vim.keymap.set('n', '<D-c>', 'i<c-c>', { buffer = true })
     vim.keymap.set('n', '<c-v>', 'pi', { buffer = true })
+    vim.keymap.set('n', 'p', '"0p', { buffer = true })
 
     -- Force Normal insert
     vim.keymap.set('n', 'i', 'i', { buffer = true })
