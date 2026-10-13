@@ -1213,6 +1213,7 @@ vim.keymap.set('x', '<d-g>', ":'<,'>m $<cr>")
 u.ft({ "nu", "bash", "sh" }, function(buffer)
   vim.keymap.set('i', '`', '$""<left>', { buffer = buffer })
   vim.keymap.set('i', ';r', "return ", { buffer = buffer })
+  vim.keymap.set('i', ';s', "| complete | get stdout", { buffer = buffer })
   vim.keymap.set('i', ';v', "let <c-r>. = <c-r>\"", { buffer = buffer })
   vim.keymap.set('i', ';q', '``<left>', { buffer = buffer })
   vim.keymap.set('i', ';jq', '"``"<left><left>', { buffer = buffer })
@@ -1783,30 +1784,38 @@ vim.lsp.config['nu_ls'] = {
   settings = {}
 }
 
-local ignored_typescript_diagnostic_codes = {
-   [6133] = true,
-   [7044] = true,
-   [6196] = true,
-}
-
-local function filter_typescript_diagnostic_report(report)
-  if report.kind == 'full' then
-    report.items = vim.tbl_filter(function(diagnostic)
-      -- return not ignored_typescript_diagnostic_codes[tonumber(diagnostic.code)]
-      return diagnostic.severity < 3
-    end, report.items)
+local function filter_diag(report)
+  if report.kind ~= 'full' then
+    return
   end
+
+  report.items = vim.tbl_filter(function(diagnostic)
+    return diagnostic.severity < 3
+  end, report.items)
 end
 
 vim.lsp.config['tsc'] = {
   cmd = { 'tsc', '--lsp', '--stdio' },
+  settings = {
+    ['js/ts'] = {
+      preferences = {
+        importModuleSpecifier = 'non-relative',
+      },
+      suggest = {
+        autoImports = true,
+        includeCompletionsForImportStatements = true,
+      },
+    },
+  },
   handlers = {
     ['textDocument/diagnostic'] = function(err, result, ctx, opts)
-      if not err and result then
-        filter_typescript_diagnostic_report(result)
-        for _, report in pairs(result.relatedDocuments or {}) do
-          filter_typescript_diagnostic_report(report)
-        end
+      if err or not result then
+        return vim.lsp.diagnostic.on_diagnostic(err, result, ctx, opts)
+      end
+
+      filter_diag(result)
+      for _, report in pairs(result.relatedDocuments or {}) do
+        filter_diag(report)
       end
       return vim.lsp.diagnostic.on_diagnostic(err, result, ctx, opts)
     end,
