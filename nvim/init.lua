@@ -1783,8 +1783,34 @@ vim.lsp.config['nu_ls'] = {
   settings = {}
 }
 
+local ignored_typescript_diagnostic_codes = {
+   [6133] = true,
+   [7044] = true,
+   [6196] = true,
+}
+
+local function filter_typescript_diagnostic_report(report)
+  if report.kind == 'full' then
+    report.items = vim.tbl_filter(function(diagnostic)
+      -- return not ignored_typescript_diagnostic_codes[tonumber(diagnostic.code)]
+      return diagnostic.severity < 3
+    end, report.items)
+  end
+end
+
 vim.lsp.config['tsc'] = {
   cmd = { 'tsc', '--lsp', '--stdio' },
+  handlers = {
+    ['textDocument/diagnostic'] = function(err, result, ctx, opts)
+      if not err and result then
+        filter_typescript_diagnostic_report(result)
+        for _, report in pairs(result.relatedDocuments or {}) do
+          filter_typescript_diagnostic_report(report)
+        end
+      end
+      return vim.lsp.diagnostic.on_diagnostic(err, result, ctx, opts)
+    end,
+  },
   filetypes = {
     'javascript',
     'javascriptreact',
