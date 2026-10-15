@@ -544,7 +544,14 @@ vim.keymap.set('n', 'O', function()
   return '"zyy"zP0D$'
 end, { expr = true })
 
-vim.keymap.set({ 'x' }, 'p', '"0p=\']')
+-- vim.keymap.set({ 'x' }, 'p', '"0p=\']')
+vim.keymap.set({ 'x' }, 'p', function()
+  if vim.fn.line('v') == vim.fn.line('.') then
+    return '"0p'
+  end
+
+  return '"0p=\']'
+end, { expr = true })
 
 vim.keymap.set('c', '*', '.*')
 vim.keymap.set('o', 'l', '2l')
