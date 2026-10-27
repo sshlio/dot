@@ -11,6 +11,7 @@ def --wrapped open [...args] {
 let $dw = ("~/Downloads" | path expand)
 
 alias opn = %open
+alias k = kubectl
 alias sel = move --first
 alias "http post" = http post --content-type application/json
 alias "gt" = get -o

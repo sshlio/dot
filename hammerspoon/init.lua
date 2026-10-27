@@ -82,6 +82,9 @@ scrollWatcher = eventtap.new({eventTypes.scrollWheel}, function(e)
       hs.eventtap.keyStroke({"cmd"}, "[", 0)
     else
       hs.eventtap.keyStroke({"cmd", "shift"}, "[", 0)
+      hs.timer.doAfter(0.1, function()
+        OnTitleChanged(hs.window.focusedWindow())
+      end)
     end
 
     return true
@@ -92,6 +95,9 @@ scrollWatcher = eventtap.new({eventTypes.scrollWheel}, function(e)
       hs.eventtap.keyStroke({"cmd"}, "]", 0)
     else
       hs.eventtap.keyStroke({"cmd", "shift"}, "]", 0)
+      hs.timer.doAfter(0.1, function()
+        OnTitleChanged(hs.window.focusedWindow())
+      end)
     end
 
     return true
@@ -111,7 +117,8 @@ button4Watcher = eventtap.new({ eventTypes.otherMouseDown }, function(event)
 
   if button == 3 then -- Mouse button numbering starts at 0 (0=left,1=right,2=middle,3=button4)
     hs.eventtap.keyStroke({"cmd"}, "w", 0)
-    return true -- swallow the event
+
+    return true
   end
 
   if button == 4 then -- Mouse button numbering starts at 0 (0=left,1=right,2=middle,3=button4)
@@ -184,10 +191,6 @@ hs.hotkey.bind({"shift"}, "§", function()
   hs.eventtap.keyStroke({"shift"}, "`", 0)
 end)
 
-Layer:bind({"cmd"}, ";", function()
-  hs.eventtap.keyStroke({}, "Escape")
-end)
-
 Layer:bind({"cmd"}, "3", function()
   if not hs.application.launchOrFocus("Slack") then
     hs.application.launchOrFocus("Messages")
@@ -202,10 +205,6 @@ Layer:bind({"cmd"}, "4", function()
   Chrome:focus(false, "Google Chrome")
 end)
 
-hs.hotkey.bind({"cmd"}, "l", function()
-  hs.eventtap.keyStroke({}, "right")
-end)
-
 hs.hotkey.bind({}, "F11", function()
   output = hs.audiodevice.defaultOutputDevice()
 
@@ -216,21 +215,6 @@ hs.hotkey.bind({}, "F12", function()
   output = hs.audiodevice.defaultOutputDevice()
 
   output:setVolume(output:volume() + 10)
-end)
-
-hs.hotkey.bind({"cmd"}, "h", function()
-  hs.eventtap.keyStroke({}, "left")
-end)
-
-
--- semi_key_tap:start()
-
-hs.hotkey.bind({"cmd"}, "j", function()
-  hs.eventtap.keyStroke({}, "down")
-end)
-
-cmdkbinding = hs.hotkey.bind({"cmd"}, "k", function()
-  hs.eventtap.keyStroke({}, "up")
 end)
 
 local ignoreNext = false
@@ -276,9 +260,11 @@ hs.hotkey.bind({"shift"}, "pageup", function()
 end)
 
 thingsbinding = hs.hotkey.bind({"cmd"}, "d", function()
-    cmdkbinding:disable()
-    hs.eventtap.keyStroke({"cmd"}, "k")
-    cmdkbinding:enable()
+    for _, pressed in ipairs({ true, false }) do
+      hs.eventtap.event.newKeyEvent({"cmd"}, "k", pressed)
+        :setProperty(hs.eventtap.event.properties.eventSourceUserData, FastBindingBypass)
+        :post()
+    end
 end)
 thingsbinding:disable()
 
@@ -311,12 +297,11 @@ w = hs.application.watcher.new(function(name, ev)
 end)
 
 w:start()
+
+
+
 scrollWatcher:start()
 button4Watcher:start()
-
--- "world "
--- "world "
--- "world "
 
 hs.urlevent.bind("chrome", function(_, params)
   chrome(false)
@@ -329,15 +314,6 @@ hs.hotkey.bind({"cmd"}, "'", function()
 end)
 
 
---
--- capsLayer:bind({}, "h", function()
---   hs.eventtap.keyStroke({}, "left")
--- end)
 
--- capsLayerTrigger = hs.hotkey.bind(
---   {}, "f18",
---   function() capsLayer:enter() end,
---   function() capsLayer:exit() end
--- )
 
 ActiveLayer:set(Layer)

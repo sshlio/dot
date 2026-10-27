@@ -1,8 +1,10 @@
 Layer = hs.hotkey.modal.new()
 SudoLayer = hs.hotkey.modal.new()
 RawLayer = hs.hotkey.modal.new()
+ControlLayer = hs.hotkey.modal.new()
 
 RawLayer.name = "RawLayer"
+ControlLayer.name = "ControlLayer"
 SudoLayer.name = "SudoLayer"
 Layer.name = "Layer"
 
@@ -106,6 +108,11 @@ SudoLayer:bind({}, 'l', function()
   hs.caffeinate.lockScreen()
 end)
 
+SudoLayer:bind({}, 'c', function()
+  ActiveLayer:set(ControlLayer)
+  ScreenBorder:set(false)
+end)
+
 Layer:bind({"cmd"}, "q", function()
   ActiveLayer:set(SudoLayer)
 
@@ -115,12 +122,66 @@ Layer:bind({"cmd"}, "q", function()
   })
 end)
 
-SudoLayer:bind({}, "n", function()
-  hs.eventtap.keyStroke({ "cmd", "alt" }, "j")
+print("Layer defined")
 
-  hs.timer.doAfter(.3, function()
-    hs.eventtap.keyStroke({ "cmd", "shift" }, "n")
-    hs.eventtap.keyStrokes("Show Network panel")
-    hs.eventtap.keyStroke({}, "return")
-  end)
+FastBinding = {}
+
+ActiveLayer:listen(function(layer)
+  local bindings = {}
+  for key, target in pairs({ h = "left", j = "down", k = "up", l = "right" }) do
+    bindings[hs.keycodes.map[key]] = { keyCode = hs.keycodes.map[target], flags = {} }
+  end
+
+  if layer == Layer or layer == ControlLayer then
+    bindings[hs.keycodes.map[";"]] = { keyCode = hs.keycodes.map.escape, flags = {} }
+  end
+
+  if layer == ControlLayer then
+    for letter in ("abcdefgimnopqrstuwxyz"):gmatch(".") do
+      bindings[hs.keycodes.map[letter]] = { control = true }
+    end
+  end
+
+  FastBinding = bindings
 end)
+
+-- Mark synthetic shortcuts which must bypass the remaps.
+FastBindingBypass = 0x46415354
+
+FastBindingTap = hs.eventtap.new({
+  hs.eventtap.event.types.keyDown,
+  hs.eventtap.event.types.keyUp,
+}, function(event)
+  if event:getProperty(hs.eventtap.event.properties.eventSourceUserData) == FastBindingBypass then
+    return false
+  end
+
+  local flags = event:getFlags()
+  local binding = FastBinding[event:getKeyCode()]
+  if not binding or not flags.cmd then
+    return false
+  end
+
+  if binding.control then
+    flags.cmd = nil
+    flags.ctrl = true
+    event:setFlags(flags)
+  elseif flags:containExactly({ "cmd" }) then
+    event:setKeyCode(binding.keyCode)
+    event:setFlags(binding.flags)
+  end
+  return false
+end):start()
+
+windowWatcher = hs.window.filter.new()
+
+OnTitleChanged = function(window, appName)
+  print('OnTitleChanged', window:title())
+  if window:title():lower():find(G.controlWindowTitle) ~= nil then
+    ActiveLayer:set(ControlLayer)
+  else
+    ActiveLayer:set(Layer)
+  end
+end
+
+windowWatcher:subscribe(hs.window.filter.windowFocused, OnTitleChanged)

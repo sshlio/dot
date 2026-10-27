@@ -1423,8 +1423,7 @@ vim.api.nvim_create_autocmd({"FocusLost", "BufWinLeave", "WinLeave"}, {
   group = augroup,
   callback = function()
     if fn.getcmdwintype() ~= "" then
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'n', false)
-      vim.cmd.close()
+      -- wincmd is open abort it
       return
     end
 
