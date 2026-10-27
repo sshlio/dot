@@ -11,7 +11,6 @@ vim.api.nvim_set_hl(0, PAUSE_HI, { default = true, link = "DiagnosticWarn" })
 local last = nil
 
 vim.keymap.set('t', '<c-e>', '<C-\\><C-n>kj0f l')
-vim.keymap.set('t', '<c-e>', '<C-\\><C-n>kj0f l')
 
 local bufState = once("term_bufstate", function() return {} end)
 
@@ -147,6 +146,12 @@ vim.api.nvim_create_autocmd("BufLeave", {
   end,
 })
 
+local function rebindNormalToTerm(key)
+  vim.keymap.set('n', key, function()
+    vim.fn.chansend(vim.b.terminal_job_id, key)
+  end, { buffer = true })
+end
+
 vim.api.nvim_create_autocmd({"TermOpen"}, {
   group = augroup,
   callback = function()
@@ -168,6 +173,9 @@ vim.api.nvim_create_autocmd({"TermOpen"}, {
 
     vim.keymap.set('n', '<c-r>', 'i<cr>-------<cr>', { buffer = true })
     vim.keymap.set('t', '<c-r>', '<cr>-------<cr>', { buffer = true })
+
+    rebindNormalToTerm('d')
+    rebindNormalToTerm('u')
 
     vim.wo.winhighlight = "Normal:NormalFloat,CursorLine:FloatCursorLine"
 
