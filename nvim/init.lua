@@ -342,8 +342,6 @@ vim.keymap.set('n', ':', function()
   return 'q:A'
 end, { expr = true })
 
-vim.keymap.set("n", "Q", "<nop>", { noremap = true, silent = true })
-
 vim.keymap.set('n', 'sq', 'qa!', { desc = "Quit vim" })
 vim.keymap.set('n', 'sQ', function()
   pcall(function() vim.cmd [[ w! ]] end)
@@ -2115,7 +2113,6 @@ vim.keymap.set('n', '\\', 'f|"')
 
 print('')
 
-vim.keymap.set('n', 'Q', 'Q')
 vim.keymap.set('n', 'q=', 'q=')
 
 vim.keymap.set('n', 'q0', clear_multicursors)
@@ -2131,12 +2128,68 @@ vim.keymap.set('n', '<D-K>', function()
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('1q=', true, false, true), 'n', false)
   end)
   return 'Q2q=k'
-end, { expr = true, desc = "Add cursor and move down" })
+end, { expr = true, desc = "Add cursor and move up" })
 
 vim.keymap.set('n', '<c-n>', '2q=Qn1q=')
 
-vim.keymap.set('n', '*', '*N')
-vim.keymap.set('n', 'Q', '2q=*NQn1q=')
+local function search_literal(text)
+  local pattern = [[\V]] .. vim.fn.escape(text, [[\]]):gsub('\n', [[\n]])
+  vim.fn.setreg('/', pattern)
+  vim.fn.histadd('search', pattern)
+  vim.v.searchforward = 1
+  vim.v.hlsearch = 1
+end
+
+vim.keymap.set('n', '*', function()
+  local word = vim.fn.expand('<cword>')
+  if word == '' then return end
+
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local line = vim.api.nvim_get_current_line()
+  local offset = 0
+  while offset <= cursor[2] do
+    local match = vim.fn.matchstrpos(line, [[\k\+]], offset)
+    if match[2] < 0 or match[2] > cursor[2] then break end
+    if cursor[2] < match[3] then
+      vim.api.nvim_win_set_cursor(0, { cursor[1], match[2] })
+      break
+    end
+    offset = match[3]
+  end
+
+  search_literal(word)
+end, { desc = 'Search current word and move to its beginning' })
+
+local function searchSelection()
+  local mode = vim.fn.mode()
+  local anchor = vim.fn.getpos('v')
+  local cursor = vim.fn.getpos('.')
+  local text = table.concat(vim.fn.getregion(anchor, cursor, {
+    type = mode,
+    exclusive = vim.o.selection == 'exclusive',
+  }), '\n')
+  if text == '' then return end
+
+  local first = anchor
+  if cursor[2] < anchor[2] or (cursor[2] == anchor[2] and cursor[3] < anchor[3]) then
+    first = cursor
+  end
+  local start = { first[2], first[3] - 1 }
+  if mode == 'V' then
+    start[2] = 0
+  elseif mode == '\22' then
+    start[2] = math.min(anchor[3], cursor[3]) - 1
+  end
+
+  vim.cmd.normal({ args = { '\27' }, bang = true })
+  vim.api.nvim_win_set_cursor(0, start)
+  search_literal(text)
+end
+
+vim.keymap.set('x', '*', searchSelection, { desc = 'Search selection and collapse to its beginning' })
+
+vim.keymap.set('n', 'Q', '*<c-n>', { remap = true })
+
 vim.keymap.set('n', 'qe', '<c-L><esc>1QnQ1q=')
 
 vim.keymap.set('x', 'Q', function()
@@ -2144,30 +2197,18 @@ vim.keymap.set('x', 'Q', function()
   -- vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
 
   if vim.fn.line('v') == vim.fn.line('.') then
-    local line = vim.api.nvim_get_current_line()
-
-    local anchor_col = vim.fn.col('v') - 1
-    local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
-
-    local first_col, last_col = math.min(anchor_col, cursor_col), math.max(anchor_col, cursor_col)
-    local first_char = vim.fn.charidx(line, first_col)
-    local last_char = vim.fn.charidx(line, last_col)
-
-    local text = vim.fn.strcharpart(line, first_char, last_char - first_char + 1)
-
-    vim.opt.hlsearch = false
-
-    vim.fn.setreg("/", "\\V" .. vim.fn.escape(text, "\\"))
-
-    vim.schedule(function()
-      vim.cmd.normal("n")
-    end)
-
-    return ("2q=*<esc>NQ2q=")
+    searchSelection()
+    vim.api.nvim_feedkeys("2q=Qn1q=", 'nt', false)
+    -- vim.cmd.normal({ args = { '2q=Qn1q=' }, bang = true })
+    return
   end
 
-  return ("Q")
-end, { expr = true })
+  vim.api.nvim_feedkeys("Q", 'n', false)
+end)
+
+
+
+vim.keymap.set({ 'x' }, '<f13>Q', 'Q')
 
 vim.keymap.set({ 'n', 'x' }, 'J', '8j')
 vim.keymap.set({ 'n', 'x' }, 'K', '8k')
