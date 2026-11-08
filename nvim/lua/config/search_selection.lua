@@ -12,5 +12,12 @@ vim.keymap.set("x", "m", function()
   return "<Esc>v" .. (steps > 0 and (steps .. "l") or "")
 end, { expr = true, desc = "Select search-register character count" })
 
-vim.keymap.set("x", "u", "gu")
-vim.keymap.set("x", "u", "gU")
+vim.keymap.set("x", "U", function()
+  local lines = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."), {
+    type = vim.fn.mode(),
+    exclusive = vim.o.selection == "exclusive",
+  })
+  local first = vim.fn.strcharpart(lines[1] or "", 0, 1)
+  return (first ~= vim.fn.tolower(first) and "gu" or "gU") .. "gv"
+end, { expr = true, desc = "Toggle selection case and keep it selected" })
+
