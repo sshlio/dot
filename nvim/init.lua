@@ -578,15 +578,8 @@ vim.keymap.set('x', '<', '<gv')
 vim.keymap.set('x', 'L', '>gv')
 vim.keymap.set('x', 'H', '<gv')
 
-vim.keymap.set({ 'x', 'o' }, 'af', function()
-  -- Go to first line, first column
-  vim.cmd('normal! gg0')
-
-  -- Select if not selected
-  local mode = vim.fn.mode() == 'V' or u.normal("V")
-
-  vim.cmd('normal! G$')
-end, { desc = 'Select entire buffer (a file)' })
+vim.keymap.set('x', 'af', '<Esc>ggVG', { desc = 'Select entire buffer (a file)' })
+vim.keymap.set('o', 'af', ':<C-u>normal! ggVG<CR>', { desc = 'Select entire buffer (a file)' })
 
 -- PAIRS
 vim.keymap.set({'i', 'c'}, '\'', "''<left>")
@@ -2187,3 +2180,5 @@ end)
 
 vim.keymap.set('n', '-', 'f-')
 vim.keymap.set('n', '_', 'F-')
+
+
