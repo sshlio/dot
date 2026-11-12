@@ -8,6 +8,9 @@ ControlLayer.name = "ControlLayer"
 SudoLayer.name = "SudoLayer"
 Layer.name = "Layer"
 
+ZellijLayer = hs.hotkey.modal.new()
+ZellijLayer.name = "ZellijLayer"
+
 ActiveLayer = Signal.new(nil)
 
 ActiveLayer:map(function(l) return l and l.name end):log("ActiveLayer")
@@ -132,12 +135,18 @@ ActiveLayer:listen(function(layer)
     bindings[hs.keycodes.map[key]] = { keyCode = hs.keycodes.map[target], flags = {} }
   end
 
-  if layer == Layer or layer == ControlLayer then
+  if layer == Layer or layer == ControlLayer or layer == ZellijLayer then
     bindings[hs.keycodes.map[";"]] = { keyCode = hs.keycodes.map.escape, flags = {} }
   end
 
   if layer == ControlLayer then
     for letter in ("abcdefgimnopqrstuwxyz"):gmatch(".") do
+      bindings[hs.keycodes.map[letter]] = { control = true }
+    end
+  end
+
+    for letter in ("cvwnm"):gmatch(".") do
+  if layer == ZellijLayer then
       bindings[hs.keycodes.map[letter]] = { control = true }
     end
   end
@@ -173,10 +182,30 @@ FastBindingTap = hs.eventtap.new({
   return false
 end):start()
 
-windowWatcher = hs.window.filter.new()
+windowWatcher = hs.window.filter.new(true)
+epoch = 0
+windowFocused = {}
 
 OnTitleChanged = function(window, appName)
-  print('OnTitleChanged', window:title())
+  if not window then return end
+  local id = window:id()
+  local app = window:application()
+  if not id or not app then return end
+
+  windowFocused[id] = windowFocused[id] or {}
+
+  windowFocused[id].epoch = epoch
+  windowFocused[id].title = window:title()
+  windowFocused[id].appid = app:bundleID()
+
+  print("stored id", window:title())
+
+  epoch = epoch + 1
+
+  for windowId, info in pairs(windowFocused) do
+    print(windowId, info.epoch, info.title, info.appid)
+  end
+
   if window:title():lower():find(G.controlWindowTitle) ~= nil then
     ActiveLayer:set(ControlLayer)
   else
@@ -185,3 +214,25 @@ OnTitleChanged = function(window, appName)
 end
 
 windowWatcher:subscribe(hs.window.filter.windowFocused, OnTitleChanged)
+
+local function updateZellijLayer()
+  local app = hs.application.frontmostApplication()
+  if app and app:name() == "zellij" then
+    ActiveLayer:set(ZellijLayer)
+  else
+    ActiveLayer:set(Layer)
+  end
+end
+
+ZellijWatcher = hs.application.watcher.new(function(_, event)
+  if event == hs.application.watcher.activated
+    or event == hs.application.watcher.deactivated then
+    updateZellijLayer()
+  end
+end)
+
+ZellijWatcher:start()
+
+updateZellijLayer()
+
+

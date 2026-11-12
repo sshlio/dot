@@ -183,6 +183,52 @@ seschs = hs.hotkey.bind({"cmd"}, "§", function()
   hs.eventtap.keyStroke({"cmd"}, "`")
 end)
 
+local appWindows = hs.window.filter.new()
+-- Keep focus events tracked between hotkey presses.
+appWindows:subscribe(hs.window.filter.windowFocused, function() end)
+
+seschs = hs.hotkey.bind({"cmd"}, "b", function()
+  print("")
+  print("---- CMD B")
+  print(windowFocused)
+
+  local app = hs.application.frontmostApplication()
+  local current = hs.window.focusedWindow()
+
+  if not app or not current then return end
+
+  local appid = app and app:bundleID()
+
+  local ids = {}
+
+  for id, info in pairs(windowFocused) do
+    if appid and info.appid == appid then
+      ids[#ids + 1] = id
+    end
+  end
+
+  table.sort(ids, function(a, b)
+    return windowFocused[a].epoch > windowFocused[b].epoch
+  end)
+
+  for _, id in ipairs(ids) do
+    local info = windowFocused[id]
+    print(id, info.epoch, info.title, info.appid)
+
+    if id ~= current:id() then
+      local window = hs.window.get(id)
+      if window then
+        window:focus()
+        return
+      end
+    end
+  end
+
+  print("----")
+  print("")
+  print("")
+end)
+
 hs.hotkey.bind({}, "§", function()
   hs.eventtap.keyStroke({}, "`", 0)
 end)
@@ -314,6 +360,6 @@ hs.hotkey.bind({"cmd"}, "'", function()
 end)
 
 
-
-
 ActiveLayer:set(Layer)
+
+

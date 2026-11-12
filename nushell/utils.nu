@@ -1007,11 +1007,12 @@ def link [--force(-f), source: path, path: path] {
   }
 
   let parent = $path | path parse | get parent
+
   if ($parent | is-not-empty) {
     mkdir $parent
   }
 
-  ln -s $source $path
+  ln -s ($source | path expand) ($path | path expand)
 }
 
 def dua [dir: path] {
@@ -1091,4 +1092,46 @@ def clip [-p] {
   }
 }
 
+
+def "ghost focus" [name] {
+  (
+    osascript -e $'
+    tell application "Ghostty"
+        repeat with w in windows
+            if name of w contains "($name)" then
+                activate window w
+                exit repeat
+            end if
+        end repeat
+    end tell'
+  )
+}
+
+def "ghost list" [] {
+  (
+    osascript -e '
+    tell application "Ghostty"
+        repeat with w in windows
+            log ("" & (name of w))
+        end repeat
+    end tell'
+  )
+  | complete | get stderr | lines
+}
+
+def "ghost open" [$name] {
+  ghost focus $name
+  let list = (ghost list)
+
+  if ($name not-in $list) {
+    (
+      osascript -e $'
+      tell application "Ghostty"
+        new window
+        set term to focused terminal of selected tab of front window
+        input text "cd ~/p/($name); nvim\n" to term
+      end tell'
+    )
+  }
+}
 

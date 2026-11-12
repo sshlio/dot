@@ -2116,7 +2116,7 @@ print('')
 vim.keymap.set('n', 'q=', 'q=')
 
 vim.keymap.set('n', 'q0', clear_multicursors)
-vim.keymap.set('n', '<D-J>', function()
+vim.keymap.set('n', { '<D-J>', '<c-s-j>' }, function()
   vim.schedule(function()
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('1q=', true, false, true), 'n', false)
   end)
@@ -2223,3 +2223,45 @@ vim.keymap.set('n', '-', 'f-')
 vim.keymap.set('n', '_', 'F-')
 
 
+local align_once = false
+
+vim.keymap.set('n', 'sv', function()
+  if align_once == true then
+    return
+  end
+
+  align_once = true
+
+  local ns = vim.api.nvim_create_namespace('nvim.multicursor')
+  local marks = vim.api.nvim_buf_get_extmarks(0, ns, 0, -1, {})
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+
+  local maxcol = col
+
+  for _, m in ipairs(marks) do
+    local id, row, col = m[1], m[2], m[3]   -- row/col are 0-based
+
+    if maxcol < col then
+       maxcol = col
+    end
+  end
+
+
+  local align = function(row, col)
+    local n = maxcol - col
+
+    vim.api.nvim_buf_set_text(0, row, col, row, col, { string.rep(' ', n) })
+  end
+
+  for _, m in ipairs(marks) do
+    align(m[2], m[3])
+  end
+
+  local nn = 2
+
+  align(row - 1, col)
+
+  vim.schedule(function()
+    align_once = false
+  end)
+end)

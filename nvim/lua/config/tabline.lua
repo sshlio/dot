@@ -3,7 +3,7 @@
 
 -- https://vieitesss.github.io/posts/Neovim-custom-status-line/
 
-o.showtabline = 0
+o.showtabline = 2
 vim.o.tabline = '%!v:lua.tabline()'
 
 -- vim.o.winbar = " - %f"
@@ -17,7 +17,7 @@ end
 
 function _G.tabline()
   return " "
-    .. colorful("  neovim ", "IncSearch")
+    .. colorful(" neovim ", "Title")
     .. " "
     .. vim.fn.getcwd():gsub("/Users/billy/p/", "")
 end
