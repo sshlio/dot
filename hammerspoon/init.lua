@@ -172,11 +172,7 @@ local function middleMouseEvent(eventType, event)
 end
 
 hs.hotkey.bind({"cmd"}, "1", function()
-  hs.application.launchOrFocus("kitty")
-end)
-
-hs.hotkey.bind({"cmd"}, "1", function()
-  hs.application.launchOrFocus("kitty")
+  hs.application.launchOrFocus(G.termApp or "kitty")
 end)
 
 seschs = hs.hotkey.bind({"cmd"}, "§", function()
