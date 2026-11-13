@@ -88,11 +88,12 @@ pcall(vim.keymap.del, "x", "<c-s>")
 pcall(vim.keymap.del, "s", "<c-s>")
 pcall(vim.keymap.del, "x", "<c-s>")
 -- It removes blinking in windows
-vim.opt.guicursor = {
-  "i:ver25",
-  "v-o:hor20",
-  "t:block-TermCursor",
-}
+
+-- vim.opt.guicursor = {
+--   "i:ver25",
+--   "v-o:hor20",
+--   -- "t:block-blinkon0-TermCursor",
+-- }
 
 _G.u = {}
 _G.o = vim.o
