@@ -19,6 +19,11 @@ keybind = super+t=unbind
 keybind = super+d=unbind
 keybind = super+n=unbind
 
+
+window-padding-balance = true
+window-padding-color   = extend
+font-shaping-break     = cursor
+
 font-size = 18
 font-family = Monaspace Neon
 font-variation = wght=800

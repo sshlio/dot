@@ -89,11 +89,12 @@ pcall(vim.keymap.del, "s", "<c-s>")
 pcall(vim.keymap.del, "x", "<c-s>")
 -- It removes blinking in windows
 
--- vim.opt.guicursor = {
---   "i:ver25",
---   "v-o:hor20",
---   -- "t:block-blinkon0-TermCursor",
--- }
+-- vim.opt.guicursor = ""
+vim.opt.guicursor = {
+  "i:ver25",
+  "v-o:hor20",
+  "t:block-blinkon0-TermCursor",
+}
 
 _G.u = {}
 _G.o = vim.o
@@ -1221,7 +1222,8 @@ u.ft({ "nu", "bash", "sh" }, function(buffer)
   vim.keymap.set('i', ';ai', 'if true {}<esc>bbviw', { buffer = buffer })
   vim.keymap.set('i', ';al', 'clip | align | clip', { buffer = buffer })
   vim.keymap.set('i', ';i', '()<left>', { buffer = buffer })
-  vim.keymap.set('i', ';d', 'def --wrapped foo [...args] {}<esc>3Bvt ', { buffer = buffer })
+  -- vim.keymap.set('i', ';d', 'def --wrapped foo [...args] {}<esc>3Bvt ', { buffer = buffer })
+  vim.keymap.set('i', ';d', '-- - - ---- ---- --- - - --<cr>', { buffer = buffer })
   vim.keymap.set('i', ';m', 'def foo [] {}<esc>3bvt ', { buffer = buffer })
   vim.keymap.set('i', ';n', '$in', { buffer = buffer })
   vim.keymap.set('i', ';`', '``<left>', { buffer = buffer })
@@ -2086,12 +2088,14 @@ end, {
   desc = "Yank whole buffer without moving view",
 })
 
-vim.keymap.set("n", "yy", function()
-  yank_keep_view("yil")
-end, {
-  silent = true,
-  desc = "Yank whole buffer without moving view",
-})
+vim.keymap.set("n", "yy", "yil")
+
+-- vim.keymap.set("n", "yy", function()
+--   yank_keep_view("yil")
+-- end, {
+--   silent = true,
+--   desc = "Yank whole buffer without moving view",
+-- })
 
 -- u like micro word
 vim.keymap.set({ "o", "x" }, "u", function()
